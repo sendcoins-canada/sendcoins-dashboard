@@ -1,2 +1,13 @@
 @import "tailwindcss";
 
+
+@layer base {
+  html, body, #root {
+    @apply font-sans;
+    font-family: Geist, sans-serif !important;
+  }
+   h1, h2 {
+    font-family: Migra, serif !important;
+  }
+}
+

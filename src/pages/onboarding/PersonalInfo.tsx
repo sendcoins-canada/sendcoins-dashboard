@@ -1,0 +1,99 @@
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { ArrowCircleLeft2, Profile } from "iconsax-react";
+import Header from "@/components/onboarding/shared/Header";
+import { TextInputField } from "@/components/ui/form"; // assuming you have a reusable InputField
+import { Formik, Form } from "formik";
+import * as Yup from "yup";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setFirstName, setLastName, setDob } from "@/store/registration/slice";
+
+const PersonalInfo: React.FC = () => {
+  const schema = Yup.object({
+    firstName: Yup.string().required("First name is required"),
+    lastName: Yup.string().required("Last name is required"),
+    dob: Yup.date()
+      .required("Date of birth is required")
+      .max(new Date(), "Date of birth cannot be in the future"),
+  });
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  return (
+    <>
+      <Header />
+      <div className="min-h-[70vh] flex flex-col gap-10 mt-10">
+        {/* Back Button */}
+        <div
+          className="flex items-center gap-2 text-[#57B5FF] cursor-pointer"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowCircleLeft2 size="24" color="#57B5FF" className="ml-28" />
+          <p>Back</p>
+        </div>
+
+        {/* Form Section */}
+        <div className="grid place-items-center">
+          <div className="text-center w-full max-w-sm px-4">
+            <div className="mx-auto mb-4 inline-flex items-center justify-center rounded-2xl bg-[#DDF4E4] p-2">
+              <Profile size="32" color="#480355" variant="Bold" />
+            </div>
+
+            <h1 className="text-[28px] font-semibold">Tell us a bit about you</h1>
+            <p className="mt-1 text-[#8C8C8C] text-[15px]">
+              Enter your full legal name and date of birth. We’ll use this to verify your identity later.
+            </p>
+
+            <Formik
+              initialValues={{ firstName: "", lastName: "", dob: "" }}
+              validationSchema={schema}
+               onSubmit={(values) => {
+                // ✅ Save to Redux
+                dispatch(setFirstName(values.firstName));
+                dispatch(setLastName(values.lastName));
+                dispatch(setDob(values.dob));
+
+                // ✅ Go to next step
+                navigate("/password");
+              }}
+            >
+              {({ isSubmitting }) => (
+                <Form className="mt-6 space-y-4 text-left">
+                  <TextInputField
+                    name="firstName"
+                    placeholder="eg: Michael"
+                    label="Firstname"
+                  />
+
+                  <TextInputField
+                    name="lastName"
+                    placeholder="eg: John"
+                    label="Last name"
+                  />
+
+                  <TextInputField
+                    name="dob"
+                    type="date"
+                    label="Date of birth"
+                  />
+
+                  <Button
+                    type="submit"
+                    className="w-full bg-[#249FFF] cursor-pointer"
+                    disabled={isSubmitting}
+                  >
+                    Continue
+                  </Button>
+                </Form>
+              )}
+            </Formik>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default PersonalInfo;
