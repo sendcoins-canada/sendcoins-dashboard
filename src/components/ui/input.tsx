@@ -1,6 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Eye, EyeSlash } from "iconsax-react";
+import { Eye, EyeSlash, PasswordCheck } from "iconsax-react";
 
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   startIcon?: React.ReactNode;

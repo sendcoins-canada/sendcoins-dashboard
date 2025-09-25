@@ -69,7 +69,7 @@ const Password: React.FC = () => {
             step === "confirm" ? setStep("create") : navigate(-1)
           }
         >
-          <ArrowCircleLeft2 size="24" color="#57B5FF" className="ml-28" />
+          <ArrowCircleLeft2 size="24" color="#57B5FF" className="md:ml-28 ml-6" />
           <p>Back</p>
         </div>
 

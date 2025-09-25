@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { showDanger, showSuccess } from "@/components/ui/toast";
-import { ArrowCircleLeft2 } from "iconsax-react";
+import { ArrowLeft2 } from "iconsax-react";
 import { PasswordCheck } from "iconsax-react";
 import Header from "@/components/onboarding/shared/Header";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -108,8 +108,8 @@ const dispatch = useDispatch()
     <>
     <Header />
     <div className="min-h-[75vh] flex flex-col gap-10 mt-10">
-      <div className="flex items-center gap-2 cursor-pointer"  onClick={() => navigate(-1)}>
-   <ArrowCircleLeft2 size="24" color="black" className="ml-28 "/><p className="">Back</p>
+      <div className="flex items-center cursor-pointer border rounded-full w-fit md:ml-28 ml-6 justify-center py-2 px-4"  onClick={() => navigate(-1)}>
+   <ArrowLeft2 size="16" color="black" className=""/><p className="text-sm font-semibold">Back</p>
       </div>
     <div className=" grid place-items-center">
       
@@ -137,7 +137,7 @@ const dispatch = useDispatch()
               value={v}
               onChange={(e) => onChange(i, e.target.value)}
               onKeyDown={(e) => onKeyDown(i, e)}
-              className="h-[72px] w-[66px] text-center font-bold text-3xl rounded-md focus:outline-none bg-[#F5F5F5] focus:ring-1 focus:ring-[#57B5FF] focus-within:bg-white"
+              className="md:h-[72px] md:w-[66px] h-14 w-12 text-center font-bold text-3xl rounded-md focus:outline-none bg-[#F5F5F5] focus:ring-1 focus:ring-[#57B5FF] focus-within:bg-white"
             />
           ))}
         </div>

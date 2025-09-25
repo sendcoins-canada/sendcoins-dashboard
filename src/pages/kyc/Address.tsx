@@ -27,7 +27,7 @@ const Address: React.FC = () => {
       <Header />
       {/* Back */}
       <div
-        className="flex items-center gap-2 cursor-pointer mb-6 self-start ml-24"
+        className="flex items-center gap-2 cursor-pointer mb-6 self-start md:ml-24 ml-6"
         onClick={() => navigate(-1)}
       >
         <ArrowCircleLeft2 size="24" color="black" />

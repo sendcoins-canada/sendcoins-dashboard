@@ -11,6 +11,9 @@ import type { LoginRequest, LoginWithPasswordResponse } from "@/types/onboarding
 import { GoogleLogin } from "@react-oauth/google";
 // import jwt_decode from "jwt_decode"
 import axios from "axios";
+import Header from "@/components/onboarding/shared/Header";
+import { PasswordCheck } from "iconsax-react";
+
 
 const schema = Yup.object({
   email: Yup.string()
@@ -52,7 +55,7 @@ const Login: React.FC = () => {
     }
   );
 
-  const handleGoogleSuccess = async (credentialResponse: any) => {
+ const handleGoogleSuccess = async (credentialResponse: any) => {
     if (credentialResponse?.credential) {
       try {
         // 1. Decode the token (optional)
@@ -60,8 +63,8 @@ const Login: React.FC = () => {
         // console.log("Decoded Google user:", decoded);
 
         // 2. Send the token to your backend
-        const res = await axios.post("https://api.sendcoins.ca/auth/google", {
-          token: credentialResponse.credential,
+        const res = await axios.post("https://api.sendcoins.ca/user/auth/google/register", {
+          googleProfile: credentialResponse.credential,
         });
 
         // 3. Handle backend response (e.g. save session token, redirect)
@@ -73,13 +76,15 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen grid place-items-center">
+    <>
+    <Header />
+        <div className="md:mt-20 mt-10 grid place-items-center">
       <div className="w-full max-w-sm px-4">
         <div className="text-center space-y-1 mb-6">
-          <h1 className="text-[28px] font-semibold">Welcome back!</h1>
-          <p className=" text-neutral-500">
+          <h3 className="text-[34px] font-semibold">Welcome back!</h3>
+          <p className=" text-[#8C8C8C]">
             Move your money globally, fast, secure, and stress-free.{" "}
-            <span className="font-medium">Sign in to continue.</span>
+            <span className="font-medium text-black">Sign in to continue.</span>
           </p>
         </div>
 
@@ -106,6 +111,7 @@ const Login: React.FC = () => {
                 label="Password"
                 placeholder="Enter password"
                 isPassword
+                startIcon={<PasswordCheck size={16} color="black"/>}
               />
 
               {/* <div className="flex items-center justify-between text-[11px]">
@@ -113,7 +119,7 @@ const Login: React.FC = () => {
                 <span className="text-neutral-500">Forgot password?</span>
               </div> */}
 
-              <Button type="submit" className="w-full bg-[#249FFF]" disabled={isPending}>
+              <Button type="submit" className="w-full bg-[#0647F7] text-white" disabled={isPending}>
                 {isPending ? "Signing in..." : "Continue"}
               </Button>
 
@@ -122,18 +128,18 @@ const Login: React.FC = () => {
                 <span className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-px bg-neutral-200" />
               </div>
 
-              <Button type="button" variant="outline" className="w-full" onClick={() => {
+              {/* <Button type="button" variant="outline" className="w-full" onClick={() => {
                 // Redirect user to your backend which starts the Google OAuth flow
                 window.location.href = `https://api.sendcoins.ca/auth/google`;
               }}>
                 Continue with Google
-              </Button>
-              {/* <GoogleLogin
+              </Button> */}
+              <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={() => {
                   showDanger("Google Sign-In Failed");
                 }}
-              /> */}
+              />
 
               <p className="text-center text-[11px] text-neutral-500">
                 Don’t have an account?{" "}
@@ -144,6 +150,7 @@ const Login: React.FC = () => {
         </Formik>
       </div>
     </div>
+    </>
   );
 };
 

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowCircleLeft2, PasswordCheck } from "iconsax-react";
+import { ArrowLeft2, PasswordCheck } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/onboarding/shared/Header";
 import { showSuccess, showDanger } from "@/components/ui/toast";
@@ -61,15 +61,19 @@ const SetupPasscode: React.FC = () => {
   return (
     <>
       <Header />
+        <div className="flex items-center cursor-pointer border rounded-full w-fit md:ml-28 ml-6 justify-center py-2 px-4"  onClick={() => navigate(-1)}>
+           <ArrowLeft2 size="16" color="black" className=""/><p className="text-sm font-semibold">Back</p>
+              </div>
       <div className="min-h-screen flex flex-col items-center bg-white">
         {/* Back button */}
-        <div
+        {/* <div
           className="flex items-center gap-2 cursor-pointer mt-6 self-start"
           onClick={() => navigate(-1)}
         >
-          <ArrowCircleLeft2 size="24" color="black" className="ml-28" />
+          <ArrowCircleLeft2 size="24" color="black" className="md:ml-28 ml-6" />
           <p>Back</p>
-        </div>
+        </div> */}
+       
 
         {/* Content */}
         <div className="flex flex-col items-center text-center mt-20 px-4">
@@ -99,11 +103,11 @@ const SetupPasscode: React.FC = () => {
           />
 
           {/* Visual passcode circles */}
-          <div className="flex gap-4 mb-10">
+          <div className="flex gap-4 mb-10 px-4 md:px-0">
             {[0, 1, 2, 3].map((index) => (
               <div
                 key={index}
-                className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100"
+                className="md:w-6 md:h-6 w-4 h-4 flex items-center justify-center rounded-full bg-gray-100"
               >
                 {passcode[index] && (
                   <div className="w-full h-full rounded-full bg-black"></div>

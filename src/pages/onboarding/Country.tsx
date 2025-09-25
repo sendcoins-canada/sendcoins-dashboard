@@ -40,7 +40,7 @@ const Country: React.FC = () => {
       <Header />
       <div className="min-h-[70vh] flex flex-col gap-10 mt-10">
         <div className="flex items-center gap-2 text-[#57B5FF] cursor-pointer"  onClick={() => navigate(-1)}>
-          <ArrowCircleLeft2 size="24" color="#57B5FF" className="ml-28" />
+          <ArrowCircleLeft2 size="24" color="#57B5FF" className="md:ml-28 ml-6" />
           <p>Back</p>
         </div>
 

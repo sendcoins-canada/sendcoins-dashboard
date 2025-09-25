@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, ChevronRight } from "lucide-react";
 import Header from "@/components/onboarding/shared/Header";
-import { ArrowCircleLeft2, ShieldTick } from "iconsax-react";
+import { ArrowLeft2, ShieldTick } from "iconsax-react";
 
 const CTA = () => {
   const navigate = useNavigate();
@@ -14,12 +14,9 @@ const CTA = () => {
     <div className="min-h-screen bg-white flex flex-col">
       {/* Top navigation */}
       
-      <div
-                className="flex items-center gap-2 cursor-pointer"
-              >
-                <ArrowCircleLeft2 size="24" color="black" className="ml-28" />
-                <p>Back</p>
-              </div>
+      <div className="flex items-center cursor-pointer border rounded-full w-fit md:ml-28 ml-6 justify-center py-2 px-4"  onClick={() => navigate(-1)}>
+         <ArrowLeft2 size="16" color="black" className=""/><p className="text-sm font-semibold">Back</p>
+            </div>
 
       {/* Content */}
       <div className="flex flex-col items-center text-center mt-12 px-4">
@@ -62,7 +59,7 @@ const CTA = () => {
         {/* Later button */}
         <Button
           variant="primary"
-          className="mt-10 bg-blue-500 text-white px-6 py-2 rounded-full"
+          className="mt-10 bg-[#0647F7] cursor-pointer text-white px-6 py-2 rounded-full"
           onClick={() => navigate("/welcome")}
         >
           I’ll do this later

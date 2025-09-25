@@ -11,6 +11,11 @@ import type { VerifyEmailRequest, VerifyEmailResponse } from "@/types/onboarding
 import { showDanger, showSuccess } from "../ui/toast";
 import { useDispatch } from "react-redux";
 import { setEmail } from "@/store/registration/slice";
+import { GoogleLogin } from "@react-oauth/google";
+import axios from "axios";
+import Logoblack from "../../assets/logoblack.svg"
+
+
 
 const Signup = () => {
   const dispatch = useDispatch();
@@ -32,13 +37,36 @@ const Signup = () => {
 
   });
 
+   const handleGoogleSuccess = async (credentialResponse: any) => {
+      if (credentialResponse?.credential) {
+        try {
+          // 1. Decode the token (optional)
+          // const decoded: any = jwtDecode(credentialResponse.credential);
+          // console.log("Decoded Google user:", decoded);
+  
+          // 2. Send the token to your backend
+          const res = await axios.post("https://api.sendcoins.ca/user/auth/google/register", {
+            googleProfile: credentialResponse.credential,
+          });
+  
+          // 3. Handle backend response (e.g. save session token, redirect)
+          console.log("Backend response:", res.data);
+        } catch (err) {
+          console.error("Google login error:", err);
+        }
+      }
+    };
+
   return (
-    <div>
+    <div className="relative ">
       <Header />
-      <div className="mx-auto max-w-md space-y-6 mt-10">
+      {/* <div className="">            
+        <img src={Logoblack} alt="logo" />
+</div> */}
+      <div className="mx-auto max-w-md space-y-6 md:mt-20 mt-10">
         <div className="space-y-1 text-center mx-auto bg-brand mb-6">
-          <h2 className="text-4xl font-semibold font-sans mb-4">Welcome to Sendcoins</h2>
-          <p className="text-base text-neutral-600  md:w-[80%] mx-auto ">
+          <h3 className="text-4xl font-semibold  mb-4">Welcome to Sendcoins</h3>
+          <p className="text-base text-[#8C8C8C]  md:w-[80%] mx-auto ">
             Move your money globally — fast, secure, and stress-free.{" "}
             <span className="font-semibold text-black">Sign in to get started.</span>
           </p>
@@ -99,7 +127,7 @@ const Signup = () => {
               <div className="space-y-3">
                 <Button
                   type="submit"
-                  className="w-full cursor-pointer bg-[#249FFF]"
+                  className="w-full cursor-pointer bg-[#0647F7] text-white"
                   disabled={isPending}
                   variant='primary'
                 >
@@ -109,14 +137,20 @@ const Signup = () => {
                   <span className="px-2 bg-white relative z-10">or</span>
                   <span className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-px bg-neutral-200" />
                 </div>
-                <Button
+                {/* <Button
                   type="button"
                   variant="outline"
                   className="w-full"
                   onClick={() => window.location.href = "https://api.sendcoins.ca/auth/google"}
                 >
                   Continue with Google
-                </Button>
+                </Button> */}
+                 <GoogleLogin
+                                onSuccess={handleGoogleSuccess}
+                                onError={() => {
+                                  showDanger("Google Sign-In Failed");
+                                }}
+                              />
 
               </div>
               <p className="text-center text-sm text-[#8C8C8C]">Already have an account? <span className="text-black cursor-pointer" onClick={() => navigate('/login')}>Login</span></p>
@@ -124,6 +158,7 @@ const Signup = () => {
           )}
         </Formik>
       </div>
+        {/* <p className="absolute text-center bottom-0">By registering, you accept our Terms of use and Privacy</p> */}
     </div>
   );
 };
