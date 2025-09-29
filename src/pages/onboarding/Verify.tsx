@@ -11,6 +11,7 @@ import type { VerifyOtpResponse } from "@/types/onboarding";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "@/store";
 import { setCode } from "@/store/registration/slice";
+import { setCredentials } from "@/store/auth/slice";
 
 
 const OTP_LENGTH = 6;
@@ -59,7 +60,14 @@ const dispatch = useDispatch()
   // ✅ React Query mutation for OTP verification
   const { mutate } = useMutation<VerifyOtpResponse, Error,  { email: string; code: string }>({
     mutationFn: fromQueryString ? verifyLoginOtp : verifyOtp,
-    onSuccess: () => {
+    onSuccess: (res) => {
+ const data = res.data;
+  dispatch(
+    setCredentials({
+      token: data.token,         // {azer_token, expires_at}
+      user: data.result[0]      // first item in result array
+    })
+  );
        dispatch(setCode(code));
       showSuccess("Code verified!");
       if (fromQueryString) {

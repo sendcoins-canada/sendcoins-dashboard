@@ -1,67 +1,65 @@
-// src/store/auth/slice.ts
-import axios from "axios";
-import type { PayloadAction } from "@reduxjs/toolkit";
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { verifyEmail } from "@/api/authApi";
-import type { VerifyEmailRequest, VerifyEmailResponse } from "@/types/onboarding";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-interface AuthState {
+export interface AuthToken {
+  azer_token: string;
+  expires_at: number;
+}
+export interface User {
+   oauth_id: number;
+  useremail: string;
+  device?: string;
+  // [key: string]: any; 
+}
+
+export interface AuthState {
   loading: boolean;
   error: string | null;
   message: string | null;
+  token: AuthToken | null;
+  user: User | null;
 }
 
 const initialState: AuthState = {
   loading: false,
   error: null,
   message: null,
-};
-
-export const verifyEmailThunk = createAsyncThunk<
-  VerifyEmailResponse,
-  VerifyEmailRequest,
-  { rejectValue: string }
->("auth/verifyEmail", async (payload, { rejectWithValue }) => {
-  try {
-    return await verifyEmail(payload);
-  } catch (err: unknown) {
-    // return rejectWithValue(err.response?.data?.message || "Something went wrong");
-     if (axios.isAxiosError(err)) {
-      return rejectWithValue(err.response?.data?.message || "Something went wrong");
-    }
-    return rejectWithValue("Something went wrong");
-  }
-});
+  token: localStorage.getItem("token")
+    ? JSON.parse(localStorage.getItem("token") as string)
+    : null, 
+ user: localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user") as string)
+    : null,};
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    setCredentials: (
+      state,
+      action: PayloadAction<{ token: AuthToken; user: User }>
+    ) => {
+      state.token = action.payload.token;
+      state.user = action.payload.user;
+      localStorage.setItem("token", JSON.stringify(action.payload.token));
+      localStorage.setItem("user", JSON.stringify(action.payload.user));
+    },
+    logout: (state) => {
+      state.token = null;
+      state.user = null;
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+    },
     clearAuthState: (state) => {
       state.error = null;
       state.message = null;
     },
   },
-  extraReducers: (builder) => {
-    builder
-      .addCase(verifyEmailThunk.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-        state.message = null;
-      })
-      .addCase(
-        verifyEmailThunk.fulfilled,
-        (state, action: PayloadAction<VerifyEmailResponse>) => {
-          state.loading = false;
-          state.message = action.payload.message;
-        }
-      )
-      .addCase(verifyEmailThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || "Failed to verify email";
-      });
-  },
 });
 
-export const { clearAuthState } = authSlice.actions;
+export const {  
+  setCredentials,
+  logout,
+  clearAuthState,
+} = authSlice.actions;
+
 export default authSlice.reducer;

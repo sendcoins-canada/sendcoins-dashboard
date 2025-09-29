@@ -60,8 +60,8 @@ const Address: React.FC = () => {
             country: "Canada",
           }}
           validationSchema={AddressSchema}
-          onSubmit={(values) => {
-            console.log("Submitted values:", values);
+          onSubmit={() => {
+            // console.log("Submitted values:", values);
             toast.success("Address saved successfully!");
             // navigate("/next-step"); // move to next step
             //  Trigger MetaMap SDK

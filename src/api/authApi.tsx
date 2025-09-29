@@ -60,7 +60,7 @@ export const resendOtp = async (email: string): Promise<{ message: string }> => 
 export const registerWithPassword = async (
   data: RegisterRequest
 ): Promise<RegisterResponse> => {
-   console.log("📡 Sending registration payload:", data); // <--
+   console.log(" Sending registration payload:", data); 
   const formData = new FormData();
   formData.append("email", data.email);
   formData.append("firstName", data.firstName);

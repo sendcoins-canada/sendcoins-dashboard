@@ -51,7 +51,6 @@ const SetupPasscode: React.FC = () => {
       setStep("confirm");
     } else if (step === "confirm") {
       if (passcode.join("") === firstPasscode.join("")) {
-        console.log("✅ Passcode set:", passcode.join(""));
          mutate({ code: passcode.join("") });
       } else {
         showDanger("Code doesn't match"); // ✅ sonner toast

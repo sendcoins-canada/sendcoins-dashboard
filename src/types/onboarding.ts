@@ -15,11 +15,31 @@ export interface VerifyOtpRequest {
   code: string;
 }
 
+// export interface VerifyOtpResponse {
+//   isSuccess: boolean;
+//   message: string;
+//   title: string;
+// }
 export interface VerifyOtpResponse {
-  isSuccess: boolean;
-  message: string;
+  data: {
   title: string;
+  token: {
+    azer_token: string;
+    expires_at: number;
+  };
+  result: Array<{
+    oauth_id: number;
+    useremail: string;
+    device?: string;
+    // [key: string]: any;
+  }>;
+  message: string;
+  isSuccess: boolean;
+  icon?: string;
+  redirectUrl?: string;
 }
+}
+
 
 export interface RegisterRequest {
   email: string;
@@ -30,8 +50,7 @@ export interface RegisterRequest {
   code: string;
 }
 
-export interface RegisterResponse {
-  
+export interface RegisterResponse { 
     data: {
         title: string,
         message: string,

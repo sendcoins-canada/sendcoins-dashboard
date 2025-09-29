@@ -11,6 +11,7 @@ import Welcome from "./pages/onboarding/Welcome";
 import Passcode from "./pages/onboarding/Passcode";
 import CTA from "./pages/onboarding/CTA";
 import Address from "./pages/kyc/Address";
+import ProtectedRoute from "./components/ProtectedRoutes";
 
 function App() {
   return (
@@ -18,15 +19,64 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+
         <Route path="/verify" element={<Verify />} />
         <Route path="/country" element={<Country />} />
         <Route path="/personal-info" element={<PersonalInfo />} />
         <Route path="/password" element={<Password />} />
+        {/* 
         <Route path="/survey" element={<Survey />} />
         <Route path="/welcome" element={<Welcome />} />
         <Route path="/setup-passcode" element={<Passcode />} />
         <Route path="/cta" element={<CTA />} />
         <Route path="/address" element={<Address />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} /> */}
+         {/* Protected routes */}
+      
+       
+        <Route
+          path="/survey"
+          element={
+            <ProtectedRoute>
+              <Survey />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/welcome"
+          element={
+            <ProtectedRoute>
+              <Welcome />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/setup-passcode"
+          element={
+            <ProtectedRoute>
+              <Passcode />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cta"
+          element={
+            <ProtectedRoute>
+              <CTA />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/address"
+          element={
+            <ProtectedRoute>
+              <Address />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Redirects */}
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

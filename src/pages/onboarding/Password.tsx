@@ -14,6 +14,7 @@ import { registerWithPassword } from "@/api/authApi";
 import type { RegisterRequest, RegisterResponse } from "@/types/onboarding";
 import { showSuccess, showDanger } from "@/components/ui/toast"
 import type { RootState } from "@/store";
+import { setCredentials } from "@/store/auth/slice";
 
 const Password: React.FC = () => {
   const [step, setStep] = useState<"create" | "confirm">("create");
@@ -50,7 +51,25 @@ const Password: React.FC = () => {
     RegisterRequest
   >({
     mutationFn: registerWithPassword,
-    onSuccess: () => {
+    onSuccess: (res) => {
+       const { token } = res.data;
+
+    // Save in Redux (no "user" object yet, so you can pass email + names)
+    dispatch(
+      setCredentials({
+        token: {
+          azer_token: token.azer_token,
+          expires_at: token.expires_at,
+        },
+        user: {
+          oauth_id: 0, // backend may not send this yet
+          useremail: email,
+          // firstName,
+          // lastName,
+          // country,
+        },
+      })
+    );
       showSuccess(" Registration successful!");
       navigate("/welcome");
     },
