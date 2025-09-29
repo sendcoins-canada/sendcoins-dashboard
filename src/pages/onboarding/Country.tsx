@@ -32,7 +32,7 @@ const Country: React.FC = () => {
         src={c.flag} // <-- backend gives you full image URL
         alt={c.country}
         className="w-5 h-5 mr-2 inline-block rounded-full"
-      /> // ✅ emoji flag
+      /> // emoji flag
     })) || [];
 
   return (
