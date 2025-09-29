@@ -16,16 +16,21 @@ const SetupPasscode: React.FC = () => {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: createPasscode,
-    onSuccess: (res) => {
-      showSuccess(res?.message || "Passcode created successfully!");
-      navigate("/dashboard"); 
-    },
-    onError: (err: any) => {
-      showDanger(err?.message || "Failed to create passcode.");
-    },
-  });
+  const { mutate, isPending } = useMutation<
+  { message: string },   //  Response type
+  Error,                 //  Error type
+  { code: string }       //  Variables type (input to mutationFn)
+>({
+  mutationFn: createPasscode,
+  onSuccess: (res) => {
+    showSuccess(res?.message || "Passcode created successfully!");
+    navigate("/dashboard");
+  },
+  onError: (err) => {
+    showDanger(err.message || "Failed to create passcode.");
+  },
+});
+
 
   useEffect(() => {
     inputRef.current?.focus();

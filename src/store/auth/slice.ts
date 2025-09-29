@@ -1,4 +1,5 @@
 // src/store/auth/slice.ts
+import axios from "axios";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { verifyEmail } from "@/api/authApi";
@@ -23,8 +24,12 @@ export const verifyEmailThunk = createAsyncThunk<
 >("auth/verifyEmail", async (payload, { rejectWithValue }) => {
   try {
     return await verifyEmail(payload);
-  } catch (err: any) {
-    return rejectWithValue(err.response?.data?.message || "Something went wrong");
+  } catch (err: unknown) {
+    // return rejectWithValue(err.response?.data?.message || "Something went wrong");
+     if (axios.isAxiosError(err)) {
+      return rejectWithValue(err.response?.data?.message || "Something went wrong");
+    }
+    return rejectWithValue("Something went wrong");
   }
 });
 

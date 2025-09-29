@@ -7,7 +7,7 @@ import Header from "@/components/onboarding/shared/Header";
 import { useNavigate, useLocation } from "react-router-dom";
 import { verifyOtp, resendOtp, verifyLoginOtp } from "@/api/authApi";
 import { useMutation } from "@tanstack/react-query";
-import type { VerifyOtpRequest, VerifyOtpResponse } from "@/types/onboarding";
+import type { VerifyOtpResponse } from "@/types/onboarding";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "@/store";
 import { setCode } from "@/store/registration/slice";
@@ -57,7 +57,7 @@ const email =
 const dispatch = useDispatch()
   
   // ✅ React Query mutation for OTP verification
-  const { mutate, isPending } = useMutation<any, Error,  { email: string; code: string }>({
+  const { mutate } = useMutation<VerifyOtpResponse, Error,  { email: string; code: string }>({
     mutationFn: fromQueryString ? verifyLoginOtp : verifyOtp,
     onSuccess: () => {
        dispatch(setCode(code));

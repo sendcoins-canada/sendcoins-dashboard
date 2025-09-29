@@ -1,7 +1,7 @@
-import React from "react";
+// import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import Header from "@/components/onboarding/shared/Header";
 import { ArrowLeft2, ShieldTick } from "iconsax-react";
 

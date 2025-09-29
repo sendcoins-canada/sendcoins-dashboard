@@ -1,11 +1,8 @@
-import React from 'react'
-import backicon from "../../../assets/backicon.svg"
-import Logo from "../../../assets/Logo.svg"
 import Logoblack from "../../../assets/logoblack.svg"
-import { useNavigate } from 'react-router-dom'
+// import { useNavigate } from 'react-router-dom'
 
 const Header = () => {
-    const navigate = useNavigate()
+    // const navigate = useNavigate()
   return (
     <div className='w-full py-8 md:px-16 px-4'>
         <div className='flex md:px-8 justify-center'>

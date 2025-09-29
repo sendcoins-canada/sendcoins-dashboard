@@ -1,7 +1,7 @@
 import React from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import { TextInputField, PillCheckboxField } from "@/components/ui/form";
+import { TextInputField } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
@@ -9,6 +9,7 @@ import { showSuccess, showDanger } from "@/components/ui/toast";
 import { loginUser, verifyOtpQueryString } from "@/api/authApi";
 import type { LoginRequest, LoginWithPasswordResponse } from "@/types/onboarding";
 import { GoogleLogin } from "@react-oauth/google";
+import type { CredentialResponse } from "@react-oauth/google";
 // import jwt_decode from "jwt_decode"
 import axios from "axios";
 import Header from "@/components/onboarding/shared/Header";
@@ -45,17 +46,20 @@ const Login: React.FC = () => {
           } else {
             showDanger("Failed to verify query string.");
           }
-        } catch (err: any) {
-          showDanger(err.message || "Failed to verify query string.");
-        }
+        } catch (err) {
+ if (err instanceof Error) {
+        showDanger(err.message || "Failed to verify query string.");
+      } else {
+        showDanger("Failed to verify query string.");
+      }        }
       },
-      onError: (err: any) => {
+      onError: (err) => {
         showDanger(err.message || "Invalid credentials, please try again.");
       },
     }
   );
 
- const handleGoogleSuccess = async (credentialResponse: any) => {
+ const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
     if (credentialResponse?.credential) {
       try {
         // 1. Decode the token (optional)
@@ -99,7 +103,7 @@ const Login: React.FC = () => {
             mutate(values);
           }}
         >
-          {({ isSubmitting }) => (
+          {() => (
             <Form className="space-y-3">
               <TextInputField
                 name="email"

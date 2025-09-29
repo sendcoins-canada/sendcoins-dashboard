@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/onboarding/shared/Header";
-import { ArrowCircleLeft2 } from "iconsax-react";
+// import { ArrowCircleLeft2 } from "iconsax-react";
 import { useNavigate } from "react-router-dom";
 import { getActiveSurvey, submitSurvey } from "@/api/authApi";
 import type { SurveyResponse } from "@/types/onboarding";
@@ -46,7 +46,7 @@ const Survey: React.FC = () => {
     try {
       setLoading(true);
        const email = localStorage.getItem("verifyEmail") || "";
-    const azerid = localStorage.getItem("azerid") || "";
+    // const azerid = localStorage.getItem("azerid") || "";
 
       const payload = {
         email: email, // TODO: replace with actual logged-in user email
@@ -75,22 +75,7 @@ const Survey: React.FC = () => {
     <>
     <Header />
     <div className="min-h-screen flex flex-col items-center ">
-          {/* <div
-                  className="flex items-center gap-2 text-[#57B5FF] cursor-pointer"
-                 
-                >
-                  <ArrowCircleLeft2 size="24" color="#57B5FF" className="ml-28" />
-                  <p>Back</p>
-                </div> */}
-      {/* Progress bar */}
-      {/* <div className="w-1/2 mb-8">
-        <div className="h-1 bg-gray-200 rounded-full">
-          <div
-            className="h-1 bg-blue-500 rounded-full transition-all duration-300"
-            style={{ width: `${(step / questions.length) * 100}%` }}
-          ></div>
-        </div>
-      </div> */}
+        
 
       {/* Question */}
       <div className="text-center max-w-lg">
@@ -149,8 +134,8 @@ const Survey: React.FC = () => {
             <Button variant="secondary" className="bg-gray-100" onClick={() => navigate('/cta')}>
               Skip
             </Button>
-            <Button className="bg-blue-500 text-white" onClick={handleNext}>
-  Finish
+            <Button className="bg-blue-500 text-white" onClick={handleNext} disabled={loading}>
+               {loading ? "Submitting..." : "Finish"}
               </Button>
           </div>
         </div>

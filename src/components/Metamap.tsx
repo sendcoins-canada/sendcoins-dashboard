@@ -3,8 +3,8 @@ import React, { useEffect, useRef, useState } from "react";
 interface MetaMapVerifyProps {
   clientId: string;
   flowId: string;
-  onSuccess: (detail: any) => void;
-  onExit: (detail: any) => void;
+  onSuccess: (detail: unknown) => void;
+  onExit: (detail: unknown) => void;
 }
 
 const MetaMapVerify: React.FC<MetaMapVerifyProps> = ({
@@ -27,12 +27,12 @@ const [loading, setLoading] = useState(true);
     };
 
     const userFinishedHandler = (event: Event) => {
-      const customEvent = event as CustomEvent;
+      const customEvent = event as CustomEvent<unknown>;
       onSuccess(customEvent.detail);
     };
 
     const exitedHandler = (event: Event) => {
-      const customEvent = event as CustomEvent;
+      const customEvent = event as CustomEvent<unknown>;
       onExit(customEvent.detail);
     };
 
@@ -57,9 +57,9 @@ const [loading, setLoading] = useState(true);
       )}
 
       <metamap-button
-        ref={buttonRef as React.RefObject<any>}
+        ref={buttonRef}
         clientid={clientId}
-        flowId={flowId}
+        flowid={flowId}
         style={{ display: loading ? "none" : "block" }}
       ></metamap-button>
     </div>

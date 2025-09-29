@@ -13,6 +13,7 @@ import { useMutation } from "@tanstack/react-query";
 import { registerWithPassword } from "@/api/authApi";
 import type { RegisterRequest, RegisterResponse } from "@/types/onboarding";
 import { showSuccess, showDanger } from "@/components/ui/toast"
+import type { RootState } from "@/store";
 
 const Password: React.FC = () => {
   const [step, setStep] = useState<"create" | "confirm">("create");
@@ -23,14 +24,14 @@ const Password: React.FC = () => {
 
   // ✅ Grab registration data from redux
   const { email, firstName, lastName, country, code } = useSelector(
-    (state: any) => state.registration
+    (state: RootState) => state.registration
   );
 
   const passwordSchema = Yup.object({
     password: Yup.string()
       .required("Input your password")
       .min(8, "Password must be at least 8 characters")
-      .matches(/[A-Z]/, "Must contain at least one uppercase letter")
+    .matches(/[A-Z]/, "Must contain at least one uppercase letter")
       .matches(/[a-z]/, "Must contain at least one lowercase letter")
       .matches(/\d/, "Must contain at least one number")
       .matches(/[@$!%*?&]/, "Must contain at least one symbol"),
@@ -39,7 +40,7 @@ const Password: React.FC = () => {
   const confirmSchema = Yup.object({
     confirmPassword: Yup.string()
       .required("Confirm your password")
-      .oneOf([Yup.ref("password"), null], "Passwords must match"),
+      .oneOf([Yup.ref("password")], "Passwords must match")
   });
 
   // ✅ Register mutation

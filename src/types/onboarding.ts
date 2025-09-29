@@ -37,7 +37,7 @@ export interface RegisterResponse {
         message: string,
         token: {
             azer_token: string,
-            expires_at: Number
+            expires_at: number
         },
         isSuccess: boolean,
         icon: string,

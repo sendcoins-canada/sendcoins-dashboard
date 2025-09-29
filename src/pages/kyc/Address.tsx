@@ -6,7 +6,7 @@ import { ArrowCircleLeft2, Location, Lock1 } from "iconsax-react";
 import { useNavigate } from "react-router-dom";
 import Input from "@/components/ui/input"; // your custom Input component
 import { toast } from "sonner";
-import MetaMapVerify from "@/components/Metamap";
+// import MetaMapVerify from "@/components/Metamap";
 import Header from "@/components/onboarding/shared/Header";
 
 // ✅ Validation schema
@@ -132,7 +132,7 @@ const Address: React.FC = () => {
 </Button>
  {/* Hidden MetaMap button */}
           <metamap-button
-            ref={metamapRef as React.RefObject<any>}
+            ref={metamapRef}
             clientid={import.meta.env.VITE_METAMAP_CLIENT_ID}
             flowId={import.meta.env.VITE_METAMAP_FLOW_ID}
             style={{ display: "none" }}

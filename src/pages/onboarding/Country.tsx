@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowCircleLeft2, Global, PasswordCheck } from "iconsax-react";
+import { ArrowCircleLeft2, Global } from "iconsax-react";
 import Header from "@/components/onboarding/shared/Header";
 import { SelectField } from "@/components/ui/form";
 import { Formik, Form } from "formik";
@@ -18,7 +18,7 @@ const Country: React.FC = () => {
   });
   const navigate = useNavigate()
     const dispatch = useDispatch();
-     const { data, isLoading, isError } = useQuery({
+     const { data } = useQuery({
     queryKey: ["countries"],
     queryFn: getCountries,
   });

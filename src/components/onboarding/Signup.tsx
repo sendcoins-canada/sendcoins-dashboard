@@ -1,9 +1,9 @@
-import React from "react";
+
 import Header from "./shared/Header";
 import { Button } from "../ui/button";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import { TextInputField, SelectField, PillCheckboxField } from "../ui/form";
+import { TextInputField } from "../ui/form";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { verifyEmail } from "@/api/authApi";
@@ -12,8 +12,9 @@ import { showDanger, showSuccess } from "../ui/toast";
 import { useDispatch } from "react-redux";
 import { setEmail } from "@/store/registration/slice";
 import { GoogleLogin } from "@react-oauth/google";
+import { CredentialResponse } from "@react-oauth/google";
 import axios from "axios";
-import Logoblack from "../../assets/logoblack.svg"
+// import Logoblack from "../../assets/logoblack.svg"
 
 
 
@@ -37,7 +38,7 @@ const Signup = () => {
 
   });
 
-   const handleGoogleSuccess = async (credentialResponse: any) => {
+   const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
       if (credentialResponse?.credential) {
         try {
           // 1. Decode the token (optional)
@@ -95,7 +96,7 @@ const Signup = () => {
           }}
 
         >
-          {({ isSubmitting }) => (
+          {() => (
             <Form className="space-y-4 md:w-[80%] mx-auto">
               <TextInputField
                 name="email"
