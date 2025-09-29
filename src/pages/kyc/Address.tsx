@@ -131,12 +131,14 @@ const Address: React.FC = () => {
   Continue
 </Button>
  {/* Hidden MetaMap button */}
+ {/* @ts-ignore */}
           <metamap-button
             ref={metamapRef}
             clientid={import.meta.env.VITE_METAMAP_CLIENT_ID}
             flowid={import.meta.env.VITE_METAMAP_FLOW_ID}
             style={{ display: "none" }}
           >
+            {/* @ts-ignore */}
           </metamap-button>
             </Form>
           )}

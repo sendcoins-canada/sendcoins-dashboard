@@ -55,13 +55,15 @@ const [loading, setLoading] = useState(true);
           <span className="ml-2 text-gray-600">Loading verification...</span>
         </div>
       )}
-
+{/* @ts-ignore */}
       <metamap-button
         ref={buttonRef}
         clientid={clientId}
         flowid={flowId}
         style={{ display: loading ? "none" : "block" }}
-      ></metamap-button>
+      >
+        {/* @ts-ignore */}
+      </metamap-button>
     </div>
   );
 };
