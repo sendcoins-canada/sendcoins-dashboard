@@ -12,7 +12,7 @@ import { showDanger, showSuccess } from "../ui/toast";
 import { useDispatch } from "react-redux";
 import { setEmail } from "@/store/registration/slice";
 import { GoogleLogin } from "@react-oauth/google";
-import { CredentialResponse } from "@react-oauth/google";
+import type { CredentialResponse } from "@react-oauth/google";
 import axios from "axios";
 // import Logoblack from "../../assets/logoblack.svg"
 

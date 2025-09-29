@@ -4,8 +4,8 @@ declare namespace JSX {
       React.HTMLAttributes<HTMLElement>,
       HTMLElement
     > & {
-      clientid: string;
-      flowId: string;
+      clientid?: string;
+      flowid?: string;
     };
   }
 }

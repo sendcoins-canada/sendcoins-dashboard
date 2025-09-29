@@ -1,4 +1,3 @@
-import React from 'react'
 import hi from "../../assets/hi.png"
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
