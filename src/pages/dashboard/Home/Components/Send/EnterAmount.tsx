@@ -13,7 +13,7 @@ interface EnterAmountProps {
   onNext: (amount: string) => void;
 }
 
-const EnterAmount: React.FC<EnterAmountProps> = ({ asset, onBack, onNext }) => {
+const EnterAmount: React.FC<EnterAmountProps> = ({ onNext }) => {
   const navigate = useNavigate();
   const [sendAmount, setSendAmount] = useState("");
   const [receiveAmount, setReceiveAmount] = useState("");

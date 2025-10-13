@@ -1,6 +1,6 @@
 // src/components/send/RecipientDetails.tsx
 import React, { useState } from "react";
-import { Input } from "@/components/ui/input";
+// import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { HeaderWithCancel } from "@/components/onboarding/shared/Header";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +8,7 @@ import { Clipboard } from "iconsax-react";
 import { Select } from "@/components/ui/select";
 import { assets } from "./SelectCryptoAsset";
 import SaveRecipientModal from "./SaveRecipientModal";
-import { showSuccess } from "@/components/ui/toast";
+// import { showSuccess } from "@/components/ui/toast";
 
 type Props = {
   asset: string;
@@ -16,7 +16,7 @@ type Props = {
   onNext: (data: { network: string; address: string }) => void;
 };
 
-const RecipientDetails: React.FC<Props> = ({ asset, onBack, onNext }) => {
+const RecipientDetails: React.FC<Props> = ({ asset, onNext }) => {
   const navigate = useNavigate();
   const [network, setNetwork] = useState("eth");
   const [address, setAddress] = useState("");

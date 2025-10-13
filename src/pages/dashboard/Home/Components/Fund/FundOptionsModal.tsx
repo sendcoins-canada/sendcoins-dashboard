@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import  Modal  from "@/components/ui/Modal";
-import { Apple, ArrowRight2, Bank, ArrowLeft, BuyCrypto } from "iconsax-react";
+import { Apple, ArrowRight2, Bank, BuyCrypto } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 import Select from "@/components/ui/select";
 // import { BuyCrypto, Moneys } from "iconsax-react";

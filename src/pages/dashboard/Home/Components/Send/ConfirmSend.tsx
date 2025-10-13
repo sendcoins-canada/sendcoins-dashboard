@@ -1,6 +1,5 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight } from "lucide-react";
 import { TransmitSqaure2 } from "iconsax-react";
 import { HeaderWithCancel } from "@/components/onboarding/shared/Header";
 import { Convert, Money, Money2 } from "iconsax-react";
@@ -18,7 +17,6 @@ const ConfirmSend: React.FC<Props> = ({
   asset,
   recipient,
   amount,
-  onBack,
   onConfirm,
 }) => {
   const exchangeRate = "$1 = 1 USDC";

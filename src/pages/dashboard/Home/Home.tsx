@@ -13,7 +13,7 @@ import FundOptionsModal from "./Components/Fund/FundOptionsModal";
 const Home: React.FC = () => {
   const navigate = useNavigate()
   const [showBalance, setShowBalance] = useState(false);
-  const [transactions, setTransactions] = useState([
+  const [transactions, _setTransactions] = useState([
     {
       id: 1,
       name: "Dwight Schrute",

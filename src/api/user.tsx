@@ -13,11 +13,11 @@ export const getUser = async (): Promise<User> => {
   const { azer_token, expires_at } = JSON.parse(tokenData);
 
    // Check if token is expired
-  const now = Date.now();
-  if (expires_at && now > expires_at) {
-    localStorage.removeItem("token");
-    throw new Error("Session expired. Please log in again.");
-  }
+//   const now = Date.now();
+//   if (expires_at && now > expires_at) {
+//     localStorage.removeItem("token");
+//     throw new Error("Session expired. Please log in again.");
+//   }
 
   if (!azer_token) {
     throw new Error("Invalid token format in local storage");

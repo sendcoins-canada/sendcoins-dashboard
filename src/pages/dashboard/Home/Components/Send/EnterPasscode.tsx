@@ -53,13 +53,13 @@ const EnterPasscode: React.FC<EnterPasscodeProps> = ({ onSuccess }) => {
       setPasscode([]);
       setStep("confirm");
     } else if (step === "confirm") {
-    //   if (passcode.join("") === firstPasscode.join("")) {
-    //      mutate({ code: passcode.join("") });
-    //   } else {
-    //     showDanger("Code doesn't match"); // ✅ sonner toast
-    //     setPasscode([]);
-    //     setStep("create");
-    //   }
+      if (passcode.join("") === firstPasscode.join("")) {
+         mutate({ code: passcode.join("") });
+      } else {
+        showDanger("Code doesn't match"); //  sonner toast
+        setPasscode([]);
+        setStep("create");
+      }
      showSuccess("Passcode confirmed!");
         onSuccess?.(); // Notify parent (SendFlow)
     

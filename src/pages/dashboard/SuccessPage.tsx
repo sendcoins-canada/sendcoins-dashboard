@@ -23,7 +23,7 @@ const SuccessPage: React.FC<SuccessPageProps> = ({
   onPrimaryClick,
   onSecondaryClick,
   backgroundColor = "#00E676",
-  iconColor = "#0647F7",
+  // iconColor = "#0647F7",
 }) => {
   const navigate = useNavigate();
 

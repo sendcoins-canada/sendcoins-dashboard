@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Modal  from "@/components/ui/Modal";
 import { showSuccess, showWarning } from "@/components/ui/toast"; // assuming shadcn toast
-import { Clipboard, Coin, KyberNetwork, Wallet2 } from "iconsax-react";
+import { Coin, KyberNetwork, Wallet2 } from "iconsax-react";
 
 interface SaveRecipientModalProps {
   open: boolean;

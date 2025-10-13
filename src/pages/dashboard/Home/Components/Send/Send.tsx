@@ -24,13 +24,13 @@ const SendFlow: React.FC = () => {
 
   // data collected through the flow
   const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
-  const [recipient, setRecipient] = useState({ name: "", address: "" });
+  const [recipient, setRecipient] = useState({name: "", network: "", address: "", });
   const [amount, setAmount] = useState<string>("");
 
-  const openFromHome = () => {
-    setIsSendModalOpen(true);
-    setStep("options");
-  };
+  // const openFromHome = () => {
+  //   setIsSendModalOpen(true);
+  //   setStep("options");
+  // };
 
   // called when SendOptionsModal option is chosen
   const handleSelectOption = (option: "crypto" | "fiat") => {
@@ -50,16 +50,16 @@ const SendFlow: React.FC = () => {
     setStep("recipient");
   };
 
-  const handleRecipientNext = (data: { name: string; address: string; amount: string }) => {
-    setRecipient({ name: data.name, address: data.address });
+  const handleRecipientNext = (data: { network: string; address: string }) => {
+    setRecipient({ name: "", network: data.network, address: data.address });
     // setAmount(data.amount);
     setStep("amount");
   };
 
-  const handleAmountNext = (amountValue: string) => {
-    setAmount(amountValue);
-    setStep("confirm");
-  };
+  // const handleAmountNext = (amountValue: string) => {
+  //   setAmount(amountValue);
+  //   setStep("confirm");
+  // };
 
   const handleConfirm = () => {
     // Do API call to create/send transaction

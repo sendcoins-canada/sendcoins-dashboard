@@ -29,7 +29,7 @@ const ConvertFlow: React.FC = () => {
     name: "John Doe",
     address: "0x89f8...a1C3",
   };
-  const estimatedArrival = "Less than 2 minutes";
+  // const estimatedArrival = "Less than 2 minutes";
 
   const handleContinue = () => {
     if (!sendAmount.trim() || isNaN(Number(sendAmount))) {

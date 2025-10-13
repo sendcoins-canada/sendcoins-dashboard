@@ -11,7 +11,7 @@ import type { LoginRequest, LoginWithPasswordResponse } from "@/types/onboarding
 import { GoogleLogin } from "@react-oauth/google";
 import type { CredentialResponse } from "@react-oauth/google";
 // import jwt_decode from "jwt_decode"
-import axios from "axios";
+import axios, {AxiosError} from "axios";
 import Header from "@/components/onboarding/shared/Header";
 import { PasswordCheck } from "iconsax-react";
 
@@ -28,36 +28,46 @@ const Login: React.FC = () => {
   const navigate = useNavigate()
 
 
-  const { mutate, isPending } = useMutation<LoginWithPasswordResponse, Error, LoginRequest>(
-    {
-      mutationFn: loginUser,
-      onSuccess: async (res, variables) => {
-        try {
-          // Save email and queryString for later use
-          localStorage.setItem("email", variables.email);
-          localStorage.setItem("verifyOTPString", res?.data?.verifyOTPString);
+ const { mutate, isPending } = useMutation<
+  LoginWithPasswordResponse,
+  AxiosError<any>,
+  LoginRequest
+>({
+  mutationFn: loginUser,
+  onSuccess: async (res, variables) => {
+    try {
+      // Save email and queryString for later use
+      localStorage.setItem("email", variables.email);
+      localStorage.setItem("verifyOTPString", res?.data?.verifyOTPString);
 
-          // Call verifyOtpQueryString first
-          const verifyRes = await verifyOtpQueryString(res?.data?.verifyOTPString);
+      // Call verifyOtpQueryString first
+      const verifyRes = await verifyOtpQueryString(res?.data?.verifyOTPString);
 
-          if (verifyRes?.data?.isSuccess) {
-            showSuccess(verifyRes.data.message || "Check your mail for the code");
-            navigate("/verify", { state: { fromQueryString: true } });
-          } else {
-            showDanger("Failed to verify query string.");
-          }
-        } catch (err) {
- if (err instanceof Error) {
+      if (verifyRes?.data?.isSuccess) {
+        showSuccess(verifyRes.data.message || "Check your mail for the code");
+        navigate("/verify", { state: { fromQueryString: true } });
+      } else {
+        showDanger("Failed to verify query string.");
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        console.log(err);
         showDanger(err.message || "Failed to verify query string.");
       } else {
         showDanger("Failed to verify query string.");
-      }        }
-      },
-      onError: (err) => {
-        showDanger(err.message || "Invalid credentials, please try again.");
-      },
+      }
     }
-  );
+  },
+  onError: (err) => {
+    console.log(err);
+
+    // ✅ AxiosError has `response` safely typed
+    const message =
+      err.response?.data?.data?.message || "Invalid credentials, please try again.";
+
+    showDanger(message);
+  },
+});
 
  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
     if (credentialResponse?.credential) {

@@ -18,7 +18,7 @@ import Transactions from "./pages/dashboard/Transactions";
 import CreateWallet from "./pages/dashboard/Home/Components/CreateWallet";
 import SendFlow from "./pages/dashboard/Home/Components/Send/Send";
 import EnterConvertAmount from "./pages/dashboard/Home/Components/Convert/EnterConvertAmount";
-import ConvertFlow from "./pages/dashboard/Home/Components/Convert/EnterConvertAmount";
+// import ConvertFlow from "./pages/dashboard/Home/Components/Convert/EnterConvertAmount";
 
 function App() {
   return (

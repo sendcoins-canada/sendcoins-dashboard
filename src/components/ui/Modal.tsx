@@ -8,7 +8,7 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
-import { CloseCircle } from "iconsax-react";
+// import { CloseCircle } from "iconsax-react";
 
 type ModalProps = {
   open: boolean;
@@ -36,8 +36,8 @@ const Modal: React.FC<ModalProps> = ({
   cancelLabel = "Cancel",
   onCancel,
   className,
-  showCloseIcon = true,
-  closeIconColor = "#8C8C8C",
+  // showCloseIcon = true,
+  // closeIconColor = "#8C8C8C",
 }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
