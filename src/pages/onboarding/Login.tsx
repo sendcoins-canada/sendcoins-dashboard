@@ -63,7 +63,7 @@ const Login: React.FC = () => {
 
     // ✅ AxiosError has `response` safely typed
     const message =
-      err.response?.data?.data?.message || "Invalid credentials, please try again.";
+      err.response?.data?.data?.message || "Invalid credential, please try again.";
 
     showDanger(message);
   },
