@@ -8,8 +8,11 @@ import { showSuccess, showDanger } from "@/components/ui/toast";
 import { useMutation } from "@tanstack/react-query";
 import { createPasscode } from "@/api/authApi";
 
-const SetupPasscode: React.FC = () => {
-  const navigate = useNavigate();
+interface EnterPasscodeProps {
+  onSuccess?: () => void;
+}
+const EnterPasscode: React.FC<EnterPasscodeProps> = ({ onSuccess }) => {
+      const navigate = useNavigate();
   const [step, setStep] = useState<"create" | "confirm">("create");
   const [passcode, setPasscode] = useState<string[]>([]);
   const [firstPasscode, setFirstPasscode] = useState<string[]>([]);
@@ -24,7 +27,7 @@ const SetupPasscode: React.FC = () => {
   mutationFn: createPasscode,
   onSuccess: (res) => {
     showSuccess(res?.message || "Passcode created successfully!");
-    navigate("/dashboard/home");
+ onSuccess?.();
   },
   onError: (err) => {
     showDanger(err.message || "Failed to create passcode.");
@@ -50,13 +53,16 @@ const SetupPasscode: React.FC = () => {
       setPasscode([]);
       setStep("confirm");
     } else if (step === "confirm") {
-      if (passcode.join("") === firstPasscode.join("")) {
-         mutate({ code: passcode.join("") });
-      } else {
-        showDanger("Code doesn't match"); // ✅ sonner toast
-        setPasscode([]);
-        setStep("create");
-      }
+    //   if (passcode.join("") === firstPasscode.join("")) {
+    //      mutate({ code: passcode.join("") });
+    //   } else {
+    //     showDanger("Code doesn't match"); // ✅ sonner toast
+    //     setPasscode([]);
+    //     setStep("create");
+    //   }
+     showSuccess("Passcode confirmed!");
+        onSuccess?.(); // Notify parent (SendFlow)
+    
     }
   };
 
@@ -88,11 +94,11 @@ const SetupPasscode: React.FC = () => {
 
           {/* Title */}
           <p className="text-2xl font-extrabold mb-2">
-            {step === "create" ? "Setup your passcode" : "Confirm your passcode"}
+            {step === "create" ? "Enter your passcode" : "Confirm your passcode"}
           </p>
           <p className="text-gray-500 mb-8">
             {step === "create"
-              ? "Set a 4-digit passcode so you can send and receive money securely."
+              ? "Enter your passcode to confirm payment"
               : "Re-enter your passcode to confirm."}
           </p>
 
@@ -130,7 +136,7 @@ const SetupPasscode: React.FC = () => {
                 : "bg-blue-100 text-gray-400"
             }`}
           >
-             {isPending ? "Saving..." : "Continue"}
+             {isPending ? "Saving..." : "Make Payment"}
           </Button>
         </div>
       </div>
@@ -138,4 +144,4 @@ const SetupPasscode: React.FC = () => {
   );
 };
 
-export default SetupPasscode;
+export default EnterPasscode;

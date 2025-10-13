@@ -12,6 +12,13 @@ import Passcode from "./pages/onboarding/Passcode";
 import CTA from "./pages/onboarding/CTA";
 import Address from "./pages/kyc/Address";
 import ProtectedRoute from "./components/ProtectedRoutes";
+import Home from "./pages/dashboard/Home/Home";
+import Recipients from "./pages/dashboard/Recipients";
+import Transactions from "./pages/dashboard/Transactions";
+import CreateWallet from "./pages/dashboard/Home/Components/CreateWallet";
+import SendFlow from "./pages/dashboard/Home/Components/Send/Send";
+import EnterConvertAmount from "./pages/dashboard/Home/Components/Convert/EnterConvertAmount";
+import ConvertFlow from "./pages/dashboard/Home/Components/Convert/EnterConvertAmount";
 
 function App() {
   return (
@@ -32,9 +39,9 @@ function App() {
         <Route path="/address" element={<Address />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} /> */}
-         {/* Protected routes */}
-      
-       
+        {/* Protected routes */}
+
+
         <Route
           path="/survey"
           element={
@@ -75,6 +82,55 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/dashboard/home"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/recipients"
+          element={
+            <ProtectedRoute>
+              <Recipients />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/transactions"
+          element={
+            <ProtectedRoute>
+              <Transactions />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/create-wallet"
+          element={
+            <ProtectedRoute>
+              <CreateWallet />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/send"
+          element={
+            <ProtectedRoute>
+              <SendFlow />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/convert"
+          element={
+            <ProtectedRoute>
+              <EnterConvertAmount />
+            </ProtectedRoute>
+          }
+        />
+
 
         {/* Redirects */}
         <Route path="/" element={<Navigate to="/login" replace />} />

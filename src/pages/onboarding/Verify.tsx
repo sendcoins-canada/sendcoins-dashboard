@@ -71,7 +71,7 @@ const dispatch = useDispatch()
        dispatch(setCode(code));
       showSuccess("Code verified!");
       if (fromQueryString) {
-      navigate("/welcome");
+      navigate("/dashboard/home");
     } else {
       navigate("/country");
     }
