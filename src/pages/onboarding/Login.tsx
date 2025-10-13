@@ -75,12 +75,45 @@ const Login: React.FC = () => {
         // 1. Decode the token (optional)
         // const decoded: any = jwtDecode(credentialResponse.credential);
         // console.log("Decoded Google user:", decoded);
+ const formData = new FormData();
+      formData.append("idToken", credentialResponse.credential);
 
         // 2. Send the token to your backend
-        const res = await axios.post("https://api.sendcoins.ca/user/auth/google/register", {
-          googleProfile: credentialResponse.credential,
-        });
+        const res = await axios.post("https://api.sendcoins.ca/auth/google", 
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
+      const data = res.data?.data;
+
+      // 3️⃣ If login successful
+      if (data?.isSuccess) {
+        // ✅ Save token object in localStorage
+        localStorage.setItem(
+          "token",
+          JSON.stringify({
+            azer_token: data.token?.azer_token,
+            expires_at: data.token?.expires_at,
+          })
+        );
+
+        // ✅ Optionally store additional info
+        localStorage.setItem("user_email", data.result?.[0]?.useremail || "");
+        localStorage.setItem("profilePicture", data.profilePicture || "");
+
+        // ✅ Redirect to dashboard
+        navigate("/dashboard/home");
+
+        // Optional success message
+        showSuccess(data.title || "Welcome back!");
+      } else {
+        showDanger(data?.message || "Google login failed. Please try again.");
+      }
+  
         // 3. Handle backend response (e.g. save session token, redirect)
         console.log("Backend response:", res.data);
       } catch (err) {
