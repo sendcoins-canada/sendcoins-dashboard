@@ -10,7 +10,7 @@ export const getUser = async (): Promise<User> => {
   }
 
   // Parse token JSON
-  const { azer_token, expires_at } = JSON.parse(tokenData);
+  const { azer_token } = JSON.parse(tokenData);
 
    // Check if token is expired
 //   const now = Date.now();
