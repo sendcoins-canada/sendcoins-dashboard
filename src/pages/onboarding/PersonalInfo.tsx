@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowCircleLeft2, Profile } from "iconsax-react";
+import { ArrowLeft2, User } from "iconsax-react";
 import Header from "@/components/onboarding/shared/Header";
 import { TextInputField } from "@/components/ui/form"; // assuming you have a reusable InputField
 import { Formik, Form } from "formik";
@@ -26,22 +26,18 @@ const PersonalInfo: React.FC = () => {
       <Header />
       <div className="min-h-[70vh] flex flex-col gap-10 mt-10">
         {/* Back Button */}
-        <div
-          className="flex items-center gap-2 text-[#57B5FF] cursor-pointer"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowCircleLeft2 size="24" color="#57B5FF" className="md:ml-28 ml-6" />
-          <p>Back</p>
-        </div>
+        <div className="flex items-center cursor-pointer border rounded-full w-fit md:ml-28 ml-6 justify-center py-2 px-4"  onClick={() => navigate(-1)}>
+           <ArrowLeft2 size="16" color="black" className=""/><p className="text-sm font-semibold">Back</p>
+              </div>
 
         {/* Form Section */}
         <div className="grid place-items-center">
           <div className="text-center w-full max-w-sm px-4">
             <div className="mx-auto mb-4 inline-flex items-center justify-center rounded-2xl bg-[#DDF4E4] p-2">
-              <Profile size="32" color="#480355" variant="Bold" />
+              <User size="32" color="#480355" variant="Bold" />
             </div>
 
-            <h1 className="text-[28px] font-semibold">Tell us a bit about you</h1>
+            <h2 className="text-[28px] font-semibold">Tell us a bit about you</h2>
             <p className="mt-1 text-[#8C8C8C] text-[15px]">
               Enter your full legal name and date of birth. We’ll use this to verify your identity later.
             </p>
@@ -81,7 +77,7 @@ const PersonalInfo: React.FC = () => {
 
                   <Button
                     type="submit"
-                    className="w-full bg-[#249FFF] cursor-pointer"
+                    className="w-full bg-[#0647F7] hover:bg-[#2563EB] text-white"
                     disabled={isSubmitting}
                   >
                     Continue

@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss"
+import twColors  from "tailwindcss/colors"
 
 const config: Config = {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
@@ -7,10 +8,12 @@ const config: Config = {
       fontFamily: {
         sans: ["Geist"], 
         migra: ["Migra", "serif"],
+        inter: ["Inter", "sans-serif"],
       },
-      colors: {
+       colors: {
+        ...twColors, 
+        primaryblue: "#57B5FF",
         destructive: "#EF4444",
-        primaryblue: "#57B5FF", 
         textgray: "#D2D2D2",
         secondary: {
           DEFAULT: "#F3F4F6",

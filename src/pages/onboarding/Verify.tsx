@@ -77,7 +77,7 @@ const dispatch = useDispatch()
     }
     },
     onError: (err) => {
-      showDanger(err.message || "Invalid code. Please try again.");
+      showDanger("Invalid Otp code.");
     },
   });
   // resend
@@ -126,7 +126,7 @@ const dispatch = useDispatch()
 
           <PasswordCheck size="32" color="#480355" variant="Bold" className="text-black"/>
         </div>
-        <h1 className="text-3xl font-semibold">We sent you a code</h1>
+        <h2 className="text-[28px] font-semibold">We sent you a code</h2>
         <p className="mt-1 text-neutral-500">
           Check your inbox for a{" "}
           <span className="font-bold text-black">6-digit code</span> to verify your
@@ -156,7 +156,7 @@ const dispatch = useDispatch()
           </Button>
         </div> */}
 
-        <div className="mt-6 text-[11px] text-neutral-500">
+        <div className="mt-6 text-sm text-neutral-500">
           Didn't get the email?
         </div>
         <div className="mt-2">

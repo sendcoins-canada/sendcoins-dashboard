@@ -20,7 +20,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div
         className={cn(
-          "flex items-center gap-2 rounded-full  bg-[#F5F5F5] px-[14px] py-[10px] focus-within:ring-1 focus-within:ring-[#57B5FF] focus-within:bg-white",
+          "flex items-center gap-2 rounded-full  bg-[#F5F5F5] px-[14px] py-[10px] focus-within:ring-1 focus-within:ring-[#3B82F6] focus-within:bg-white",
           className
         )}
       >

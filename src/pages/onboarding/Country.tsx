@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowCircleLeft2, Global } from "iconsax-react";
+import { ArrowLeft2, Global } from "iconsax-react";
 import Header from "@/components/onboarding/shared/Header";
 import { SelectField } from "@/components/ui/form";
 import { Formik, Form } from "formik";
@@ -17,8 +17,8 @@ const Country: React.FC = () => {
     country: Yup.string().required("Select a country"),
   });
   const navigate = useNavigate()
-    const dispatch = useDispatch();
-     const { data } = useQuery({
+  const dispatch = useDispatch();
+  const { data } = useQuery({
     queryKey: ["countries"],
     queryFn: getCountries,
   });
@@ -28,7 +28,7 @@ const Country: React.FC = () => {
     data?.data.map((c) => ({
       value: c.country, // unique key (or you can use c.country)
       label: c.country,
-      icon:  <img
+      icon: <img
         src={c.flag} // <-- backend gives you full image URL
         alt={c.country}
         className="w-5 h-5 mr-2 inline-block rounded-full"
@@ -39,10 +39,9 @@ const Country: React.FC = () => {
     <>
       <Header />
       <div className="min-h-[70vh] flex flex-col gap-10 mt-10">
-        <div className="flex items-center gap-2 text-[#57B5FF] cursor-pointer"  onClick={() => navigate(-1)}>
-          <ArrowCircleLeft2 size="24" color="#57B5FF" className="md:ml-28 ml-6" />
-          <p>Back</p>
-        </div>
+        <div className="flex items-center cursor-pointer border rounded-full w-fit md:ml-28 ml-6 justify-center py-2 px-4"  onClick={() => navigate(-1)}>
+           <ArrowLeft2 size="16" color="black" className=""/><p className="text-sm font-semibold">Back</p>
+              </div>
 
         <div className="grid place-items-center">
           <div className="text-center w-full max-w-sm px-4">
@@ -52,10 +51,10 @@ const Country: React.FC = () => {
 
             <h1 className="text-[28px] font-semibold">Select your country</h1>
             <p className="mt-1 text-[#8C8C8C] text-[15px]">
-We’ll personalize your experience based on where you are.            </p>
+              We’ll personalize your experience based on where you are.            </p>
 
             <Formik
-              initialValues={{ country: "" }}
+              initialValues={{ country: "Canada" }}
               validationSchema={schema}
               onSubmit={(values) => {
                 // ✅ Save to Redux
@@ -76,7 +75,7 @@ We’ll personalize your experience based on where you are.            </p>
 
                   <Button
                     type="submit"
-                    className="w-full bg-[#249FFF]"
+                    className="w-full bg-[#0647F7] hover:bg-[#2563EB] text-white"
                     disabled={isSubmitting}
 
                   >

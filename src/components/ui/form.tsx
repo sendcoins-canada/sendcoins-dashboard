@@ -25,15 +25,15 @@ export const FieldWrapper: React.FC<FieldWrapperProps> = ({
   return (
     <div className={cn("space-y-1", className)}>
       {label ? (
-        <label className="block text-xs text-neutral-600" htmlFor={name}>
+        <label className="block text-sm font-medium text-[#4A4A4A]" htmlFor={name}>
           {label}
         </label>
       ) : null}
       {children}
       {error ? (
-        <p className="text-xs text-red-600">{error}</p>
+        <p className="text-sm text-red-600">{error}</p>
       ) : helperText ? (
-        <p className="text-xs text-neutral-500">{helperText}</p>
+        <p className="text-sm text-neutral-500">{helperText}</p>
       ) : null}
     </div>
   );

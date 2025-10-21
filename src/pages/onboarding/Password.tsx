@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowCircleLeft2, PasswordCheck } from "iconsax-react";
+import { TickCircle, ArrowLeft2, PasswordCheck } from "iconsax-react";
 import Header from "@/components/onboarding/shared/Header";
 import { TextInputField } from "@/components/ui/form";
 import { Formik, Form } from "formik";
@@ -19,9 +19,26 @@ import { setCredentials } from "@/store/auth/slice";
 const Password: React.FC = () => {
   const [step, setStep] = useState<"create" | "confirm">("create");
   const [tempPassword, setTempPassword] = useState("");
+  // const [password, setPassword] = useState("");
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const rules = [
+    {
+      test: tempPassword.length >= 8,
+      label: "Must be at least 8 characters",
+    },
+    {
+      test: /[A-Z]/.test(tempPassword) && /[a-z]/.test(tempPassword),
+      label: "A mix of uppercase and lowercase letters",
+    },
+    { test: /\d/.test(tempPassword), label: "At least one number" },
+    {
+      test: /[@$!%*?&]/.test(tempPassword),
+      label: "A symbol (like ! or @)",
+    },
+  ];
 
   // ✅ Grab registration data from redux
   const { email, firstName, lastName, country, code } = useSelector(
@@ -32,7 +49,7 @@ const Password: React.FC = () => {
     password: Yup.string()
       .required("Input your password")
       .min(8, "Password must be at least 8 characters")
-    .matches(/[A-Z]/, "Must contain at least one uppercase letter")
+      .matches(/[A-Z]/, "Must contain at least one uppercase letter")
       .matches(/[a-z]/, "Must contain at least one lowercase letter")
       .matches(/\d/, "Must contain at least one number")
       .matches(/[@$!%*?&]/, "Must contain at least one symbol"),
@@ -52,24 +69,24 @@ const Password: React.FC = () => {
   >({
     mutationFn: registerWithPassword,
     onSuccess: (res) => {
-       const { token } = res.data;
+      const { token } = res.data;
 
-    // Save in Redux (no "user" object yet, so you can pass email + names)
-    dispatch(
-      setCredentials({
-        token: {
-          azer_token: token.azer_token,
-          expires_at: token.expires_at,
-        },
-        user: {
-          oauth_id: 0, // backend may not send this yet
-          useremail: email,
-          // firstName,
-          // lastName,
-          // country,
-        },
-      })
-    );
+      // Save in Redux (no "user" object yet, so you can pass email + names)
+      dispatch(
+        setCredentials({
+          token: {
+            azer_token: token.azer_token,
+            expires_at: token.expires_at,
+          },
+          user: {
+            oauth_id: 0, // backend may not send this yet
+            useremail: email,
+            // firstName,
+            // lastName,
+            // country,
+          },
+        })
+      );
       showSuccess(" Registration successful!");
       navigate("/welcome");
     },
@@ -83,14 +100,10 @@ const Password: React.FC = () => {
       <Header />
       <div className="min-h-[70vh] flex flex-col gap-10 mt-10">
         {/* Back Button */}
-        <div
-          className="flex items-center gap-2 text-[#57B5FF] cursor-pointer"
-          onClick={() =>
-            step === "confirm" ? setStep("create") : navigate(-1)
-          }
-        >
-          <ArrowCircleLeft2 size="24" color="#57B5FF" className="md:ml-28 ml-6" />
-          <p>Back</p>
+        <div className="flex items-center cursor-pointer border rounded-full w-fit md:ml-28 ml-6 justify-center py-2 px-4" onClick={() =>
+          step === "confirm" ? setStep("create") : navigate(-1)
+        }>
+          <ArrowLeft2 size="16" color="black" className="" /><p className="text-sm font-semibold">Back</p>
         </div>
 
         <div className="grid place-items-center">
@@ -128,41 +141,57 @@ const Password: React.FC = () => {
                 setSubmitting(false);
               }}
             >
-              {({ isSubmitting }) => (
+              {({ isSubmitting, values, handleChange }) => (
                 <Form className="mt-6 space-y-4 text-left">
                   {step === "create" ? (
                     <>
-                      <h1 className="text-[28px] font-semibold">Setup your password</h1>
-                      <p className="mt-1 text-[#8C8C8C] text-[15px]">
-                        Create a strong password so only you can access your account
-                      </p>
+                      <div className="text-center">
 
-                      <TextInputField
-                        name="password"
-                        label="Password"
-                        placeholder="Enter password"
-                        isPassword
-                      />
-
-                      {/* Password Rules */}
-                      <div className="text-sm text-[#8C8C8C] space-y-2 mt-2">
-                        <p className="flex items-center gap-2">
-                          <span className="text-purple-500">●</span> Must be at least 8 characters
-                        </p>
-                        <p className="flex items-center gap-2">
-                          <span className="text-purple-500">●</span> A mix of uppercase and lowercase letters
-                        </p>
-                        <p className="flex items-center gap-2">
-                          <span className="text-purple-500">●</span> At least one number
-                        </p>
-                        <p className="flex items-center gap-2">
-                          <span className="text-purple-500">●</span> A symbol (like ! or @)
+                        <h2 className="text-[28px] font-semibold ">Setup your password</h2>
+                        <p className="mt-1 text-[#8C8C8C] text-[15px]">
+                          Create a strong password so only you can access your account
                         </p>
                       </div>
 
+                      <TextInputField
+                        name="password"
+                        // label="Password"
+                        placeholder="Enter password"
+                        isPassword
+                        startIcon={<PasswordCheck size={16} color="black" />}
+                        className="text-left"
+                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+        handleChange(e);          // ✅ updates Formik
+        setTempPassword(e.target.value); // ✅ updates local validation
+      }}
+      value={values.password}
+                      />
+
+                      {/* Password Rules */}
+                      
+                      <div className="text-sm mt-2 space-y-2">
+                        {rules.map((rule, idx) => (
+                          <p key={idx} className="flex items-center gap-2">
+                            {rule.test ? (
+                              <TickCircle size={18} color="#9C51E1" variant="Bold" />
+                            ) : (
+                              <span className="w-4 h-4 border border-purple-400 rounded-full inline-block"></span>
+                            )}
+                            <span
+                              className={
+                                rule.test ? "text-gray-700 font-medium" : "text-[#8C8C8C]"
+                              }
+                            >
+                              {rule.label}
+                            </span>
+                          </p>
+                        ))}
+                      </div>
+
+
                       <Button
                         type="submit"
-                        className="w-full bg-[#249FFF]"
+                        className="w-full bg-[#0647F7] text-white hover:bg-[#2563EB]"
                         disabled={isSubmitting}
                       >
                         Create password
@@ -170,21 +199,26 @@ const Password: React.FC = () => {
                     </>
                   ) : (
                     <>
+                    <div  className="text-center">
+
                       <h1 className="text-[28px] font-semibold">Confirm your password</h1>
                       <p className="mt-1 text-[#8C8C8C] text-[15px]">
                         Re-enter your password to confirm
                       </p>
+                    </div>
 
                       <TextInputField
                         name="confirmPassword"
-                        label="Confirm Password"
+                        // label="Confirm Password"
                         placeholder="Re-enter password"
+                                                startIcon={<PasswordCheck size={16} color="black" />}
+
                         isPassword
                       />
 
                       <Button
                         type="submit"
-                        className="w-full bg-[#249FFF]"
+                        className="w-full bg-[#0647F7] text-white hover:bg-[#2563EB]"
                         disabled={isSubmitting}
                       >
                         {isPending ? "Registering..." : "Confirm password"}

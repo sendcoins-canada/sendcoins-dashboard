@@ -79,9 +79,9 @@ const Home: React.FC = () => {
   return (
     <DashboardLayout>
       {/* Balance Section */}
-      <div className="md:w-[60%]">
+      <div className="md:w-[50%]">
         <div className="mb-6 mt-10 ">
-          <div className="flex items-start justify-between ">
+          <div className="flex items-start justify-between">
             <div>
               <h3 onClick={() => setWalletOpen(true)} className="text-gray-500 text-sm cursor-pointer">ETH <ArrowDown2 size="14" color="#262626" className="inline"/></h3>
               <p className="text-3xl text-[#777777]">

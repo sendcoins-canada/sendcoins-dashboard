@@ -19,16 +19,23 @@ export interface AuthState {
   user: User | null;
 }
 
+const storedToken = localStorage.getItem("token");
+const storedUser = localStorage.getItem("user");
+
 const initialState: AuthState = {
   loading: false,
   error: null,
   message: null,
-  token: localStorage.getItem("token")
-    ? JSON.parse(localStorage.getItem("token") as string)
-    : null, 
- user: localStorage.getItem("user")
-    ? JSON.parse(localStorage.getItem("user") as string)
-    : null,};
+  token:
+    storedToken && storedToken !== "undefined"
+      ? JSON.parse(storedToken)
+      : null,
+  user:
+    storedUser && storedUser !== "undefined"
+      ? JSON.parse(storedUser)
+      : null,
+};
+
 
 const authSlice = createSlice({
   name: "auth",

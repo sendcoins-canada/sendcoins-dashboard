@@ -14,6 +14,7 @@ import type { CredentialResponse } from "@react-oauth/google";
 import axios, {AxiosError} from "axios";
 import Header from "@/components/onboarding/shared/Header";
 import { PasswordCheck } from "iconsax-react";
+import GoogleLoginButton from "@/components/ui/GoogleLogin";
 
 
 const schema = Yup.object({
@@ -123,12 +124,12 @@ const Login: React.FC = () => {
   };
 
   return (
-    <>
+    <div className="flex flex-col justify-between min-h-screen">
     <Header />
-        <div className="md:mt-20 mt-10 grid place-items-center">
+        <div className=" grid place-items-center">
       <div className="w-full max-w-sm px-4">
         <div className="text-center space-y-1 mb-6">
-          <h3 className="text-[34px] font-semibold">Welcome back!</h3>
+          <h3 className="text-[34px] font-semibold font-inter">Welcome back!</h3>
           <p className=" text-[#8C8C8C]">
             Move your money globally, fast, secure, and stress-free.{" "}
             <span className="font-medium text-black">Sign in to continue.</span>
@@ -147,7 +148,7 @@ const Login: React.FC = () => {
           }}
         >
           {() => (
-            <Form className="space-y-3">
+            <Form className="space-y-3 w-full bg-primaryblue">
               <TextInputField
                 name="email"
                 label="Enter your email"
@@ -166,11 +167,11 @@ const Login: React.FC = () => {
                 <span className="text-neutral-500">Forgot password?</span>
               </div> */}
 
-              <Button type="submit" className="w-full bg-[#0647F7] text-white" disabled={isPending}>
+              <Button type="submit" className="w-full bg-[#0647F7] text-white hover:bg-[#2563EB]" disabled={isPending}>
                 {isPending ? "Signing in..." : "Continue"}
               </Button>
 
-              <div className="relative text-center text-xs text-neutral-500">
+              <div className="relative text-center text-xs text-primaryblue">
                 <span className="px-2 bg-white relative z-10">or</span>
                 <span className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-px bg-neutral-200" />
               </div>
@@ -181,14 +182,18 @@ const Login: React.FC = () => {
               }}>
                 Continue with Google
               </Button> */}
-              <GoogleLogin
+              {/* <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={() => {
                   showDanger("Google Sign-In Failed");
                 }}
-              />
+              /> */}
+              <GoogleLoginButton
+  onSuccess={handleGoogleSuccess}
+  onError={() => showDanger("Google Sign-In Failed")}
+/>
 
-              <p className="text-center text-[11px] text-neutral-500">
+              <p className="text-center text-[11px] text-neutral-500 ">
                 Don’t have an account?{" "}
                 <span className="font-bold cursor-pointer" onClick={() => navigate('/signup')}>Create an account</span>
               </p>
@@ -197,7 +202,9 @@ const Login: React.FC = () => {
         </Formik>
       </div>
     </div>
-    </>
+
+    <p className="text-center text-sm font-medium mb-8 text-[#262626]">By registering, you accept our Terms of use and Privacy</p>
+    </div>
   );
 };
 
