@@ -28,7 +28,7 @@ const Survey: React.FC = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [answers, setAnswers] = useState<{ [key: string]: string }>({});
-  const [surveys, setSurveys] = useState<Survey[]>([]);
+  // const [surveys, setSurveys] = useState<Survey[]>([]);
   const [allQuestions, setAllQuestions] = useState<Array<Question & { config_id: number; survey_title: string }>>([]);
   const navigate = useNavigate();
   
@@ -39,10 +39,10 @@ const Survey: React.FC = () => {
       try {
         const res = await getActiveSurvey();
         const surveysData = Array.isArray(res.data) ? res.data : [res.data];
-        setSurveys(surveysData);
+        // setSurveys(surveysData);
         
         // Flatten all questions from all surveys
-        const questions = surveysData.flatMap((survey: Survey) => 
+        const questions = surveysData.flatMap((survey: any) => 
           survey.questions.map((q: Question) => ({
             ...q,
             config_id: survey.config_id,

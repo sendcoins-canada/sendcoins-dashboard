@@ -12,13 +12,13 @@ const OTP_LENGTH = 6;
 const ForgotVerifyOtp: React.FC = () => {
   const [values, setValues] = React.useState<string[]>(Array(OTP_LENGTH).fill(""));
   const inputsRef = React.useRef<Array<HTMLInputElement | null>>([]);
-  const [seconds, setSeconds] = React.useState(50);
+  // const [seconds, setSeconds] = React.useState(50);
   const navigate = useNavigate();
 
-  React.useEffect(() => {
-    const t = setInterval(() => setSeconds((s) => (s > 0 ? s - 1 : 0)), 1000);
-    return () => clearInterval(t);
-  }, []);
+  // React.useEffect(() => {
+  //   const t = setInterval(() => setSeconds((s) => (s > 0 ? s - 1 : 0)), 1000);
+  //   return () => clearInterval(t);
+  // }, []);
 
   const onChange = (index: number, val: string) => {
     const only = val.replace(/\D/g, "").slice(-1);
