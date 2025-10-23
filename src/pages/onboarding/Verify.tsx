@@ -76,7 +76,7 @@ const dispatch = useDispatch()
       navigate("/country");
     }
     },
-    onError: (err) => {
+    onError: () => {
       showDanger("Invalid Otp code.");
     },
   });

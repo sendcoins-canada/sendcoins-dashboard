@@ -18,6 +18,11 @@ import Transactions from "./pages/dashboard/Transactions/Transactions";
 import CreateWallet from "./pages/dashboard/Home/Components/CreateWallet";
 import SendFlow from "./pages/dashboard/Home/Components/Send/Send";
 import EnterConvertAmount from "./pages/dashboard/Home/Components/Convert/EnterConvertAmount";
+// Forgot password pages
+import ForgotEmail from "./pages/onboarding/forgot/ForgotEmail.tsx";
+import ForgotNewPassword from "./pages/onboarding/forgot/ForgotNewPassword.tsx";
+import ForgotConfirmPassword from "./pages/onboarding/forgot/ForgotConfirmPassword.tsx";
+import ForgotVerifyOtp from "./pages/onboarding/forgot/ForgotVerifyOtp.tsx";
 // import ConvertFlow from "./pages/dashboard/Home/Components/Convert/EnterConvertAmount";
 
 function App() {
@@ -31,6 +36,11 @@ function App() {
         <Route path="/country" element={<Country />} />
         <Route path="/personal-info" element={<PersonalInfo />} />
         <Route path="/password" element={<Password />} />
+        {/* Forgot Password Flow (public) */}
+        <Route path="/forgot-password/email" element={<ForgotEmail />} />
+        <Route path="/forgot-password/new" element={<ForgotNewPassword />} />
+        <Route path="/forgot-password/confirm" element={<ForgotConfirmPassword />} />
+        <Route path="/forgot-password/otp" element={<ForgotVerifyOtp />} />
         {/* 
         <Route path="/survey" element={<Survey />} />
         <Route path="/welcome" element={<Welcome />} />

@@ -8,18 +8,7 @@ const config: Config = {
       fontFamily: {
         sans: ["Geist"], 
         migra: ["Migra", "serif"],
-        inter: ["Inter", "sans-serif"],
-      },
-       colors: {
-        ...twColors, 
-        primaryblue: "#57B5FF",
-        destructive: "#EF4444",
-        textgray: "#D2D2D2",
-        secondary: {
-          DEFAULT: "#F3F4F6",
-          foreground: "#111827",
-        },
-      },
+      }
     },
   },
   plugins: [],

@@ -1,6 +1,6 @@
 // src/api/authApi.ts
 import api from "./axios";
-import type { VerifyEmailRequest, VerifyEmailResponse, VerifyOtpRequest, VerifyOtpResponse, RegisterRequest, RegisterResponse, LoginRequest, LoginWithPasswordResponse, SurveyResponse, SubmitSurveyRequest, CountryResponse } from "../types/onboarding";
+import type { VerifyEmailRequest, VerifyEmailResponse, VerifyOtpRequest, VerifyOtpResponse, RegisterRequest, RegisterResponse, LoginRequest, LoginWithPasswordResponse, SurveyResponse, SubmitSurveyRequest, CountryResponse, RequestPasswordResetRequest, RequestPasswordResetResponse, VerifyPasswordResetOtpRequest, VerifyPasswordResetOtpResponse, UpdatePasswordWithOtpRequest, UpdatePasswordWithOtpResponse } from "../types/onboarding";
 
 // verify mail
 export const verifyEmail = async (
@@ -145,7 +145,6 @@ export const getActiveSurvey = async (): Promise<SurveyResponse> => {
 export const submitSurvey = async (data: SubmitSurveyRequest) => {
   const formData = new FormData();
   formData.append("email", data.email);
-  // formData.append("azerid", data.azerid);
   formData.append("configid", String(data.config_id));
   formData.append("questionid", String(data.question_id));
   formData.append("answers", data.answer);
@@ -178,5 +177,53 @@ export const createPasscode = async (data: { code: string }) => {
     headers: { "Content-Type": "multipart/form-data" },
   });
 
+  return response.data;
+};
+
+// Forgot password - Step 1: request reset & send OTP
+export const requestPasswordReset = async (
+  data: RequestPasswordResetRequest
+): Promise<RequestPasswordResetResponse> => {
+  const formData = new FormData();
+  formData.append("email", data.email);
+  formData.append("newPassword", data.newPassword);
+
+  const response = await api.post<RequestPasswordResetResponse>(
+    "/user/auth/request_password_reset",
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return response.data;
+};
+
+// Forgot password - Step 2: verify OTP
+export const verifyPasswordResetOtp = async (
+  data: VerifyPasswordResetOtpRequest
+): Promise<VerifyPasswordResetOtpResponse> => {
+  const formData = new FormData();
+  formData.append("authHash", data.authHash);
+  formData.append("otp", data.otp);
+
+  const response = await api.post<VerifyPasswordResetOtpResponse>(
+    "/user/auth/auth_verify_password_otp",
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return response.data;
+};
+
+// Forgot password - Step 3: finalize update
+export const updatePasswordWithOtp = async (
+  data: UpdatePasswordWithOtpRequest
+): Promise<UpdatePasswordWithOtpResponse> => {
+  const formData = new FormData();
+  formData.append("authHash", data.authHash);
+  formData.append("otp", data.otp);
+
+  const response = await api.post<UpdatePasswordWithOtpResponse>(
+    "/user/auth/auth_update_password_with_otp",
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
   return response.data;
 };
