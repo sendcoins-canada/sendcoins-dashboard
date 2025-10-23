@@ -1,5 +1,5 @@
 // components/RecipientDetails.tsx
-import { ArrowLeft } from "iconsax-react";
+import { Share, Edit2, Star1 } from "iconsax-react";
 import { useState } from "react";
 
 interface RecipientDetailsProps {
@@ -50,19 +50,13 @@ const RecipientDetails: React.FC<RecipientDetailsProps> = ({ recipient, onBack }
           tagColor: "bg-green-100",
         },
       ]);
-
+      console.log(recipient)
   return (
-    <div className="px-6 py-10 flex flex-col md:flex-row gap-10 max-w-6xl mx-auto">
+    <div className="px-6 py-10 flex flex-col md:flex-row gap-40 max-w-6xl">
       {/* Left Section */}
-      <div className="flex-1">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-gray-600 mb-6 hover:text-black transition"
-        >
-          <ArrowLeft size={18} /> Back to Recipients
-        </button>
-
-        <div className="w-24 h-24 rounded-full flex items-center justify-center text-2xl font-semibold text-white mb-4 relative">
+      <div className="flex-1/3">
+      <p className="text-2xl font-semibold mb-8">Profile</p>
+              <div className="w-24 h-24 rounded-full flex items-center justify-center text-2xl font-semibold text-white mb-4 relative mx-auto text-center">
           <div
             className={`w-full h-full rounded-full ${recipient.color} flex items-center justify-center`}
           >
@@ -75,41 +69,45 @@ const RecipientDetails: React.FC<RecipientDetailsProps> = ({ recipient, onBack }
           />
         </div>
 
-        <h2 className="text-xl font-semibold mb-4">{recipient.name}</h2>
+        <h2 className="text-xl font-semibold mb-4 text-center">{recipient.name}</h2>
 
-        <div className="flex gap-4 mb-6">
-          <button className="bg-[#F5F5F5] px-4 py-2 rounded-md text-sm">Share</button>
-          <button className="bg-[#F5F5F5] px-4 py-2 rounded-md text-sm">Edit</button>
-          <button className="bg-[#F5F5F5] px-4 py-2 rounded-md text-sm">Favourited</button>
+        <div className="flex gap-4 mb-6 w-full">
+          <button className="bg-[#F5F5F5] px-4 py-2 rounded-xl w-28 h-24 flex flex-col items-center justify-center gap-1 text-[#262626]"><Share size="16" color="#777777"/>Share</button>
+          <button className="bg-[#F5F5F5] px-4 py-2 rounded-xl w-28 h-24 flex flex-col items-center justify-center gap-1 text-[#262626]"><Edit2 size="16" color="#777777"/>Edit</button>
+          <button className="bg-[#F5F5F5] px-4 py-2 rounded-xl w-28 h-24 flex flex-col items-center justify-center gap-1 text-[#262626]"><Star1 size="16" color="#777777"/>Favourited</button>
         </div>
 
         <div className="text-sm text-gray-600 space-y-3 mb-6">
-          <div>
-            <p className="text-xs mb-1">Wallet Address</p>
+          <div className="flex justify-between">
+            <p className="text-sm mb-1">Wallet Address</p>
             <p className="font-mono">{recipient.address}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex justify-between items-center gap-2 ">
+            <p>Network</p>
+            <div className="flex gap-1">
+
             <img
               src={recipient.coinIcon}
               className="w-4 h-4"
               alt="network"
-            />
-            <span>{recipient.network}</span>
+              />
+            <span>{recipient.currency}</span>
+              </div>
           </div>
         </div>
 
-        <button className="bg-[#0047FF] text-white px-6 py-2 rounded-full hover:bg-[#003ad9]">
+        <button className="bg-[#0047FF] text-white px-6 py-2 rounded-full w-full hover:bg-[#003ad9]">
           Send money
         </button>
       </div>
 
-       <div className="flex-1 bg-white rounded-lg p-4 border shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-medium text-gray-800">Transaction history</h3>
-          <button className="text-sm text-[#0047FF]">See all</button>
+       <div className="flex-2/3 bg-white rounded-lg py-4 mt-8">
+        <div className="flex items-center justify-between mb-8">
+          <h3 className="font-medium text-gray-800 ">Transaction history</h3>
+          <button className="text-sm  border rounded-full py-2 px-4">See all</button>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 px-4">
           {transactions.map((tx) => (
             <div key={tx.id} className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -125,7 +123,7 @@ const RecipientDetails: React.FC<RecipientDetailsProps> = ({ recipient, onBack }
                   <p className="text-sm font-medium text-[#262626]">{tx.name}</p>
                   <p className="text-xs text-[#777777]">
                     <span
-                      className={`px-2 py-0.5 rounded-full text-xs ${tx.tagColor} ${tx.textColor} mr-1`}
+                      className={`py-0.5 rounded-full text-xs  ${tx.textColor} mr-1`}
                     >
                       {tx.status}
                     </span>

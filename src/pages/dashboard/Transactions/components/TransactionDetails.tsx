@@ -61,7 +61,7 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({ transaction }) 
    const [activeTab, setActiveTab] = useState<"timeline" | "details">("timeline");
 
   return (
-    <div className="flex flex-col items-center justify-center px-4 py-8">
+    <div className="flex flex-col items-center justify-center px-4 pb-8">
       {/* Header with main send icon + small status icon */}
       <div className="text-center mb-8">
         <div className="relative w-16 h-16 mx-auto mb-3">

@@ -19,6 +19,7 @@ import CreateWallet from "./pages/dashboard/Home/Components/CreateWallet";
 import SendFlow from "./pages/dashboard/Home/Components/Send/Send";
 import EnterConvertAmount from "./pages/dashboard/Home/Components/Convert/EnterConvertAmount";
 // import ConvertFlow from "./pages/dashboard/Home/Components/Convert/EnterConvertAmount";
+import AccountDeleted from "./components/AccountDeleted";
 
 function App() {
   return (
@@ -127,6 +128,14 @@ function App() {
           element={
             <ProtectedRoute>
               <EnterConvertAmount />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/account-deleted"
+          element={
+            <ProtectedRoute>
+              <AccountDeleted />
             </ProtectedRoute>
           }
         />

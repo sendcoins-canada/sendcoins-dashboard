@@ -7,6 +7,7 @@ import {
   DialogDescription,
   DialogTrigger,
   DialogClose,
+  DialogOverlay
 } from "@/components/ui/dialog";
 // import { CloseCircle } from "iconsax-react";
 
@@ -42,9 +43,9 @@ const Modal: React.FC<ModalProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-
+        <DialogOverlay className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40" />
       <DialogContent
-        className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl p-6 bg-white shadow-lg  ${className || ""}`}
+        className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white shadow-lg  ${className || ""}`}
       >
         {/* ✅ Custom Close Icon */}
         {/* {showCloseIcon && (

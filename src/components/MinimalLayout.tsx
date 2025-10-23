@@ -1,20 +1,23 @@
 
 import React, { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { NavLink } from "react-router-dom";
-import { Home, User, DocumentText, Setting } from "iconsax-react";
+import { data, NavLink } from "react-router-dom";
+import { Home, User, DocumentText, Setting, ArrowLeft2 } from "iconsax-react";
 import Logo from "../assets/Logosingle.png";
 import Code from "../assets/Code.png"
 import type { User as UserType } from "@/types/user";
 import { getUser } from "@/api/user";
+import { useNavigate } from "react-router-dom";
 import CloseAccountModal from "./CloseAccountModal";
 
- type DashboardLayoutProps = {
+
+ type MinimalLayoutProps = {
    children: ReactNode;
  };
 
-const DashboardLayout: React.FC<DashboardLayoutProps> =({ children }) => {
+const MinimalLayout: React.FC<MinimalLayoutProps> =({ children }) => {
   const [user, setUser] = useState<UserType | null>(null);
+  const navigate = useNavigate()
 console.log(user)
   useEffect(() => {
     const fetchUser = async () => {
@@ -38,13 +41,15 @@ console.log(user)
     const linkClasses =
     "group flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100 transition-colors";
   const textClasses = "transition-colors";
-   const [openModal, setOpenModal] = useState(false);
-  
-    const handleDeleteAccount = async () => {
-      // Call your API here, e.g.:
-      // await axios.delete(`/api/user/${userId}`);
-      console.log("Deleting account...");
-    };
+
+ const [openModal, setOpenModal] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    // Call your API here, e.g.:
+    // await axios.delete(`/api/user/${userId}`);
+    console.log("Deleting account...");
+  };
+
 
   return (
     <div className="flex h-screen">
@@ -162,46 +167,43 @@ console.log(user)
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Header */}
+         {/* Header */}
         <header className="flex justify-between items-center h-16 px-6 pt-9">
-          <div>
-            <p className="text-sm font-sans text-gray-500">Good Morning 👋</p>
-            <p className="font-semibold text-gray-800 text-lg">
-              {/* Kevin Malone */}
-               {user ? `${user.data.first_name} ${user.data.last_name}` : "Loading..."}
-              </p>
-          </div>
+            <div className="flex items-center cursor-pointer border rounded-full w-fit md:ml-2 ml-6 justify-center py-2 px-4"  onClick={() => navigate(-1)}>
+                     <ArrowLeft2 size="16" color="black" className=""/><p className="text-sm font-semibold">Back</p>
+                        </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex space-x-4">
             {/* <select className="border rounded-lg px-3 py-1 text-sm">
               <option>ETH</option>
               <option>BTC</option>
               <option>USD</option>
             </select> */}
-            <div className="w-10 h-10 rounded-full bg-pink-300 flex items-center justify-center text-white font-bold" onClick={() => setOpenModal(true)}>
+            <div className="w-10 h-10 rounded-full bg-pink-300 flex items-center justify-center text-white font-bold cursor-pointer"  onClick={() => setOpenModal(true)}>
               {initials}
             </div>
           </div>
         </header>
+        
 
         {/* Content Area */}
         <main className="flex-1 p-6 overflow-y-auto">
           {children}
         </main>
       </div>
-        {/*  Modal */}
-            <CloseAccountModal
-              open={openModal}
-              onOpenChange={setOpenModal}
-              userName={user?.data?.first_name || ''}
-              userEmail={user?.data?.user_email || ""}
-              initials={initials}
-              firstName={user?.data?.first_name || ''}
-              lastName={user?.data?.last_name || ''}
-              onDeleteAccount={handleDeleteAccount}
-            />
+       {/*  Modal */}
+      <CloseAccountModal
+        open={openModal}
+        onOpenChange={setOpenModal}
+        userName={user?.data?.first_name || ''}
+        userEmail={user?.data?.user_email || ""}
+        initials={initials}
+        firstName={user?.data?.first_name || ''}
+        lastName={user?.data?.last_name || ''}
+        onDeleteAccount={handleDeleteAccount}
+      />
     </div>
   );
 };
 
-export default DashboardLayout;
+export default MinimalLayout;

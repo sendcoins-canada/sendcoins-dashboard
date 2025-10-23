@@ -4,6 +4,7 @@ import { SearchNormal1 } from "iconsax-react";
 import USDC from "@/assets/Usdc.svg"
 import ETH from "@/assets/Eth.svg"
 import RecipientDetails from "./components/RecepientDetails";
+import MinimalLayout from "@/components/MinimalLayout";
 
 const recipientsData = [
   {
@@ -54,12 +55,12 @@ const Recipients = () => {
 
   if (selectedRecipient) {
     return (
-      <DashboardLayout>
+      <MinimalLayout>
         <RecipientDetails
           recipient={selectedRecipient}
           onBack={() => setSelectedRecipient(null)}
         />
-      </DashboardLayout>
+      </MinimalLayout>
     );
   }
 

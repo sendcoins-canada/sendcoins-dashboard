@@ -4,6 +4,7 @@ import { SearchNormal1, Filter, ArrowLeft } from "iconsax-react";
 import FilterDrawer from "./components/FilterDrawer";
 import TransactionDetails from "./components/TransactionDetails";
 import type { Transaction } from "./components/TransactionDetails";
+import MinimalLayout from "@/components/MinimalLayout";
 
 
 const Transactions = () => {
@@ -61,18 +62,12 @@ const Transactions = () => {
   // 🟢 If a transaction is selected, show the details view instead
   if (selectedTransaction) {
     return (
-      <DashboardLayout>
+      <MinimalLayout>
         <div className="px-6 py-8 md:w-[50%]">
-          <button
-            onClick={() => setSelectedTransaction(null)}
-            className="flex items-center gap-2 text-gray-600 mb-6 hover:text-black transition"
-          >
-            <ArrowLeft size={18} /> Back to Transactions
-          </button>
-
+  
           <TransactionDetails transaction={selectedTransaction} />
         </div>
-      </DashboardLayout>
+      </MinimalLayout>
     );
   }
 

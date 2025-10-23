@@ -13,7 +13,7 @@ const config: Config = {
        colors: {
         ...twColors, 
         primaryblue: "#57B5FF",
-        destructive: "#EF4444",
+        destructive: "#FF4D4F",
         textgray: "#D2D2D2",
         secondary: {
           DEFAULT: "#F3F4F6",
