@@ -93,11 +93,12 @@ export interface LoginWithPasswordResponse {
 
 export interface SurveyResponse {
   data: {
-    config_id: number;
-    survey_title: string;
-    survey_description: string;
-    is_required: boolean;
-    question: {
+    // Backward compatibility for single survey
+    config_id?: number;
+    survey_title?: string;
+    survey_description?: string;
+    is_required?: boolean;
+    question?: {
       question_id: number;
       question_text: string;
       question_type: string;
@@ -109,7 +110,6 @@ export interface SurveyResponse {
 
 export interface SubmitSurveyRequest {
   email: string;
-  // azerid: string;
   config_id: number;
   question_id: number;
   answer: string;
@@ -129,4 +129,55 @@ export interface CountryResponse {
             flag_emoji: string
         },
       ]
+}
+
+// Forgot Password types
+export interface RequestPasswordResetRequest {
+  email: string;
+  newPassword: string;
+  currentPassword?: string; // not used for forgotten flow
+  created_for?: string; // default 'password_reset'
+}
+
+export interface RequestPasswordResetResponse {
+  data: {
+    authHash: string;
+    emailAccount: string;
+    created_for: string;
+    title: string;
+    message: string;
+    isSuccess: boolean;
+    icon?: string;
+  };
+}
+
+export interface VerifyPasswordResetOtpRequest {
+  authHash: string;
+  otp: string;
+}
+
+export interface VerifyPasswordResetOtpResponse {
+  data: {
+    Oauth_hash: string;
+    emailAccount: string;
+    created_for: string;
+    title: string;
+    message: string;
+    isSuccess: boolean;
+    icon?: string;
+  };
+}
+
+export interface UpdatePasswordWithOtpRequest {
+  authHash: string;
+  otp: string;
+}
+
+export interface UpdatePasswordWithOtpResponse {
+  data: {
+    title: string;
+    message: string;
+    isSuccess: boolean;
+    icon?: string;
+  };
 }

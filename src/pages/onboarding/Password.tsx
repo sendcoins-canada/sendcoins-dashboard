@@ -88,7 +88,7 @@ const Password: React.FC = () => {
         })
       );
       showSuccess(" Registration successful!");
-      navigate("/welcome");
+      navigate("/survey");
     },
     onError: (err) => {
       showDanger(err.message || "Something went wrong, try again.");

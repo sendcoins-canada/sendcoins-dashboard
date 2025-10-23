@@ -12,7 +12,7 @@ const Welcome = () => {
         <img src={hi} alt="wave"  />
         <h1 className='font-extrabold text-[56px] leading-[64px] '>Hey there!  Welcome</h1>
         <p className='text-textgray'>You're one step closer to sending coins your <br /> way, fast, easy, and stress-free</p>
-        <Button variant={'white'} className='cursor-pointer' onClick={()=> navigate('/survey')}>Continue</Button>
+        <Button variant={'white'} className='cursor-pointer' onClick={()=> navigate('/cta')}>Continue</Button>
         </div>
     </div>
   )
