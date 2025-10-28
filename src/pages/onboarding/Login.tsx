@@ -65,7 +65,7 @@ const Login: React.FC = () => {
     onError: (err) => {
       console.log(err);
 
-      // ✅ AxiosError has `response` safely typed
+      //  AxiosError has `response` safely typed
       const message =
         err.response?.data?.data?.message ||
         "Invalid credential, please try again.";
@@ -132,14 +132,15 @@ const Login: React.FC = () => {
 
 const handleGoogleSuccess = async (tokenResponse: any) => {
   try {
-    // tokenResponse contains { code: "..." } if flow: "auth-code"
-    if (!tokenResponse?.code) {
-      showDanger("No authorization code returned from Google");
-      return;
-    }
+     const { access_token } = tokenResponse;
 
-    const formData = new FormData();
-    formData.append("idToken", tokenResponse.code);
+      if (!access_token) {
+        showDanger("No access token returned from Google");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("accessToken", access_token);
 
     const res = await axios.post(
       "https://api.sendcoins.ca/auth/google",

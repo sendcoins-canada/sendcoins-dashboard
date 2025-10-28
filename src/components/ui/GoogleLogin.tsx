@@ -5,7 +5,7 @@ import Google from "@/assets/Google.svg"
 
 const GoogleLoginButton = ({ onSuccess, onError }: any) => {
   const login = useGoogleLogin({
-     flow: "auth-code",
+    //  flow: "auth-code",
     onSuccess,
     onError,
   });
