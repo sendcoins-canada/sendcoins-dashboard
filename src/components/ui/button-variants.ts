@@ -8,7 +8,7 @@ export const buttonVariants = cva(
         // primary maps to project brand color to avoid relying on shadcn CSS tokens
         primary: "bg-primaryblue text-neutral-900 hover:bg-primaryblue/90",
         destructive:
-          "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+          "bg-danger text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
           "border border-brand/40 text-brand bg-transparent hover:bg-brand/10",
         secondary: "bg-neutral-100 text-neutral-900 hover:bg-neutral-200",

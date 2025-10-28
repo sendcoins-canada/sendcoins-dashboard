@@ -44,6 +44,7 @@
   --color-textgray: #D2D2D2;
   --color-bggray: #F5F5F5;
   --color-secondarygray: #EDEDED;
+  --color-danger: #FF4D4F;
 }
 
 :root {

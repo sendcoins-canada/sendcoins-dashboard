@@ -129,14 +129,14 @@ const CloseAccountModal: React.FC<CloseAccountModalProps> = ({
           </ul>
           <div className="flex justify-center space-x-3 pt-4">
             <Button
-            //   variant="outline"
+              variant="outline"
             //   size="sm"
               onClick={() => setStep("profile")}
             >
               Cancel
             </Button>
             <Button
-            //   variant="destructive"
+              variant="destructive"
             //   size="sm"
               onClick={handleContinueClose}
               className="bg-[#FF4D4F] text-white py-3"
@@ -156,14 +156,14 @@ const CloseAccountModal: React.FC<CloseAccountModalProps> = ({
           </p>
           <div className="flex justify-center space-x-3 pt-4">
             <Button
-            //   variant="outline"
+              variant="outline"
             //   size="sm"
               onClick={() => setStep("profile")}
             >
               Cancel
             </Button>
             <Button
-            //   variant="destructive"
+              variant="destructive"
             //   size="sm"
               onClick={handleFinalClose}
               className="bg-[#FF4D4F] text-white"
