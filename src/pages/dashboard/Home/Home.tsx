@@ -104,20 +104,20 @@ const Home: React.FC = () => {
 
           {/* Action Buttons */}
           <div className="flex space-x-3 mt-4">
-            <button  onClick={() => setIsFundingOpen(true)} className="flex items-center space-x-2 px-4 py-2 bg-[#0647F7] text-white rounded-full hover:bg-blue-700">
+            <button  onClick={() => setIsFundingOpen(true)} className="flex items-center space-x-2 px-4 py-2 bg-primaryblue text-white rounded-full hover:bg-blue-700">
               <span>Fund</span><Add size={18} color="white" />
             </button>
-            <button onClick={() => setIsSendModalOpen(true)} className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200">
+            <button onClick={() => setIsSendModalOpen(true)} className="flex items-center space-x-2 px-4 py-2 bg-bggray text-gray-700 rounded-full hover:bg-gray-200">
               <span>Send</span> <Send2 size={18} color="black" />
             </button>
-            <button onClick={() => navigate('/dashboard/convert')} className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200">
+            <button onClick={() => navigate('/dashboard/convert')} className="flex items-center space-x-2 px-4 py-2 bg-bggray text-gray-700 rounded-full hover:bg-gray-200">
               <span>Convert</span><Convert size={18} color="black" />
             </button>
           </div>
         </div>
 
         {/* Reminder Card */}
-        <div className="bg-[#F5F5F5] rounded-xl px-4 flex items-start justify-between mb-6">
+        <div className="bg-bggray rounded-xl px-4 flex items-start justify-between mb-6">
           <div>
             <h2 className="font-bold text-gray-800 pt-4">Almost there! 🚀</h2>
             <p className=" text-gray-500 mt-2">
@@ -136,7 +136,7 @@ const Home: React.FC = () => {
               // <button className="text-sm text-[#0647F7] hover:underline">
               //   See all
               // </button>
-              <Button variant={'outline'}>See all</Button>
+              <Button variant={'outline'} onClick={() => navigate('/dashboard/transactions')}>See all</Button>
             )}
           </div>
 

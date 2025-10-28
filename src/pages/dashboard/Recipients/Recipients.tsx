@@ -58,7 +58,6 @@ const Recipients = () => {
       <MinimalLayout>
         <RecipientDetails
           recipient={selectedRecipient}
-          onBack={() => setSelectedRecipient(null)}
         />
       </MinimalLayout>
     );

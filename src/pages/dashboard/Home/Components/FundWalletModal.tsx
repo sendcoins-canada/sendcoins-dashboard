@@ -76,7 +76,7 @@ const WalletModal: React.FC = () => {
         {wallets.map((wallet, i) => (
           <div
             key={i}
-            className="flex justify-between items-center border bg-gray-50 hover:bg-[#CDDAFE] p-3 rounded-xl cursor-pointer"
+            className="flex justify-between items-center border bg-secondarygray hover:bg-[#CDDAFE] p-3 rounded-xl cursor-pointer"
           >
             <div className="flex items-center space-x-3">
                <div className="w-8 h-8 flex items-center justify-center">

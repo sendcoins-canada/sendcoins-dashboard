@@ -40,7 +40,7 @@ const Survey: React.FC = () => {
         const res = await getActiveSurvey();
         const surveysData = Array.isArray(res.data) ? res.data : [res.data];
         // setSurveys(surveysData);
-        
+        console.log(surveysData)
         // Flatten all questions from all surveys
         const questions = surveysData.flatMap((survey: any) => 
           survey.questions.map((q: Question) => ({

@@ -1,11 +1,10 @@
 import React from "react";
 import { Button } from "./ui/button";
-import { CheckCircle2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { ShieldTick } from "iconsax-react";
 
 const AccountDeleted: React.FC = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const handleClose = () => {
     

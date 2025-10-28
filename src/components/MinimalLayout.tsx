@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { data, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { Home, User, DocumentText, Setting, ArrowLeft2 } from "iconsax-react";
 import Logo from "../assets/Logosingle.png";
 import Code from "../assets/Code.png"

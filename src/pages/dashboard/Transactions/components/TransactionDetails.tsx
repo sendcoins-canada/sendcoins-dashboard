@@ -80,7 +80,7 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({ transaction }) 
       </div>
 
       {/* Tabs */}
-       <div className="flex bg-gray-100 rounded-full p-1 mb-6">
+       <div className="flex rounded-full p-1 mb-6">
         <button
           className={`px-4 py-1.5 text-sm font-medium rounded-full ${
             activeTab === "timeline" ? "bg-black text-white" : "text-gray-500"

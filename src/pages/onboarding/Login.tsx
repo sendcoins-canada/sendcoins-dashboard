@@ -12,7 +12,7 @@ import type {
   LoginWithPasswordResponse,
 } from "@/types/onboarding";
 // import { GoogleLogin } from "@react-oauth/google";
-import type { CredentialResponse } from "@react-oauth/google";
+// import type { CredentialResponse } from "@react-oauth/google";
 // import jwt_decode from "jwt_decode"
 import axios, { AxiosError } from "axios";
 import Header from "@/components/onboarding/shared/Header";
@@ -74,61 +74,129 @@ const Login: React.FC = () => {
     },
   });
 
-  const handleGoogleSuccess = async (
-    credentialResponse: CredentialResponse
-  ) => {
-    if (credentialResponse?.credential) {
-      try {
-        // 1. Decode the token (optional)
-        // const decoded: any = jwtDecode(credentialResponse.credential);
-        // console.log("Decoded Google user:", decoded);
-        const formData = new FormData();
-        formData.append("idToken", credentialResponse.credential);
+  // const handleGoogleSuccess = async (
+  //   credentialResponse: CredentialResponse
+  // ) => {
+  //   if (credentialResponse?.credential) {
+  //     try {
+  //       // 1. Decode the token (optional)
+  //       // const decoded: any = jwtDecode(credentialResponse.credential);
+  //       // console.log("Decoded Google user:", decoded);
+  //       const formData = new FormData();
+  //       formData.append("idToken", credentialResponse.credential);
 
-        // 2. Send the token to your backend
-        const res = await axios.post(
-          "https://api.sendcoins.ca/auth/google",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+  //       // 2. Send the token to your backend
+  //       const res = await axios.post(
+  //         "https://api.sendcoins.ca/auth/google",
+  //         formData,
+  //         {
+  //           headers: {
+  //             "Content-Type": "multipart/form-data",
+  //           },
+  //         }
+  //       );
 
-        const data = res.data?.data;
+  //       const data = res.data?.data;
 
-        // 3️⃣ If login successful
-        if (data?.isSuccess) {
-          // ✅ Save token object in localStorage
-          localStorage.setItem(
-            "token",
-            JSON.stringify({
-              azer_token: data.token?.azer_token,
-              expires_at: data.token?.expires_at,
-            })
-          );
+  //       // 3️⃣ If login successful
+  //       if (data?.isSuccess) {
+  //         // ✅ Save token object in localStorage
+  //         localStorage.setItem(
+  //           "token",
+  //           JSON.stringify({
+  //             azer_token: data.token?.azer_token,
+  //             expires_at: data.token?.expires_at,
+  //           })
+  //         );
 
-          // ✅ Optionally store additional info
-          localStorage.setItem("user_email", data.result?.[0]?.useremail || "");
-          localStorage.setItem("profilePicture", data.profilePicture || "");
+  //         // ✅ Optionally store additional info
+  //         localStorage.setItem("user_email", data.result?.[0]?.useremail || "");
+  //         localStorage.setItem("profilePicture", data.profilePicture || "");
 
-          // ✅ Redirect to dashboard
-          navigate("/dashboard/home");
+  //         // ✅ Redirect to dashboard
+  //         navigate("/dashboard/home");
 
-          // Optional success message
-          showSuccess(data.title || "Welcome back!");
-        } else {
-          showDanger(data?.message || "Google login failed. Please try again.");
-        }
+  //         // Optional success message
+  //         showSuccess(data.title || "Welcome back!");
+  //       } else {
+  //         showDanger(data?.message || "Google login failed. Please try again.");
+  //       }
 
-        // 3. Handle backend response (e.g. save session token, redirect)
-        console.log("Backend response:", res.data);
-      } catch (err) {
-        console.error("Google login error:", err);
-      }
+  //       // 3. Handle backend response (e.g. save session token, redirect)
+  //       console.log("Backend response:", res.data);
+  //     } catch (err) {
+  //       console.error("Google login error:", err);
+  //     }
+  //   }
+  // };
+
+const handleGoogleSuccess = async (tokenResponse: any) => {
+  try {
+    // tokenResponse contains { code: "..." } if flow: "auth-code"
+    if (!tokenResponse?.code) {
+      showDanger("No authorization code returned from Google");
+      return;
     }
-  };
+
+    const formData = new FormData();
+    formData.append("idToken", tokenResponse.code);
+
+    const res = await axios.post(
+      "https://api.sendcoins.ca/auth/google",
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+
+    const data = res.data?.data;
+
+    if (data?.isSuccess) {
+      localStorage.setItem(
+        "token",
+        JSON.stringify({
+          azer_token: data.token?.azer_token,
+          expires_at: data.token?.expires_at,
+        })
+      );
+
+      localStorage.setItem("user_email", data.result?.[0]?.useremail || "");
+      localStorage.setItem("profilePicture", data.profilePicture || "");
+
+      navigate("/dashboard/home");
+      showSuccess(data.title || "Welcome back!");
+    } else {
+      showDanger(data?.message || "Google login failed. Please try again.");
+    }
+  } catch (err) {
+    console.error("Google login error:", err);
+    showDanger("Google Sign-In failed. Please try again.");
+  }
+};
+
+
+// const handleGoogleSuccess = async (tokenResponse: any) => {
+//   try {
+//     // 1️⃣ Use the access token to get the ID token or profile info
+//     const userInfo = await axios.get(
+//       "https://www.googleapis.com/oauth2/v3/userinfo",
+//       {
+//         headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+//       }
+//     );
+
+//     console.log("Google user info:", userInfo.data);
+
+//     // 2️⃣ If your backend only accepts an ID token, this won't work — 
+//     // you need to switch to the <GoogleLogin /> component instead.
+//     // But if your backend accepts user info, send it:
+//     await axios.post("https://api.sendcoins.ca/auth/google", userInfo.data.sub);
+
+//   } catch (err) {
+//     console.error("Google login error:", err);
+//   }
+// };
+
 
   return (
     <div className="flex flex-col justify-between min-h-screen">

@@ -178,7 +178,7 @@ console.log(user)
               <option>BTC</option>
               <option>USD</option>
             </select> */}
-            <div className="w-10 h-10 rounded-full bg-pink-300 flex items-center justify-center text-white font-bold" onClick={() => setOpenModal(true)}>
+            <div className="w-10 h-10 rounded-full bg-pink-300 flex items-center justify-center text-white font-bold cursor-pointer" onClick={() => setOpenModal(true)}>
               {initials}
             </div>
           </div>

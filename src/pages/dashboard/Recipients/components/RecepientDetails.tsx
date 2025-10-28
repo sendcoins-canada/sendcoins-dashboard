@@ -4,10 +4,10 @@ import { useState } from "react";
 
 interface RecipientDetailsProps {
   recipient: any;
-  onBack: () => void;
+  
 }
 
-const RecipientDetails: React.FC<RecipientDetailsProps> = ({ recipient, onBack }) => {
+const RecipientDetails: React.FC<RecipientDetailsProps> = ({ recipient }) => {
     const [transactions, _setTransactions] = useState([
         {
           id: 1,
@@ -62,11 +62,11 @@ const RecipientDetails: React.FC<RecipientDetailsProps> = ({ recipient, onBack }
           >
             {recipient.initials}
           </div>
-          <img
+          {/* <img
             src={recipient.coinIcon}
             alt="coin"
             className="w-5 h-5 absolute bottom-0 right-0 bg-white rounded-full p-0.5"
-          />
+          /> */}
         </div>
 
         <h2 className="text-xl font-semibold mb-4 text-center">{recipient.name}</h2>
@@ -96,7 +96,7 @@ const RecipientDetails: React.FC<RecipientDetailsProps> = ({ recipient, onBack }
           </div>
         </div>
 
-        <button className="bg-[#0047FF] text-white px-6 py-2 rounded-full w-full hover:bg-[#003ad9]">
+        <button className="bg-primaryblue text-white px-6 py-2 rounded-full w-full hover:bg-[#003ad9]">
           Send money
         </button>
       </div>

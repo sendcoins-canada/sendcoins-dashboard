@@ -14,10 +14,18 @@ import { setEmail } from "@/store/registration/slice";
 // import { GoogleLogin } from "@react-oauth/google";
 import type { CredentialResponse } from "@react-oauth/google";
 import axios from "axios";
+import { AxiosError } from "axios";
 import GoogleLoginButton from "../ui/GoogleLogin";
 // import Logoblack from "../../assets/logoblack.svg"
 
-
+export type ApiErrorResponse = {
+  data?: {
+    icon?: string;
+    isSuccess?: boolean;
+    message?: string;
+    title?: string;
+  };
+};
 
 const Signup = () => {
   const dispatch = useDispatch();
@@ -25,7 +33,7 @@ const Signup = () => {
 
   const { mutate, isPending } = useMutation<
     VerifyEmailResponse,
-    Error,
+    AxiosError<ApiErrorResponse>,
     VerifyEmailRequest
   >({
     mutationFn: verifyEmail,
@@ -125,7 +133,8 @@ const Signup = () => {
                   localStorage.setItem("verifyEmail", values.email); // optional fallback
                 },
                 onError: (err) => {
-                  showDanger(err.message || "Something went wrong, try again.");
+                  console.log(err)
+                  showDanger(err.response?.data?.data?.message || "Something went wrong, try again.");
                 },
               });
             }}

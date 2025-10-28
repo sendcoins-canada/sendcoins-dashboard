@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Modal from "./ui/Modal";
 import { LogoutCurve, ProfileDelete, TickCircle } from "iconsax-react";
 import { Button } from "./ui/button"; 
-import AccountDeleted from "./AccountDeleted";
 import { useNavigate } from "react-router-dom";
 
 
@@ -46,10 +45,10 @@ const CloseAccountModal: React.FC<CloseAccountModalProps> = ({
 };
 
 
-  const handleModalClose = () => {
-    onOpenChange(false);
-    setTimeout(() => setStep("profile"), 300);
-  };
+  // const handleModalClose = () => {
+  //   onOpenChange(false);
+  //   setTimeout(() => setStep("profile"), 300);
+  // };
 
   return (
     <Modal

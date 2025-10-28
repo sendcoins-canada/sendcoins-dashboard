@@ -40,8 +40,10 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   /* Custom colors */
-  --color-primaryblue: #57B5FF;
+  --color-primaryblue: #0647F7;
   --color-textgray: #D2D2D2;
+  --color-bggray: #F5F5F5;
+  --color-secondarygray: #EDEDED;
 }
 
 :root {

@@ -97,7 +97,7 @@ import { ArrowDown2 } from "iconsax-react";
 
 export type SelectOption = {
   value: string;
-  label: string;
+  label: string | React.ReactNode;
   icon?: React.ReactNode;
 };
 

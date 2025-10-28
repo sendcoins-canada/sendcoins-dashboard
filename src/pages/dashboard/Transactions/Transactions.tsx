@@ -1,6 +1,6 @@
 import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { SearchNormal1, Filter, ArrowLeft } from "iconsax-react";
+import { SearchNormal1, Filter } from "iconsax-react";
 import FilterDrawer from "./components/FilterDrawer";
 import TransactionDetails from "./components/TransactionDetails";
 import type { Transaction } from "./components/TransactionDetails";
@@ -63,7 +63,7 @@ const Transactions = () => {
   );
   
   
-  // 🟢 If a transaction is selected, show the details view instead
+  //  If a transaction is selected, show the details view instead
   if (selectedTransaction) {
     return (
       <MinimalLayout>
