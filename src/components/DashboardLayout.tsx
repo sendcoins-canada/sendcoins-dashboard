@@ -1,21 +1,22 @@
 
 import React, { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { NavLink } from "react-router-dom";
-import { Home, User, DocumentText, Setting } from "iconsax-react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { Home, User, DocumentText, Setting, LogoutCurve, ShieldTick, Lock, MessageQuestion } from "iconsax-react";
 import Logo from "../assets/Logosingle.png";
 import Code from "../assets/Code.png"
 import type { User as UserType } from "@/types/user";
 import { getUser } from "@/api/user";
 import CloseAccountModal from "./CloseAccountModal";
 
- type DashboardLayoutProps = {
-   children: ReactNode;
- };
 
-const DashboardLayout: React.FC<DashboardLayoutProps> =({ children }) => {
+type DashboardLayoutProps = {
+  children: ReactNode;
+};
+
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [user, setUser] = useState<UserType | null>(null);
-console.log(user)
+  console.log(user)
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -35,16 +36,17 @@ console.log(user)
     : "??";
 
 
-    const linkClasses =
+  const linkClasses =
     "group flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100 transition-colors";
   const textClasses = "transition-colors";
-   const [openModal, setOpenModal] = useState(false);
-  
-    const handleDeleteAccount = async () => {
-      // Call your API here, e.g.:
-      // await axios.delete(`/api/user/${userId}`);
-      console.log("Deleting account...");
-    };
+  const [openModal, setOpenModal] = useState(false);
+  const [openSettingsModal, setOpenSettingsModal] = useState(false);
+  const navigate = useNavigate()
+  const handleDeleteAccount = async () => {
+    // Call your API here, e.g.:
+    // await axios.delete(`/api/user/${userId}`);
+    console.log("Deleting account...");
+  };
 
   return (
     <div className="flex h-screen">
@@ -70,9 +72,8 @@ console.log(user)
                   className="transition-colors"
                 />
                 <span
-                  className={`${textClasses} ${
-                    isActive ? "text-[#0647F7]" : "text-[#8C8C8C]"
-                  }`}
+                  className={`${textClasses} ${isActive ? "text-[#0647F7]" : "text-[#8C8C8C]"
+                    }`}
                 >
                   Home
                 </span>
@@ -95,9 +96,8 @@ console.log(user)
                   className="transition-colors"
                 />
                 <span
-                  className={`${textClasses} ${
-                    isActive ? "text-[#0647F7]" : "text-[#8C8C8C]"
-                  }`}
+                  className={`${textClasses} ${isActive ? "text-[#0647F7]" : "text-[#8C8C8C]"
+                    }`}
                 >
                   Recipients
                 </span>
@@ -120,9 +120,8 @@ console.log(user)
                   className="transition-colors"
                 />
                 <span
-                  className={`${textClasses} ${
-                    isActive ? "text-[#0647F7]" : "text-[#8C8C8C]"
-                  }`}
+                  className={`${textClasses} ${isActive ? "text-[#0647F7]" : "text-[#8C8C8C]"
+                    }`}
                 >
                   Transactions
                 </span>
@@ -130,33 +129,71 @@ console.log(user)
             )}
           </NavLink>
 
+
+        </nav>
+        <div className="border-t">
           {/* Settings */}
-          <NavLink
-            to="/dashboard/settings"
-            className={({ isActive }) =>
-              `${linkClasses} ${isActive ? "bg-blue-50" : ""}`
-            }
-          >
-            {({ isActive }) => (
+
+          <div className="relative">
+            <div
+              onClick={() => setOpenSettingsModal(true)}
+              className="group flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
+            >
+              <Setting size="20" color="#8C8C8C" />
+              <span className="text-[#8C8C8C]">Settings</span>
+            </div>
+
+            {openSettingsModal && (
               <>
-                <Setting
-                  size="20"
-                  color={isActive ? "#0647F7" : "#8C8C8C"}
-                  className="transition-colors"
-                />
-                <span
-                  className={`${textClasses} ${
-                    isActive ? "text-[#0647F7]" : "text-[#8C8C8C]"
-                  }`}
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setOpenSettingsModal(false)}
+                ></div>
+                <div
+                  className="absolute bottom-10 left-0 bg-white border shadow-lg rounded-xl p-4 w-fit z-50"
                 >
-                  Settings
-                </span>
+                  <div className="flex flex-col items-center text-center space-y-4 cursor-pointer">
+                    {/* Profile header */}
+                    <div className="flex gap-2 items-center justify-start hover:bg-[#F5F5F5] p-2 rounded-md" onClick={() => setOpenModal(true)}>
+
+                      <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-lg">
+                        {initials}
+                      </div>
+                      <div className="flex flex-col items-start">
+                        <p className="font-semibold">{user?.data?.first_name}</p>
+                        <p className="text-gray-500 text-xs">{user?.data?.user_email}</p>
+                      </div>
+                    </div>
+
+                    {/* Options */}
+                    <div className="w-full space-y-1 text-sm text-left text-[#8C8C8C]">
+                      <div className="flex items-center gap-2 hover:bg-[#F5F5F5] rounded-md hover:text-black p-2">
+                        <ShieldTick size="18" color="#8C8C8C" /> KYC
+                      </div>
+                      <div className="flex items-center gap-2 hover:bg-[#F5F5F5] rounded-md hover:text-black p-2" onClick={() => {
+                        setOpenSettingsModal(false);
+                        navigate("/dashboard/change-passcode");
+                      }}>
+                        <Lock size="18" color="#8C8C8C" /> Change passcode
+                      </div>
+                      <div className="flex items-center gap-2 hover:bg-[#F5F5F5] rounded-md hover:text-black p-2">
+                        <Lock size="18" color="#8C8C8C" /> Privacy
+                      </div>
+                      <div className="flex items-center gap-2 hover:bg-[#F5F5F5] rounded-md hover:text-black p-2">
+                        <MessageQuestion size="18" color="#8C8C8C" /> Contact support
+                      </div>
+                      <div className="flex items-center justify-center gap-2 text-danger mt-2 cursor-pointer">
+                        <LogoutCurve size="18" color="#FF4D4F" /> Logout
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </>
             )}
-          </NavLink>
-        </nav>
-        <div>
-          <img src={Code}/>
+          </div>
+
+
+          <img src={Code} />
         </div>
       </aside>
 
@@ -168,17 +205,13 @@ console.log(user)
             <p className="text-sm font-sans text-gray-500">Good Morning 👋</p>
             <p className="font-semibold text-gray-800 text-lg">
               {/* Kevin Malone */}
-               {user ? `${user.data.first_name} ${user.data.last_name}` : "Loading..."}
-              </p>
+              {user ? `${user.data.first_name} ${user.data.last_name}` : "Loading..."}
+            </p>
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* <select className="border rounded-lg px-3 py-1 text-sm">
-              <option>ETH</option>
-              <option>BTC</option>
-              <option>USD</option>
-            </select> */}
-            <div className="w-10 h-10 rounded-full bg-pink-300 flex items-center justify-center text-white font-bold cursor-pointer" onClick={() => setOpenModal(true)}>
+
+            <div className="w-10 h-10 rounded-full bg-pink-300 flex items-center justify-center text-white font-bold cursor-pointer">
               {initials}
             </div>
           </div>
@@ -189,17 +222,27 @@ console.log(user)
           {children}
         </main>
       </div>
-        {/*  Modal */}
-            <CloseAccountModal
-              open={openModal}
-              onOpenChange={setOpenModal}
-              userName={user?.data?.first_name || ''}
-              userEmail={user?.data?.user_email || ""}
-              initials={initials}
-              firstName={user?.data?.first_name || ''}
-              lastName={user?.data?.last_name || ''}
-              onDeleteAccount={handleDeleteAccount}
-            />
+      {/*  Modal */}
+      <CloseAccountModal
+        open={openModal}
+        onOpenChange={setOpenModal}
+        userName={user?.data?.first_name || ''}
+        userEmail={user?.data?.user_email || ""}
+        initials={initials}
+        firstName={user?.data?.first_name || ''}
+        lastName={user?.data?.last_name || ''}
+        onDeleteAccount={handleDeleteAccount}
+      />
+      {/* <SettingsModal
+  open={openSettingsModal}
+  onOpenChange={setOpenSettingsModal}
+  user={{
+    initials,
+    name: `${user?.data?.first_name} ${user?.data?.last_name}`,
+    email: user?.data?.user_email,
+  }}
+/> */}
+
     </div>
   );
 };

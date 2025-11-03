@@ -25,6 +25,7 @@ import ForgotConfirmPassword from "./pages/onboarding/forgot/ForgotConfirmPasswo
 import ForgotVerifyOtp from "./pages/onboarding/forgot/ForgotVerifyOtp.tsx";
 // import ConvertFlow from "./pages/dashboard/Home/Components/Convert/EnterConvertAmount";
 import AccountDeleted from "./components/AccountDeleted";
+import ChangePasscode from "./pages/dashboard/Settings/ChangePasscode.tsx";
 
 function App() {
   return (
@@ -146,6 +147,14 @@ function App() {
           element={
             <ProtectedRoute>
               <AccountDeleted />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/change-passcode"
+          element={
+            <ProtectedRoute>
+              <ChangePasscode />
             </ProtectedRoute>
           }
         />

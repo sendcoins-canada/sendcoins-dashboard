@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import SuccessPage from "../../SuccessPage";
-import { getCurrency, getSupportedNetwork, createWallet } from "@/api/wallet";
-
+import { getCurrency, getSupportedNetwork, createWallet, getCoins } from "@/api/wallet";
+import type { Coin } from "@/types/wallet";
+import { showDanger } from "@/components/ui/toast";
 
 const CreateWallet: React.FC = () => {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ const CreateWallet: React.FC = () => {
   const [currency, setCurrency] = useState("");
   const [network, setNetwork] = useState("");
    const [isSuccess, setIsSuccess] = useState(false);
-    const [currencies, setCurrencies] = useState<any[]>([]);
+    const [coins, setCoins] = useState<Record<string, Coin>>({});
   const [networks, setNetworks] = useState<any[]>([]);
 const [isLoading, setIsLoading] = useState(false);
   
@@ -23,45 +24,38 @@ const [isLoading, setIsLoading] = useState(false);
   
   //  Fetch currencies when component mounts
   useEffect(() => {
-    const fetchCurrencies = async () => {
+    const fetchCoins = async () => {
       try {
-        const res = await getCurrency();
-        setCurrencies(res.data || []);
+        const res = await getCoins(); // should return { coins: {...} }
+        if (res?.coins) {
+          setCoins(res.coins);
+        } else {
+          showDanger("No coins data received from backend.");
+        }
       } catch (err) {
         console.error("Error fetching currencies:", err);
+        showDanger("Failed to fetch currencies.");
       }
     };
-    fetchCurrencies();
+    fetchCoins();
   }, []);
 
-  // ✅ Fetch networks when currency changes
+  //  Fetch supported networks for selected currency
   useEffect(() => {
     const fetchNetworks = async () => {
       if (!currency) return;
       try {
         const res = await getSupportedNetwork(currency);
-        setNetworks(res.data || []);
+        setNetworks(res?.data || []);
       } catch (err) {
         console.error("Error fetching networks:", err);
+        showDanger("Failed to fetch supported networks.");
       }
     };
     fetchNetworks();
   }, [currency]);
 
-  // const handleSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //    // Simulate wallet creation success
-  //   setTimeout(() => {
-  //     setIsSuccess(true);
-  //   }, 80);
-  //   console.log({
-  //     walletName: (e.target as any).walletName.value,
-  //     currency,
-  //     network,
-  //   });
-  // };
-
-   // ✅ Handle wallet creation
+   //  Handle wallet creation
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currency || !network || !walletName) return;
@@ -160,18 +154,18 @@ const [isLoading, setIsLoading] = useState(false);
             <Select
   value={currency}
   onChange={setCurrency}
-  options={currencies.map((coin) => ({
-    value: coin.currency_name.toLowerCase(), // e.g. "btc"
+  options={Object.values(coins).map((coin) => ({
+    value: coin.symbol.toLowerCase(), // e.g. "btc"
     // label: coin.currency_name.toUpperCase(), 
     label: (
       <div className="flex items-center gap-2">
         <img
-          src={coin.flag}
-          alt={coin.currency_name}
+          src={coin.logo}
+          alt={coin.name}
           className="w-5 h-5 rounded-full"
         />
         <span className="capitalize">
-          {coin.currency_init} ({coin.currency_name.toUpperCase()})
+          {coin.symbol} ({coin.name_display.toUpperCase()})
         </span>
       </div>
     ),

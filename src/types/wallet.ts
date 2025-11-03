@@ -11,6 +11,20 @@ export interface CurrencyResponse {
         },
       ]
 }
+// Coin structure
+export interface Coin {
+  symbol: string;
+  usd: number;
+  logo: string;
+  name: string;
+  name_display: string;
+}
+
+// Main response type
+export interface CoinResponse {
+  coins: Record<string, Coin>;
+}
+
 
 export interface SupportedCoins {
     data: [

@@ -227,3 +227,8 @@ export const updatePasswordWithOtp = async (
   );
   return response.data;
 };
+// passcode
+export const changePasscode = async (data: { oldCode: string; newCode: string }) => {
+  const response = await api.post("/auth/change-passcode", data);
+  return response.data;
+};

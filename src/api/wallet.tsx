@@ -1,8 +1,12 @@
 import api from "./axios";
-import type { CurrencyResponse } from "@/types/wallet";
+import type { CoinResponse, CurrencyResponse } from "@/types/wallet";
 
 export const getCurrency = async () => {
   const response = await api.get<CurrencyResponse>("/currency/supported");
+  return response.data;
+};
+export const getCoins = async () => {
+  const response = await api.get<CoinResponse>("/coin/all");
   return response.data;
 };
 

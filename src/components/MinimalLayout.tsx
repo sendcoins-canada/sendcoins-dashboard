@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
-import { Home, User, DocumentText, Setting, ArrowLeft2 } from "iconsax-react";
+import { Home, User, DocumentText, Setting, ArrowLeft2, LogoutCurve, ShieldTick, Lock, MessageQuestion } from "iconsax-react";
 import Logo from "../assets/Logosingle.png";
 import Code from "../assets/Code.png"
 import type { User as UserType } from "@/types/user";
@@ -43,7 +43,7 @@ console.log(user)
   const textClasses = "transition-colors";
 
  const [openModal, setOpenModal] = useState(false);
-
+  const [openSettingsModal, setOpenSettingsModal] = useState(false);
   const handleDeleteAccount = async () => {
     // Call your API here, e.g.:
     // await axios.delete(`/api/user/${userId}`);
@@ -136,33 +136,72 @@ console.log(user)
           </NavLink>
 
           {/* Settings */}
-          <NavLink
-            to="/dashboard/settings"
-            className={({ isActive }) =>
-              `${linkClasses} ${isActive ? "bg-blue-50" : ""}`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <Setting
-                  size="20"
-                  color={isActive ? "#0647F7" : "#8C8C8C"}
-                  className="transition-colors"
-                />
-                <span
-                  className={`${textClasses} ${
-                    isActive ? "text-[#0647F7]" : "text-[#8C8C8C]"
-                  }`}
-                >
-                  Settings
-                </span>
-              </>
-            )}
-          </NavLink>
+         
         </nav>
-        <div>
-          <img src={Code}/>
-        </div>
+        <div className="border-t">
+                  {/* Settings */}
+        
+                  <div className="relative">
+                    <div
+                      onClick={() => setOpenSettingsModal(true)}
+                      className="group flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
+                    >
+                      <Setting size="20" color="#8C8C8C" />
+                      <span className="text-[#8C8C8C]">Settings</span>
+                    </div>
+        
+                    {openSettingsModal && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-40"
+                          onClick={() => setOpenSettingsModal(false)}
+                        ></div>
+                        <div
+                          className="absolute bottom-10 left-0 bg-white border shadow-lg rounded-xl p-4 w-fit z-50"
+                        >
+                          <div className="flex flex-col items-center text-center space-y-4 cursor-pointer">
+                            {/* Profile header */}
+                            <div className="flex gap-2 items-center justify-start hover:bg-[#F5F5F5] p-2 rounded-md" onClick={() => setOpenModal(true)}>
+        
+                              <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-lg">
+                                {initials}
+                              </div>
+                              <div className="flex flex-col items-start">
+                                <p className="font-semibold">{user?.data?.first_name}</p>
+                                <p className="text-gray-500 text-xs">{user?.data?.user_email}</p>
+                              </div>
+                            </div>
+        
+                            {/* Options */}
+                            <div className="w-full space-y-1 text-sm text-left text-[#8C8C8C]">
+                              <div className="flex items-center gap-2 hover:bg-[#F5F5F5] rounded-md hover:text-black p-2">
+                                <ShieldTick size="18" color="#8C8C8C" /> KYC
+                              </div>
+                              <div className="flex items-center gap-2 hover:bg-[#F5F5F5] rounded-md hover:text-black p-2" onClick={() => {
+                                setOpenSettingsModal(false);
+                                navigate("/dashboard/change-passcode");
+                              }}>
+                                <Lock size="18" color="#8C8C8C" /> Change passcode
+                              </div>
+                              <div className="flex items-center gap-2 hover:bg-[#F5F5F5] rounded-md hover:text-black p-2">
+                                <Lock size="18" color="#8C8C8C" /> Privacy
+                              </div>
+                              <div className="flex items-center gap-2 hover:bg-[#F5F5F5] rounded-md hover:text-black p-2">
+                                <MessageQuestion size="18" color="#8C8C8C" /> Contact support
+                              </div>
+                              <div className="flex items-center justify-center gap-2 text-danger mt-2 cursor-pointer">
+                                <LogoutCurve size="18" color="#FF4D4F" /> Logout
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+        
+        
+                  <img src={Code} />
+                </div>
       </aside>
 
       {/* Main Content */}
@@ -174,12 +213,8 @@ console.log(user)
                         </div>
 
           <div className="flex space-x-4">
-            {/* <select className="border rounded-lg px-3 py-1 text-sm">
-              <option>ETH</option>
-              <option>BTC</option>
-              <option>USD</option>
-            </select> */}
-            <div className="w-10 h-10 rounded-full bg-pink-300 flex items-center justify-center text-white font-bold cursor-pointer"  onClick={() => setOpenModal(true)}>
+            
+            <div className="w-10 h-10 rounded-full bg-pink-300 flex items-center justify-center text-white font-bold">
               {initials}
             </div>
           </div>
