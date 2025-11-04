@@ -60,7 +60,7 @@ const SuccessPage: React.FC<SuccessPageProps> = ({
 
         <Button
           onClick={onSecondaryClick || (() => navigate(-1))}
-        //   variant="outline"
+          variant="ghost"
           className="rounded-full  text-black hover:bg-[#262626] hover:text-white px-6 py-2"
         >
           {secondaryButtonText}

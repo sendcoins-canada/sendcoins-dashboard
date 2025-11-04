@@ -80,7 +80,7 @@ const EnterAmount: React.FC<EnterAmountProps> = ({ onNext }) => {
               />
 
               {error && (
-                <p className="text-xs text-red-500 mt-1 font-medium">
+                <p className="text-xs text-danger mt-1 font-medium">
                   {error}
                 </p>
               )}
@@ -136,7 +136,7 @@ const EnterAmount: React.FC<EnterAmountProps> = ({ onNext }) => {
 
           {/* Info & Continue button */}
           <div className="mt-6 text-center">
-            <p className="text-xs text-green-700 bg-green-50 border border-green-300 inline-block px-3 py-1 rounded-full">
+            <p className="text-xs text-green-700 bg-green-50 border border-green-300 border-dashed inline-block px-3 py-1 rounded-full">
               Usually takes less than 2 minutes
             </p>
 

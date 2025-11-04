@@ -132,7 +132,7 @@ const EnterPasscode: React.FC<EnterPasscodeProps> = ({ onSuccess }) => {
             disabled={!isComplete || isPending}
             className={`px-6 py-2 rounded-full ${
               isComplete
-                ? "bg-blue-500 text-white cursor-pointer"
+                ? "bg-primaryblue text-white cursor-pointer"
                 : "bg-blue-100 text-gray-400"
             }`}
           >

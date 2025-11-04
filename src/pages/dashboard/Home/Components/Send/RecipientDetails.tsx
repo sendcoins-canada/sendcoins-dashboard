@@ -38,10 +38,10 @@ const RecipientDetails: React.FC<Props> = ({ asset, onNext }) => {
       {/* Keep your existing header */}
       <HeaderWithCancel onCancel={() => navigate(-1)} />
 
-      <div className="flex flex-col items-center justify-center min-h-[75vh] px-4">
+      <div className="flex flex-col items-center min-h-[75vh] px-4">
         <div className="w-full max-w-sm">
           {/* Page Title */}
-          <h2 className="text-center text-[20px] font-semibold text-neutral-900 mb-1">
+          <h2 className="text-center text-[28px] font-semibold text-neutral-900 mb-1">
             Enter recipient details
           </h2>
 

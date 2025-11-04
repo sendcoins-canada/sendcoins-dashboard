@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { TransmitSqaure2 } from "iconsax-react";
 import { HeaderWithCancel } from "@/components/onboarding/shared/Header";
 import { Convert, Money, Money2 } from "iconsax-react";
+import Eth from "@/assets/Eth.svg"
 
 
 type Props = {
@@ -67,12 +68,12 @@ const ConfirmSend: React.FC<Props> = ({
           <p className="text-sm text-gray-500">Network</p>
           <div className="flex items-center gap-2">
             <img
-              src="/ethereum-icon.svg"
+              src={Eth}
               alt="Ethereum"
               className="w-4 h-4"
             />
-            <span className="text-sm font-medium text-gray-800">
-              Ethereum
+            <span className="text-sm font-medium text-gray-800 capitalize">
+            {asset}
             </span>
           </div>
         </div>
