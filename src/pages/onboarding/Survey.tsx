@@ -3,9 +3,10 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/onboarding/shared/Header";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { getActiveSurvey, submitSurvey } from "@/api/authApi";
-import type { RootState } from "@/store";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "@/store";
+import { getActiveSurvey } from "@/api/authApi";
+import { submitSurveyThunk } from "@/store/user/asyncThunks/submitSurvey";
 
 interface Question {
   question_id: number;
@@ -26,13 +27,13 @@ interface Survey {
 
 const Survey: React.FC = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [loading, setLoading] = useState(false);
   const [answers, setAnswers] = useState<{ [key: string]: string }>({});
   // const [surveys, setSurveys] = useState<Survey[]>([]);
   const [allQuestions, setAllQuestions] = useState<Array<Question & { config_id: number; survey_title: string }>>([]);
   const navigate = useNavigate();
-  
-  const user = useSelector((state: RootState) => state.auth.user);
+
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading } = useSelector((state: RootState) => state.user);
 
   useEffect(() => {
     const fetchSurveys = async () => {
@@ -77,28 +78,21 @@ const Survey: React.FC = () => {
 
   const handleNext = async () => {
     const currentAnswer = answers[questionKey];
-    
+
     if (!currentAnswer && currentQuestion.is_required) {
       alert("Please select an answer");
       return;
     }
 
-    // Submit current answer
-    try {
-      setLoading(true);
-      const email = user?.useremail || 
-                   localStorage.getItem("email") || 
-                   localStorage.getItem("verifyEmail") || "";
+    // Submit current answer via Redux thunk
+    const result = await dispatch(submitSurveyThunk({
+      config_id: currentQuestion.config_id,
+      question_id: currentQuestion.question_id,
+      answer: currentAnswer,
+    }));
 
-      const payload = {
-        email: email,
-        config_id: currentQuestion.config_id,
-        question_id: currentQuestion.question_id,
-        answer: currentAnswer,
-      };
-
-      await submitSurvey(payload);
-      console.log("Answer submitted:", payload);
+    if (submitSurveyThunk.fulfilled.match(result)) {
+      console.log("Answer submitted successfully");
 
       // Move to next question or finish
       if (currentQuestionIndex < totalQuestions - 1) {
@@ -107,10 +101,8 @@ const Survey: React.FC = () => {
         // All questions answered, navigate to welcome
         navigate("/welcome");
       }
-    } catch (err) {
-      console.error("Failed to submit answer:", err);
-    } finally {
-      setLoading(false);
+    } else {
+      console.error("Failed to submit answer:", result.payload);
     }
   };
 

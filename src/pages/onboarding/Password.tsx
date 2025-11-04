@@ -8,21 +8,19 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "@/store";
 import { setPassword } from "@/store/registration/slice";
-import { useMutation } from "@tanstack/react-query";
-import { registerWithPassword } from "@/api/authApi";
-import type { RegisterRequest, RegisterResponse } from "@/types/onboarding";
-import { showSuccess, showDanger } from "@/components/ui/toast"
-import type { RootState } from "@/store";
-import { setCredentials } from "@/store/auth/slice";
+import { registerWithPasswordThunk } from "@/store/auth/asyncThunks/registerWithPassword";
+import { showSuccess, showDanger } from "@/components/ui/toast";
 
 const Password: React.FC = () => {
   const [step, setStep] = useState<"create" | "confirm">("create");
   const [tempPassword, setTempPassword] = useState("");
-  // const [password, setPassword] = useState("");
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+
+  const { loading } = useSelector((state: RootState) => state.auth);
 
   const rules = [
     {
@@ -40,11 +38,6 @@ const Password: React.FC = () => {
     },
   ];
 
-  // ✅ Grab registration data from redux
-  const { email, firstName, lastName, country, code } = useSelector(
-    (state: RootState) => state.registration
-  );
-
   const passwordSchema = Yup.object({
     password: Yup.string()
       .required("Input your password")
@@ -61,39 +54,20 @@ const Password: React.FC = () => {
       .oneOf([Yup.ref("password")], "Passwords must match")
   });
 
-  // ✅ Register mutation
-  const { mutate, isPending } = useMutation<
-    RegisterResponse,
-    Error,
-    RegisterRequest
-  >({
-    mutationFn: registerWithPassword,
-    onSuccess: (res) => {
-      const { token } = res.data;
+  const handleRegistration = async () => {
+    // Save password in Redux
+    dispatch(setPassword(tempPassword));
 
-      // Save in Redux (no "user" object yet, so you can pass email + names)
-      dispatch(
-        setCredentials({
-          token: {
-            azer_token: token.azer_token,
-            expires_at: token.expires_at,
-          },
-          user: {
-            oauth_id: 0, // backend may not send this yet
-            useremail: email,
-            // firstName,
-            // lastName,
-            // country,
-          },
-        })
-      );
-      showSuccess(" Registration successful!");
+    // Call registerWithPasswordThunk (automatically gets data from Redux)
+    const result = await dispatch(registerWithPasswordThunk({ password: tempPassword }));
+
+    if (registerWithPasswordThunk.fulfilled.match(result)) {
+      showSuccess("Registration successful!");
       navigate("/survey");
-    },
-    onError: (err) => {
-      showDanger(err.message || "Something went wrong, try again.");
-    },
-  });
+    } else if (registerWithPasswordThunk.rejected.match(result)) {
+      showDanger(result.payload || "Something went wrong, try again.");
+    }
+  };
 
   return (
     <>
@@ -115,25 +89,14 @@ const Password: React.FC = () => {
             <Formik
               initialValues={{ password: "", confirmPassword: "" }}
               validationSchema={step === "create" ? passwordSchema : confirmSchema}
-              onSubmit={(values, { setSubmitting }) => {
+              onSubmit={async (values, { setSubmitting }) => {
                 if (step === "create") {
                   // Save password temporarily in state
                   setTempPassword(values.password);
                   setStep("confirm");
                 } else {
                   if (values.confirmPassword === tempPassword) {
-                    //  Save password in Redux
-                    dispatch(setPassword(tempPassword));
-
-                    // Call register endpoint with all data
-                    mutate({
-                      email,
-                      firstName,
-                      lastName,
-                      password: tempPassword,
-                      country,
-                      code,
-                    });
+                    await handleRegistration();
                   } else {
                     showDanger("Passwords do not match");
                   }
@@ -219,9 +182,9 @@ const Password: React.FC = () => {
                       <Button
                         type="submit"
                         className="w-full bg-[#0647F7] text-white hover:bg-[#2563EB]"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || loading}
                       >
-                        {isPending ? "Registering..." : "Confirm password"}
+                        {loading ? "Registering..." : "Confirm password"}
                       </Button>
                     </>
                   )}

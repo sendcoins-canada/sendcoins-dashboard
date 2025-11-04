@@ -1,36 +1,47 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { User } from "@/types/user";
+import type { RootState } from "@/store";
+import api from "@/api/axios";
 
-// Example thunk; replace URL/logic with real API later
-export const fetchUser = createAsyncThunk<User, string>(
+/**
+ * Async thunk for fetching user profile
+ * Automatically retrieves token from Redux auth state
+ */
+export const fetchUser = createAsyncThunk<
+  User,
+  void,
+  { state: RootState; rejectValue: string }
+>(
   "user/fetchUser",
-  async (userId: string) => {
-    await new Promise((r) => setTimeout(r, 300));
-     return {
-      data: {
-        azer_id: 1,
-        first_name: "Olivia",
-        last_name: "Rhye",
-        profession: null,
-        twitter: null,
-        instagram: null,
-        flag: null,
-        country: "CA",
-        user_email: "olivia@untitledui.com",
-        live_secret_key: null,
-        api_key: "abc123",
-        isPinAvailable: true,
-        verified: true,
-        userID: userId,
-        vibrate: "on",
-        device_security: "enabled",
-        sound: "on",
-        activity_notify: "enabled",
-        default_currency: "USD",
-        profileUrl: "https://example.com/avatar.png",
-        loginCount: "10",
-        isSuccessful: true,
-      },
-    };
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const state = getState();
+      const token = state.auth.token?.azer_token;
+
+      if (!token) {
+        return rejectWithValue("No authentication token found. Please log in again.");
+      }
+
+      const formData = new FormData();
+      formData.append("token", token);
+
+      const response = await api.post<User>(
+        "/user/profile",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      return response.data;
+    } catch (error: any) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to fetch user profile.";
+      return rejectWithValue(message);
+    }
   }
 );

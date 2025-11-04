@@ -4,33 +4,20 @@ import { ArrowLeft2, PasswordCheck } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/onboarding/shared/Header";
 import { showSuccess, showDanger } from "@/components/ui/toast";
-import { useMutation } from "@tanstack/react-query";
-import { changePasscode } from "@/api/authApi"; 
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "@/store";
+import { changePasscodeThunk } from "@/store/auth/asyncThunks/changePasscode"; 
 
 const ChangePasscode: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading } = useSelector((state: RootState) => state.auth);
 
   const [step, setStep] = useState<"current" | "new" | "confirm">("current");
   const [passcode, setPasscode] = useState<string[]>([]);
   const [currentCode, setCurrentCode] = useState<string[]>([]);
   const [newCode, setNewCode] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement | null>(null);
-
-  // Mutation
-  const { mutate, isPending } = useMutation<
-    { message: string },
-    Error,
-    { oldCode: string; newCode: string }
-  >({
-    mutationFn: changePasscode,
-    onSuccess: (res) => {
-      showSuccess(res.message || "Passcode changed successfully!");
-      navigate("/dashboard/home");
-    },
-    onError: (err) => {
-      showDanger(err.message || "Failed to change passcode.");
-    },
-  });
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -42,7 +29,7 @@ const ChangePasscode: React.FC = () => {
     setPasscode(value.split(""));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (passcode.length !== 4) return;
 
     if (step === "current") {
@@ -55,10 +42,17 @@ const ChangePasscode: React.FC = () => {
       setStep("confirm");
     } else if (step === "confirm") {
       if (passcode.join("") === newCode.join("")) {
-        mutate({
+        const result = await dispatch(changePasscodeThunk({
           oldCode: currentCode.join(""),
           newCode: newCode.join(""),
-        });
+        }));
+
+        if (changePasscodeThunk.fulfilled.match(result)) {
+          showSuccess(result.payload.message || "Passcode changed successfully!");
+          navigate("/dashboard/home");
+        } else {
+          showDanger("Failed to change passcode.");
+        }
       } else {
         showDanger("New PINs do not match.");
         setPasscode([]);
@@ -66,7 +60,7 @@ const ChangePasscode: React.FC = () => {
       }
     }
   };
-
+  console.log({passcode, newCode, currentCode});
   const isComplete = passcode.length === 4;
 
   return (
@@ -108,10 +102,14 @@ const ChangePasscode: React.FC = () => {
             maxLength={4}
             value={passcode.join("")}
             onChange={handleChange}
-            className="absolute opacity-0 pointer-events-none"
+            className="absolute opacity-0 -z-10"
+            autoFocus
           />
 
-          <div className="flex gap-4 mb-10 px-4 md:px-0">
+          <div
+            className="flex gap-4 mb-10 px-4 md:px-0 cursor-pointer"
+            onClick={() => inputRef.current?.focus()}
+          >
             {[0, 1, 2, 3].map((index) => (
               <div
                 key={index}
@@ -126,14 +124,14 @@ const ChangePasscode: React.FC = () => {
 
           <Button
             onClick={handleSubmit}
-            disabled={!isComplete || isPending}
+            disabled={!isComplete || loading}
             className={`px-6 py-2 rounded-full ${
               isComplete
                 ? "bg-primaryblue text-white cursor-pointer"
                 : "bg-blue-100 text-gray-400"
             }`}
           >
-            {isPending
+            {loading
               ? "Saving..."
               : step === "confirm"
               ? "Confirm"

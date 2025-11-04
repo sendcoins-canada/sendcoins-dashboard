@@ -1,38 +1,37 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "@/store";
 import { ArrowLeft2, PasswordCheck } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/onboarding/shared/Header";
 import { showSuccess, showDanger } from "@/components/ui/toast";
-import { useMutation } from "@tanstack/react-query";
-import { createPasscode } from "@/api/authApi";
+import { createPasscodeThunk } from "@/store/auth/asyncThunks/createPasscode";
 
 interface EnterPasscodeProps {
   onSuccess?: () => void;
 }
 const EnterPasscode: React.FC<EnterPasscodeProps> = ({ onSuccess }) => {
-      const navigate = useNavigate();
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading } = useSelector((state: RootState) => state.auth);
+
   const [step, setStep] = useState<"create" | "confirm">("create");
   const [passcode, setPasscode] = useState<string[]>([]);
   const [firstPasscode, setFirstPasscode] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+  const handleCreatePasscode = async (code: string) => {
+    const result = await dispatch(createPasscodeThunk({ code }));
 
-  const { mutate, isPending } = useMutation<
-  { message: string },   //  Response type
-  Error,                 //  Error type
-  { code: string }       //  Variables type (input to mutationFn)
->({
-  mutationFn: createPasscode,
-  onSuccess: (res) => {
-    showSuccess(res?.message || "Passcode created successfully!");
- onSuccess?.();
-  },
-  onError: (err) => {
-    showDanger(err.message || "Failed to create passcode.");
-  },
-});
+    if (createPasscodeThunk.fulfilled.match(result)) {
+      showSuccess(result.payload.message || "Passcode created successfully!");
+      onSuccess?.();
+    } else {
+      showDanger(result.payload || "Failed to create passcode.");
+    }
+  };
 
 
   useEffect(() => {
@@ -54,7 +53,7 @@ const EnterPasscode: React.FC<EnterPasscodeProps> = ({ onSuccess }) => {
       setStep("confirm");
     } else if (step === "confirm") {
       if (passcode.join("") === firstPasscode.join("")) {
-         mutate({ code: passcode.join("") });
+        handleCreatePasscode(passcode.join(""));
       } else {
         showDanger("Code doesn't match"); //  sonner toast
         setPasscode([]);
@@ -129,14 +128,14 @@ const EnterPasscode: React.FC<EnterPasscodeProps> = ({ onSuccess }) => {
           {/* Continue Button */}
           <Button
             onClick={handleSubmit}
-            disabled={!isComplete || isPending}
+            disabled={!isComplete || loading}
             className={`px-6 py-2 rounded-full ${
               isComplete
                 ? "bg-blue-500 text-white cursor-pointer"
                 : "bg-blue-100 text-gray-400"
             }`}
           >
-             {isPending ? "Saving..." : "Make Payment"}
+             {loading ? "Saving..." : "Make Payment"}
           </Button>
         </div>
       </div>
