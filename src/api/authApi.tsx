@@ -76,11 +76,8 @@ export const registerWithPassword = async (
       headers: { "Content-Type": "multipart/form-data" },
     }
   );
-//  Save AzerID to localStorage if available
-  if (response.data?.data?.token?.azer_token) {
-    localStorage.setItem("azertoken", response.data.data.token.azer_token);
-  }
 
+  // Token storage is now handled by Redux auth slice
   return response.data;
 };
 
@@ -126,10 +123,7 @@ export const verifyLoginOtp = async (data: { email: string; code: string }) => {
     headers: { "Content-Type": "multipart/form-data" },
   });
 
-   if (response.data?.data?.token?.azer_token) {
-    localStorage.setItem("azertoken", response.data.data.token.azer_token);
-  }
-
+  // Token storage is now handled by Redux auth slice
   return response.data;
 };
 
@@ -162,15 +156,13 @@ export const getCountries = async (): Promise<CountryResponse> => {
   return response.data;
 };
 
-export const createPasscode = async (data: { code: string }) => {
-  const token = localStorage.getItem("azertoken"); // get token from storage
-
-  if (!token) {
+export const createPasscode = async (data: { code: string; token: string }) => {
+  if (!data.token) {
     throw new Error("No token found. Please log in again.");
   }
 
   const formData = new FormData();
-  formData.append("token", token);
+  formData.append("token", data.token);
   formData.append("passcode", data.code);
 
   const response = await api.post("/user/auth/create/passcode", formData, {

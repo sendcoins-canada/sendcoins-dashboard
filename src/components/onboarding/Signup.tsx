@@ -5,98 +5,57 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { TextInputField } from "../ui/form";
 import { useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
-import { verifyEmail } from "@/api/authApi";
-import type { VerifyEmailRequest, VerifyEmailResponse } from "@/types/onboarding";
 import { showDanger, showSuccess } from "../ui/toast";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "@/store";
 import { setEmail } from "@/store/registration/slice";
-// import { GoogleLogin } from "@react-oauth/google";
-import type { CredentialResponse } from "@react-oauth/google";
-import axios from "axios";
-import { AxiosError } from "axios";
+import { verifyEmailThunk } from "@/store/auth/asyncThunks/verifyEmail";
+import { googleLoginThunk } from "@/store/auth/asyncThunks/googleLogin";
 import GoogleLoginButton from "../ui/GoogleLogin";
-// import Logoblack from "../../assets/logoblack.svg"
-
-export type ApiErrorResponse = {
-  data?: {
-    icon?: string;
-    isSuccess?: boolean;
-    message?: string;
-    title?: string;
-  };
-};
 
 const Signup = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate()
-
-  const { mutate, isPending } = useMutation<
-    VerifyEmailResponse,
-    AxiosError<ApiErrorResponse>,
-    VerifyEmailRequest
-  >({
-    mutationFn: verifyEmail,
-
-  });
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+  const { loading } = useSelector((state: RootState) => state.auth);
 
   const schema = Yup.object({
     email: Yup.string()
       .email("Enter a valid email")
       .required("Email is required"),
-
   });
 
-  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
-    if (credentialResponse?.credential) {
-      try {
-        // 1. Decode the token (optional)
-        // const decoded: any = jwtDecode(credentialResponse.credential);
-        // console.log("Decoded Google user:", decoded);
-        const formData = new FormData();
-        formData.append("idToken", credentialResponse.credential);
+  const handleSignup = async (values: { email: string }) => {
+    const result = await dispatch(verifyEmailThunk({ email: values.email }));
 
-        // 2. Send the token to your backend
-        const res = await axios.post("https://api.sendcoins.ca/auth/google",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+    if (verifyEmailThunk.fulfilled.match(result)) {
+      dispatch(setEmail(values.email));
+      showSuccess("Verification link sent! Please check your email.");
+      navigate("/verify", { state: { email: values.email } });
+    } else if (verifyEmailThunk.rejected.match(result)) {
+      showDanger(result.payload || "Something went wrong, try again.");
+    }
+  };
 
-        const data = res.data?.data;
+  const handleGoogleSuccess = async (tokenResponse: any) => {
+    try {
+      const { access_token } = tokenResponse;
 
-        // 3️⃣ If login successful
-        if (data?.isSuccess) {
-          // ✅ Save token object in localStorage
-          localStorage.setItem(
-            "token",
-            JSON.stringify({
-              azer_token: data.token?.azer_token,
-              expires_at: data.token?.expires_at,
-            })
-          );
-
-          // ✅ Optionally store additional info
-          localStorage.setItem("user_email", data.result?.[0]?.useremail || "");
-          localStorage.setItem("profilePicture", data.profilePicture || "");
-
-          // ✅ Redirect to dashboard
-          navigate("/dashboard/home");
-
-          // Optional success message
-          showSuccess(data.title || "Welcome back!");
-        } else {
-          showDanger(data?.message || "Google login failed. Please try again.");
-        }
-
-        // 3. Handle backend response (e.g. save session token, redirect)
-        console.log("Backend response:", res.data);
-      } catch (err) {
-        console.error("Google login error:", err);
+      if (!access_token) {
+        showDanger("No access token returned from Google");
+        return;
       }
+
+      const result = await dispatch(googleLoginThunk({ access_token }));
+
+      if (googleLoginThunk.fulfilled.match(result)) {
+        showSuccess("Welcome to Sendcoins!");
+        navigate("/dashboard/home");
+      } else if (googleLoginThunk.rejected.match(result)) {
+        showDanger(result.payload || "Google Sign-In failed. Please try again.");
+      }
+    } catch (err) {
+      console.error("Google login error:", err);
+      showDanger("Google Sign-In failed. Please try again.");
     }
   };
 
@@ -119,26 +78,9 @@ const Signup = () => {
           <Formik
             initialValues={{
               email: "",
-              // password: "",
-              // country: "",
-              // reason: false,
             }}
             validationSchema={schema}
-            onSubmit={(values) => {
-              mutate({ email: values.email }, {
-                onSuccess: () => {
-                  dispatch(setEmail(values.email));
-                  showSuccess("Verification link sent! Please check your email.");
-                  navigate("/verify", { state: { email: values.email } });
-                  localStorage.setItem("verifyEmail", values.email); // optional fallback
-                },
-                onError: (err) => {
-                  console.log(err)
-                  showDanger(err.response?.data?.data?.message || "Something went wrong, try again.");
-                },
-              });
-            }}
-
+            onSubmit={handleSignup}
           >
             {() => (
               <Form className="space-y-4 md:w-[80%] mx-auto">
@@ -152,10 +94,10 @@ const Signup = () => {
                   <Button
                     type="submit"
                     className="w-full cursor-pointer bg-[#0647F7] hover:bg-[#2563EB] text-white"
-                    disabled={isPending}
+                    disabled={loading}
                     variant='primary'
                   >
-                    {isPending ? "Verifying..." : "Continue"}
+                    {loading ? "Verifying..." : "Continue"}
                   </Button>
                   <div className="relative text-center text-xs text-neutral-500">
                     <span className="px-2 bg-white relative z-10">or</span>

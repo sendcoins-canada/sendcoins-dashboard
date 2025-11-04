@@ -5,8 +5,12 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { Home, User, DocumentText, Setting, LogoutCurve, ShieldTick, Lock, MessageQuestion } from "iconsax-react";
 import Logo from "../assets/Logosingle.png";
 import Code from "../assets/Code.png"
-import type { User as UserType } from "@/types/user";
-import { getUser } from "@/api/user";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "@/store";
+import { fetchUser } from "@/store/user/asyncRequests/fetchUser";
+import { logout } from "@/store/auth/slice";
+import { clearUser } from "@/store/user/slice";
+import { resetRegistration } from "@/store/registration/slice";
 import CloseAccountModal from "./CloseAccountModal";
 
 
@@ -15,21 +19,19 @@ type DashboardLayoutProps = {
 };
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-  const [user, setUser] = useState<UserType | null>(null);
-  console.log(user)
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const userData = await getUser();
-        setUser(userData);
-      } catch (error) {
-        console.error("Failed to fetch user:", error);
-        // Optional: redirect to login page if token expired
-      }
-    };
+  const dispatch = useDispatch<AppDispatch>();
+  const { user, loading, error } = useSelector((state: RootState) => state.user);
+  const [hasFetched, setHasFetched] = useState(false);
 
-    fetchUser();
-  }, []);
+  console.log(user);
+
+  useEffect(() => {
+    // Only fetch once if user is not already loaded and we haven't tried fetching yet
+    if (!user && !loading && !hasFetched && !error) {
+      setHasFetched(true);
+      dispatch(fetchUser());
+    }
+  }, [dispatch, user, loading, hasFetched, error]);
 
   const initials = user
     ? `${user.data.first_name?.[0] ?? ""}${user.data.last_name?.[0] ?? ""}`.toUpperCase()
@@ -41,11 +43,25 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const textClasses = "transition-colors";
   const [openModal, setOpenModal] = useState(false);
   const [openSettingsModal, setOpenSettingsModal] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
   const handleDeleteAccount = async () => {
     // Call your API here, e.g.:
     // await axios.delete(`/api/user/${userId}`);
     console.log("Deleting account...");
+  };
+
+  const handleLogout = () => {
+    // Clear all Redux state
+    dispatch(logout()); // Clears auth state + localStorage
+    dispatch(clearUser()); // Clears user profile data
+    dispatch(resetRegistration()); // Clears any leftover registration data
+
+    // Close settings modal
+    setOpenSettingsModal(false);
+
+    // Navigate to login page
+    navigate("/login");
   };
 
   return (
@@ -182,7 +198,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                       <div className="flex items-center gap-2 hover:bg-[#F5F5F5] rounded-md hover:text-black p-2">
                         <MessageQuestion size="18" color="#8C8C8C" /> Contact support
                       </div>
-                      <div className="flex items-center justify-center gap-2 text-danger mt-2 cursor-pointer">
+                      <div
+                        className="flex items-center justify-center gap-2 text-danger mt-2 cursor-pointer hover:bg-red-50 p-2 rounded-md"
+                        onClick={handleLogout}
+                      >
                         <LogoutCurve size="18" color="#FF4D4F" /> Logout
                       </div>
                     </div>

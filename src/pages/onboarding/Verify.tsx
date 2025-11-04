@@ -5,13 +5,12 @@ import { ArrowLeft2 } from "iconsax-react";
 import { PasswordCheck } from "iconsax-react";
 import Header from "@/components/onboarding/shared/Header";
 import { useNavigate, useLocation } from "react-router-dom";
-import { verifyOtp, resendOtp, verifyLoginOtp } from "@/api/authApi";
-import { useMutation } from "@tanstack/react-query";
-import type { VerifyOtpResponse } from "@/types/onboarding";
 import { useSelector, useDispatch } from "react-redux";
-import type { RootState } from "@/store";
+import type { AppDispatch, RootState } from "@/store";
 import { setCode } from "@/store/registration/slice";
-import { setCredentials } from "@/store/auth/slice";
+import { verifyOtpThunk } from "@/store/auth/asyncThunks/verifyOtp";
+import { verifyLoginOtpThunk } from "@/store/auth/asyncThunks/verifyLoginOtp";
+import { resendOtpThunk } from "@/store/auth/asyncThunks/resendOtp";
 
 
 const OTP_LENGTH = 6;
@@ -22,15 +21,19 @@ const Verify: React.FC = () => {
   );
   const inputsRef = React.useRef<Array<HTMLInputElement | null>>([]);
   const [seconds, setSeconds] = React.useState(50);
-      const navigate = useNavigate()
+  const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch<AppDispatch>();
+
+  const { loading } = useSelector((state: RootState) => state.auth);
   const fromQueryString = (location.state as { fromQueryString?: boolean })?.fromQueryString || false;
-// const email = (location.state as { email?: string })?.email || "";
-//  const email = useSelector((state: RootState) => state.registration.email);
-const email =
-  useSelector((state: RootState) => state.registration.email) ||
-  localStorage.getItem("email") ||
-  "";
+
+  // Get email from Redux with localStorage fallbacks
+  const email =
+    useSelector((state: RootState) => state.registration.email) ||
+    localStorage.getItem("email") ||
+    localStorage.getItem("verifyEmail") ||
+    "";
 
   React.useEffect(() => {
     const t = setInterval(() => setSeconds((s) => (s > 0 ? s - 1 : 0)), 1000);
@@ -55,59 +58,49 @@ const email =
   };
 
   const code = values.join("");
-const dispatch = useDispatch()
-  
-  // ✅ React Query mutation for OTP verification
-  const { mutate } = useMutation<VerifyOtpResponse, Error,  { email: string; code: string }>({
-    mutationFn: fromQueryString ? verifyLoginOtp : verifyOtp,
-    onSuccess: (res) => {
- const data = res.data;
-  dispatch(
-    setCredentials({
-      token: data.token,         // {azer_token, expires_at}
-      user: data.result[0]      // first item in result array
-    })
-  );
-       dispatch(setCode(code));
-      showSuccess("Code verified!");
-      if (fromQueryString) {
-      navigate("/dashboard/home");
+
+  // Resend OTP handler using Redux thunk
+  const handleResendOtp = async () => {
+    const result = await dispatch(resendOtpThunk({ email }));
+
+    if (resendOtpThunk.fulfilled.match(result)) {
+      showSuccess(result.payload.message || "OTP resent successfully!");
+      setSeconds(50); // restart countdown
+      setValues(Array(OTP_LENGTH).fill("")); // clear OTP inputs
     } else {
-      navigate("/country");
+      showDanger("Failed to resend OTP, try again.");
     }
-    },
-    onError: () => {
-      showDanger("Invalid Otp code.");
-    },
-  });
-  // resend
-  const { mutate: resendMutate, isPending: isResending } = useMutation<
-  { message: string },
-  Error,
-  string
->({
-  mutationFn: resendOtp,
-  onSuccess: (res) => {
-    showSuccess(res.message || "OTP resent successfully!");
-    setSeconds(50); // restart countdown
-  },
-  onError: (err) => {
-    showDanger(err.message || "Failed to resend OTP, try again.");
-  },
-});
+  };
 
-
-  const submit = () => {
+  const submit = async () => {
     if (code.length !== OTP_LENGTH) {
       showDanger("Incorrect passcode. Please try again.");
       return;
     }
-    mutate({ email, code });
-    
+
+    // Use appropriate thunk based on flow
+    const result = fromQueryString
+      ? await dispatch(verifyLoginOtpThunk({ email, code }))
+      : await dispatch(verifyOtpThunk({ email, code }));
+
+    // Check if verification succeeded
+    if (verifyLoginOtpThunk.fulfilled.match(result) || verifyOtpThunk.fulfilled.match(result)) {
+      dispatch(setCode(code));
+      showSuccess("Code verified!");
+
+      if (fromQueryString) {
+        navigate("/dashboard/home");
+      } else {
+        navigate("/country");
+      }
+    } else {
+      showDanger("Invalid OTP code. Please try again.");
+    }
   };
-   //  Trigger submit automatically when all inputs are filled
+
+  // Trigger submit automatically when all inputs are filled
   React.useEffect(() => {
-    if (values.every((val) => val !== "")) {
+    if (values.every((val) => val !== "") && !loading) {
       submit();
     }
   }, [values]);
@@ -163,15 +156,12 @@ const dispatch = useDispatch()
   <Button
     variant="outline"
     className="rounded-full px-4 py-2 text-xs cursor-pointer"
-    disabled={seconds > 0 || isResending}
-    onClick={() => {
-      resendMutate(email);
-      setValues(Array(OTP_LENGTH).fill("")); // clear OTP inputs after resend
-    }}
+    disabled={seconds > 0 || loading}
+    onClick={handleResendOtp}
   >
     {seconds > 0
       ? `Resend · 0:${seconds.toString().padStart(2, "0")}`
-      : isResending
+      : loading
       ? "Resending..."
       : "Resend"}
   </Button>
