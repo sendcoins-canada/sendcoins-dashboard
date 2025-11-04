@@ -2,13 +2,14 @@ import React from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "@/store";
 import Header from "@/components/onboarding/shared/Header";
 import { TextInputField } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { useMutation } from "@tanstack/react-query";
-import { requestPasswordReset } from "@/api/authApi";
 import { showDanger, showSuccess } from "@/components/ui/toast";
 import { PasswordCheck, ArrowLeft2 } from "iconsax-react";
+import { requestPasswordResetThunk } from "@/store/auth/asyncThunks/requestPasswordReset";
 
 const confirmSchema = Yup.object({
   confirmPassword: Yup.string()
@@ -21,23 +22,29 @@ const confirmSchema = Yup.object({
 
 const ForgotConfirmPassword: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading } = useSelector((state: RootState) => state.auth);
+
   const email = localStorage.getItem("forgot_email") || "";
   const newPassword = localStorage.getItem("forgot_new_password") || "";
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: requestPasswordReset,
-    onSuccess: (res) => {
-      const authHash = res?.data?.authHash;
+  const handleSubmitPasswordReset = async () => {
+    const result = await dispatch(requestPasswordResetThunk({
+      email,
+      newPassword,
+    }));
+
+    if (requestPasswordResetThunk.fulfilled.match(result)) {
+      const authHash = result.payload.authHash;
       if (authHash) {
         localStorage.setItem("forgot_auth_hash", authHash);
       }
-      showSuccess(res?.data?.message || "Code sent to your email");
+      showSuccess(result.payload.message || "Code sent to your email");
       navigate("/forgot-password/otp");
-    },
-    onError: (err: any) => {
-      showDanger(err?.message || "Failed to request password reset");
-    },
-  });
+    } else {
+      showDanger(result.payload || "Failed to request password reset");
+    }
+  };
 
   return (
     <>
@@ -59,24 +66,21 @@ const ForgotConfirmPassword: React.FC = () => {
             <Formik
               initialValues={{ confirmPassword: "" }}
               validationSchema={confirmSchema}
-              onSubmit={() => {
-                // Automatically call API and navigate to OTP
-                mutate({ email, newPassword });
-              }}
+              onSubmit={handleSubmitPasswordReset}
             >
               {({ isSubmitting, values }) => (
                 <Form className="mt-6 space-y-4 text-left">
                   <TextInputField name="confirmPassword" placeholder="Re-enter your new password" isPassword />
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className={`w-full rounded-full py-3 font-medium ${
                       values.confirmPassword && values.confirmPassword === newPassword
-                        ? "bg-[#0647F7] text-white hover:bg-[#0534CC]" 
+                        ? "bg-[#0647F7] text-white hover:bg-[#0534CC]"
                         : "bg-[#CDDAFE] text-gray-400 cursor-not-allowed"
                     }`}
-                    disabled={isSubmitting || isPending || !values.confirmPassword || values.confirmPassword !== newPassword}
+                    disabled={isSubmitting || loading || !values.confirmPassword || values.confirmPassword !== newPassword}
                   >
-                    {isPending ? "Sending code..." : "Create password"}
+                    {loading ? "Sending code..." : "Create password"}
                   </Button>
                 </Form>
               )}

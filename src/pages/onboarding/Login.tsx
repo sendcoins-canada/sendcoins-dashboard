@@ -4,17 +4,11 @@ import * as Yup from "yup";
 import { TextInputField } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "@/store";
 import { showSuccess, showDanger } from "@/components/ui/toast";
-import { loginUser, verifyOtpQueryString } from "@/api/authApi";
-import type {
-  LoginRequest,
-  LoginWithPasswordResponse,
-} from "@/types/onboarding";
-// import { GoogleLogin } from "@react-oauth/google";
-// import type { CredentialResponse } from "@react-oauth/google";
-// import jwt_decode from "jwt_decode"
-import axios, { AxiosError } from "axios";
+import { loginWithPasswordThunk } from "@/store/auth/asyncThunks/loginWithPassword";
+import { googleLoginThunk } from "@/store/auth/asyncThunks/googleLogin";
 import Header from "@/components/onboarding/shared/Header";
 import { PasswordCheck } from "iconsax-react";
 import GoogleLoginButton from "@/components/ui/GoogleLogin";
@@ -29,50 +23,19 @@ const schema = Yup.object({
 });
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading } = useSelector((state: RootState) => state.auth);
 
-  const { mutate, isPending } = useMutation<
-    LoginWithPasswordResponse,
-    AxiosError<any>,
-    LoginRequest
-  >({
-    mutationFn: loginUser,
-    onSuccess: async (res, variables) => {
-      try {
-        // Save email and queryString for later use
-        localStorage.setItem("email", variables.email);
-        localStorage.setItem("verifyOTPString", res?.data?.verifyOTPString);
+  const handleLogin = async (values: { email: string; password: string }) => {
+    const result = await dispatch(loginWithPasswordThunk(values));
 
-        // Call verifyOtpQueryString first
-        const verifyRes = await verifyOtpQueryString(
-          res?.data?.verifyOTPString
-        );
-
-        if (verifyRes?.data?.isSuccess) {
-          showSuccess(verifyRes.data.message || "Check your mail for the code");
-          navigate("/verify", { state: { fromQueryString: true } });
-        } else {
-          showDanger("Failed to verify query string.");
-        }
-      } catch (err) {
-        if (err instanceof Error) {
-          console.log(err);
-          showDanger(err.message || "Failed to verify query string.");
-        } else {
-          showDanger("Failed to verify query string.");
-        }
-      }
-    },
-    onError: (err) => {
-      console.log(err);
-
-      //  AxiosError has `response` safely typed
-      const message =
-        err.response?.data?.data?.message ||
-        "Invalid credential, please try again.";
-
-      showDanger(message);
-    },
-  });
+    if (loginWithPasswordThunk.fulfilled.match(result)) {
+      showSuccess("Check your mail for the verification code");
+      navigate("/verify", { state: { fromQueryString: true } });
+    } else if (loginWithPasswordThunk.rejected.match(result)) {
+      showDanger(result.payload || "Invalid credentials, please try again.");
+    }
+  };
 
   // const handleGoogleSuccess = async (
   //   credentialResponse: CredentialResponse
@@ -132,42 +95,20 @@ const Login: React.FC = () => {
 
 const handleGoogleSuccess = async (tokenResponse: any) => {
   try {
-     const { access_token } = tokenResponse;
+    const { access_token } = tokenResponse;
 
-      if (!access_token) {
-        showDanger("No access token returned from Google");
-        return;
-      }
+    if (!access_token) {
+      showDanger("No access token returned from Google");
+      return;
+    }
 
-      const formData = new FormData();
-      formData.append("accessToken", access_token);
+    const result = await dispatch(googleLoginThunk({ access_token }));
 
-    const res = await axios.post(
-      "https://api.sendcoins.ca/auth/google",
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
-
-    const data = res.data?.data;
-
-    if (data?.isSuccess) {
-      localStorage.setItem(
-        "token",
-        JSON.stringify({
-          azer_token: data.token?.azer_token,
-          expires_at: data.token?.expires_at,
-        })
-      );
-
-      localStorage.setItem("user_email", data.result?.[0]?.useremail || "");
-      localStorage.setItem("profilePicture", data.profilePicture || "");
-
+    if (googleLoginThunk.fulfilled.match(result)) {
+      showSuccess("Welcome back!");
       navigate("/dashboard/home");
-      showSuccess(data.title || "Welcome back!");
-    } else {
-      showDanger(data?.message || "Google login failed. Please try again.");
+    } else if (googleLoginThunk.rejected.match(result)) {
+      showDanger(result.payload || "Google Sign-In failed. Please try again.");
     }
   } catch (err) {
     console.error("Google login error:", err);
@@ -223,9 +164,7 @@ const handleGoogleSuccess = async (tokenResponse: any) => {
               remember: false,
             }}
             validationSchema={schema}
-            onSubmit={(values) => {
-              mutate(values);
-            }}
+            onSubmit={handleLogin}
           >
             {() => (
               <Form className="space-y-3 w-full">
@@ -255,9 +194,9 @@ const handleGoogleSuccess = async (tokenResponse: any) => {
                 <Button
                   type="submit"
                   className="w-full bg-[#0647F7] text-white hover:bg-[#2563EB]"
-                  disabled={isPending}
+                  disabled={loading}
                 >
-                  {isPending ? "Signing in..." : "Continue"}
+                  {loading ? "Signing in..." : "Continue"}
                 </Button>
 
                 <div className="relative text-center text-xs text-primaryblue">

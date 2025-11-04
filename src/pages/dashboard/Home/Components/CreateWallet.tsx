@@ -1,34 +1,39 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "@/store";
 import { ArrowLeft2 } from "iconsax-react";
 import { HeaderWithCancel } from "@/components/onboarding/shared/Header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import SuccessPage from "../../SuccessPage";
-import { getCurrency, getSupportedNetwork, createWallet, getCoins } from "@/api/wallet";
-import type { Coin } from "@/types/wallet";
+import { getSupportedNetwork, getCoins } from "@/api/wallet";
 import { showDanger } from "@/components/ui/toast";
+import { createWalletThunk } from "@/store/wallet/asyncThunks/createWallet";
+import { setCoins, setNetworks } from "@/store/wallet/slice";
 
 const CreateWallet: React.FC = () => {
   const navigate = useNavigate();
-   const [walletName, setWalletName] = useState("");
+  const dispatch = useDispatch<AppDispatch>();
+
+  const [walletName, setWalletName] = useState("");
   const [currency, setCurrency] = useState("");
   const [network, setNetwork] = useState("");
-   const [isSuccess, setIsSuccess] = useState(false);
-    const [coins, setCoins] = useState<Record<string, Coin>>({});
-  const [networks, setNetworks] = useState<any[]>([]);
-const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  // Get coins and loading state from Redux
+  const { coins, networks, loading } = useSelector((state: RootState) => state.wallet);
   
 
   
-  //  Fetch currencies when component mounts
+  //  Fetch currencies when component mounts (kept as GET request)
   useEffect(() => {
     const fetchCoins = async () => {
       try {
         const res = await getCoins(); // should return { coins: {...} }
         if (res?.coins) {
-          setCoins(res.coins);
+          dispatch(setCoins(res.coins));
         } else {
           showDanger("No coins data received from backend.");
         }
@@ -38,57 +43,41 @@ const [isLoading, setIsLoading] = useState(false);
       }
     };
     fetchCoins();
-  }, []);
+  }, [dispatch]);
 
-  //  Fetch supported networks for selected currency
+  //  Fetch supported networks for selected currency (kept as GET request)
   useEffect(() => {
     const fetchNetworks = async () => {
       if (!currency) return;
       try {
         const res = await getSupportedNetwork(currency);
-        setNetworks(res?.data || []);
+        // res.data is the array of networks
+        dispatch(setNetworks((res?.data || []) as any));
       } catch (err) {
         console.error("Error fetching networks:", err);
         showDanger("Failed to fetch supported networks.");
       }
     };
     fetchNetworks();
-  }, [currency]);
+  }, [currency, dispatch]);
 
-   //  Handle wallet creation
+  //  Handle wallet creation via Redux thunk
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currency || !network || !walletName) return;
 
-    setIsLoading(true);
-     try {
-    const storedToken = localStorage.getItem("token");
-    if (!storedToken) {
-      console.error("No token found in localStorage");
-      return;
-    }
+    const result = await dispatch(createWalletThunk({
+      symbol: currency,
+      network,
+      name: walletName,
+    }));
 
-    // Parse the token object
-    const parsed = JSON.parse(storedToken);
-    const token = parsed.azer_token; //  extract the actual token string
-
-      const payload = {
-        symbol: currency,
-        network,
-        token,
-        name: walletName,
-      };
-
-      const res = await createWallet(payload);
-      console.log("Wallet created:", res);
-
-      if (res?.data?.isSuccess) {
-        setIsSuccess(true);
-      }
-    } catch (err) {
-      console.error("Error creating wallet:", err);
-    } finally {
-      setIsLoading(false);
+    if (createWalletThunk.fulfilled.match(result)) {
+      console.log("Wallet created successfully:", result.payload);
+      setIsSuccess(true);
+    } else {
+      console.error("Error creating wallet:", result.payload);
+      showDanger(result.payload || "Failed to create wallet");
     }
   };
 
@@ -203,7 +192,7 @@ const [isLoading, setIsLoading] = useState(false);
             variant="primary"
             size="lg"
             className="w-[40%] mx-auto text-center rounded-full bg-primaryblue hover:bg-blue-700 text-white "
-              disabled={isLoading} 
+            disabled={loading}
           >
             Create Wallet
           </Button>

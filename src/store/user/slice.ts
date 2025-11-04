@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { User } from "@/types/user";
 import { fetchUser } from "./asyncRequests/fetchUser";
+import { submitSurveyThunk } from "./asyncThunks/submitSurvey";
 
 type UserState = {
   user: User | null;
@@ -29,6 +30,7 @@ const userSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    // Fetch user
     builder
       .addCase(fetchUser.pending, (state) => {
         state.loading = true;
@@ -41,6 +43,21 @@ const userSlice = createSlice({
       .addCase(fetchUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Failed to fetch user";
+      });
+
+    // Submit survey
+    builder
+      .addCase(submitSurveyThunk.pending, (state) => {
+        state.loading = true;
+        state.error = undefined;
+      })
+      .addCase(submitSurveyThunk.fulfilled, (state) => {
+        state.loading = false;
+        // Survey submission doesn't update user state
+      })
+      .addCase(submitSurveyThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Failed to submit survey answer";
       });
   },
 });
