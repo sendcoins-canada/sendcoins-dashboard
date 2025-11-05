@@ -9,7 +9,6 @@ import { useSelector, useDispatch } from "react-redux";
 import type { AppDispatch, RootState } from "@/store";
 import { setCode } from "@/store/registration/slice";
 import { verifyOtpThunk } from "@/store/auth/asyncThunks/verifyOtp";
-import { verifyLoginOtpThunk } from "@/store/auth/asyncThunks/verifyLoginOtp";
 import { resendOtpThunk } from "@/store/auth/asyncThunks/resendOtp";
 
 
@@ -22,11 +21,9 @@ const Verify: React.FC = () => {
   const inputsRef = React.useRef<Array<HTMLInputElement | null>>([]);
   const [seconds, setSeconds] = React.useState(50);
   const navigate = useNavigate();
-  const location = useLocation();
   const dispatch = useDispatch<AppDispatch>();
 
   const { loading } = useSelector((state: RootState) => state.auth);
-  const fromQueryString = (location.state as { fromQueryString?: boolean })?.fromQueryString || false;
 
   // Get email from Redux with localStorage fallbacks
   const email =
@@ -73,30 +70,31 @@ const Verify: React.FC = () => {
   };
 
   const submit = async () => {
-    if (code.length !== OTP_LENGTH) {
-      showDanger("Incorrect passcode. Please try again.");
-      return;
-    }
+  if (code.length !== OTP_LENGTH) {
+    showDanger("Incorrect passcode. Please try again.");
+    return;
+  }
+   // Retrieve purpose — ensure it's always a valid string
+  const storedPurpose = localStorage.getItem("purpose");
+  const purpose: "login" | "registration" =
+    storedPurpose === "login" ? "login" : "registration";
+  // Send purpose in the request
+  const result = await dispatch(verifyOtpThunk({ email, code, purpose }));
 
-    // Use appropriate thunk based on flow
-    const result = fromQueryString
-      ? await dispatch(verifyLoginOtpThunk({ email, code }))
-      : await dispatch(verifyOtpThunk({ email, code }));
+  if (verifyOtpThunk.fulfilled.match(result)) {
+    dispatch(setCode(code));
+    showSuccess("Code verified!");
 
-    // Check if verification succeeded
-    if (verifyLoginOtpThunk.fulfilled.match(result) || verifyOtpThunk.fulfilled.match(result)) {
-      dispatch(setCode(code));
-      showSuccess("Code verified!");
-
-      if (fromQueryString) {
-        navigate("/dashboard/home");
-      } else {
-        navigate("/country");
-      }
+    if (purpose === "login") {
+      navigate("/dashboard/home");
     } else {
-      showDanger("Invalid OTP code. Please try again.");
+      navigate("/country");
     }
-  };
+  } else {
+    showDanger("Invalid OTP code. Please try again.");
+  }
+};
+
 
   // Trigger submit automatically when all inputs are filled
   React.useEffect(() => {

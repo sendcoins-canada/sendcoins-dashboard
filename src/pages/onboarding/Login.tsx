@@ -30,68 +30,14 @@ const Login: React.FC = () => {
     const result = await dispatch(loginWithPasswordThunk(values));
 
     if (loginWithPasswordThunk.fulfilled.match(result)) {
+      localStorage.setItem("purpose", "login");
       showSuccess("Check your mail for the verification code");
-      navigate("/verify", { state: { fromQueryString: true } });
+      navigate("/verify");
     } else if (loginWithPasswordThunk.rejected.match(result)) {
       showDanger(result.payload || "Invalid credentials, please try again.");
     }
   };
 
-  // const handleGoogleSuccess = async (
-  //   credentialResponse: CredentialResponse
-  // ) => {
-  //   if (credentialResponse?.credential) {
-  //     try {
-  //       // 1. Decode the token (optional)
-  //       // const decoded: any = jwtDecode(credentialResponse.credential);
-  //       // console.log("Decoded Google user:", decoded);
-  //       const formData = new FormData();
-  //       formData.append("idToken", credentialResponse.credential);
-
-  //       // 2. Send the token to your backend
-  //       const res = await axios.post(
-  //         "https://api.sendcoins.ca/auth/google",
-  //         formData,
-  //         {
-  //           headers: {
-  //             "Content-Type": "multipart/form-data",
-  //           },
-  //         }
-  //       );
-
-  //       const data = res.data?.data;
-
-  //       // 3️⃣ If login successful
-  //       if (data?.isSuccess) {
-  //         // ✅ Save token object in localStorage
-  //         localStorage.setItem(
-  //           "token",
-  //           JSON.stringify({
-  //             azer_token: data.token?.azer_token,
-  //             expires_at: data.token?.expires_at,
-  //           })
-  //         );
-
-  //         // ✅ Optionally store additional info
-  //         localStorage.setItem("user_email", data.result?.[0]?.useremail || "");
-  //         localStorage.setItem("profilePicture", data.profilePicture || "");
-
-  //         // ✅ Redirect to dashboard
-  //         navigate("/dashboard/home");
-
-  //         // Optional success message
-  //         showSuccess(data.title || "Welcome back!");
-  //       } else {
-  //         showDanger(data?.message || "Google login failed. Please try again.");
-  //       }
-
-  //       // 3. Handle backend response (e.g. save session token, redirect)
-  //       console.log("Backend response:", res.data);
-  //     } catch (err) {
-  //       console.error("Google login error:", err);
-  //     }
-  //   }
-  // };
 
 const handleGoogleSuccess = async (tokenResponse: any) => {
   try {
@@ -115,29 +61,6 @@ const handleGoogleSuccess = async (tokenResponse: any) => {
     showDanger("Google Sign-In failed. Please try again.");
   }
 };
-
-
-// const handleGoogleSuccess = async (tokenResponse: any) => {
-//   try {
-//     // 1️⃣ Use the access token to get the ID token or profile info
-//     const userInfo = await axios.get(
-//       "https://www.googleapis.com/oauth2/v3/userinfo",
-//       {
-//         headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-//       }
-//     );
-
-//     console.log("Google user info:", userInfo.data);
-
-//     // 2️⃣ If your backend only accepts an ID token, this won't work — 
-//     // you need to switch to the <GoogleLogin /> component instead.
-//     // But if your backend accepts user info, send it:
-//     await axios.post("https://api.sendcoins.ca/auth/google", userInfo.data.sub);
-
-//   } catch (err) {
-//     console.error("Google login error:", err);
-//   }
-// };
 
 
   return (

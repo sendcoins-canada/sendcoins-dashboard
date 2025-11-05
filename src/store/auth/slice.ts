@@ -3,7 +3,6 @@ import { loginWithPasswordThunk } from "./asyncThunks/loginWithPassword";
 import { googleLoginThunk } from "./asyncThunks/googleLogin";
 import { verifyEmailThunk } from "./asyncThunks/verifyEmail";
 import { verifyOtpThunk } from "./asyncThunks/verifyOtp";
-import { verifyLoginOtpThunk } from "./asyncThunks/verifyLoginOtp";
 import { registerWithPasswordThunk } from "./asyncThunks/registerWithPassword";
 import { createPasscodeThunk } from "./asyncThunks/createPasscode";
 import { requestPasswordResetThunk } from "./asyncThunks/requestPasswordReset";
@@ -158,24 +157,24 @@ const authSlice = createSlice({
       });
 
     // Verify login OTP
-    builder
-      .addCase(verifyLoginOtpThunk.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(verifyLoginOtpThunk.fulfilled, (state, action) => {
-        state.loading = false;
-        state.token = action.payload.token;
-        state.user = action.payload.user;
-        // Sync to localStorage
-        localStorage.setItem("token", JSON.stringify(action.payload.token));
-        localStorage.setItem("user", JSON.stringify(action.payload.user));
-        localStorage.setItem("azertoken", action.payload.token.azer_token);
-      })
-      .addCase(verifyLoginOtpThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || "Login OTP verification failed";
-      });
+    // builder
+    //   .addCase(verifyLoginOtpThunk.pending, (state) => {
+    //     state.loading = true;
+    //     state.error = null;
+    //   })
+    //   .addCase(verifyLoginOtpThunk.fulfilled, (state, action) => {
+    //     state.loading = false;
+    //     state.token = action.payload.token;
+    //     state.user = action.payload.user;
+    //     // Sync to localStorage
+    //     localStorage.setItem("token", JSON.stringify(action.payload.token));
+    //     localStorage.setItem("user", JSON.stringify(action.payload.user));
+    //     localStorage.setItem("azertoken", action.payload.token.azer_token);
+    //   })
+    //   .addCase(verifyLoginOtpThunk.rejected, (state, action) => {
+    //     state.loading = false;
+    //     state.error = action.payload || "Login OTP verification failed";
+    //   });
 
     // Register with password
     builder

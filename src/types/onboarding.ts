@@ -1,7 +1,7 @@
 // src/types/auth.ts
 export interface VerifyEmailRequest {
   email: string;
-//   code: string;
+  purpose: "login" | "registration" ;
 }
 
 export interface VerifyEmailResponse {
@@ -13,6 +13,7 @@ export interface VerifyEmailResponse {
 export interface VerifyOtpRequest {
   email: string;
   code: string;
+  purpose: "login" | "registration" ;
 }
 
 // export interface VerifyOtpResponse {

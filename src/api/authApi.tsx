@@ -6,15 +6,15 @@ import type { VerifyEmailRequest, VerifyEmailResponse, VerifyOtpRequest, VerifyO
 export const verifyEmail = async (
   data: VerifyEmailRequest
 ): Promise<VerifyEmailResponse> => {
-  const formData = new FormData();
-  formData.append("email", data.email);
-
-  const response = await api.post<VerifyEmailResponse>(
-    "/user/auth/email/verify",
-    formData,
+    const response = await api.post<VerifyEmailResponse>(
+    "/auth/otp/send",
+    {
+      email: data.email,
+      purpose: data.purpose,
+    },
     {
       headers: {
-        "Content-Type": "multipart/form-data",
+        "Content-Type": "application/json",
       },
     }
   );
@@ -26,16 +26,17 @@ export const verifyEmail = async (
 export const verifyOtp = async (
   data: VerifyOtpRequest
 ): Promise<VerifyOtpResponse> => {
-  const formData = new FormData();
-  formData.append("email", data.email);
-  formData.append("code", data.code);
 
   const response = await api.post<VerifyOtpResponse>(
-    "/user/auth/verifyOTP",
-    formData,
+    "/auth/otp/verify",
+     {
+      email: data.email,
+      code: data.code,
+      purpose: data.purpose,
+    },
     {
       headers: {
-        "Content-Type": "multipart/form-data",
+        "Content-Type": "application/json",
       },
     }
   );
@@ -98,21 +99,21 @@ export const loginUser = async (data: LoginRequest): Promise<LoginWithPasswordRe
   return response.data;
 };
 
-export const verifyOtpQueryString = async (queryString: string) => {
-  const formData = new FormData();
-  formData.append("queryString", queryString);
+// export const verifyOtpQueryString = async (queryString: string) => {
+//   const formData = new FormData();
+//   formData.append("queryString", queryString);
 
-  const response = await api.post(
-    "/user/auth/verifyOTPQueryString",
-    formData,
-    {
-      headers: { "Content-Type": "multipart/form-data" },
-    }
-  );
+//   const response = await api.post(
+//     "/user/auth/verifyOTPQueryString",
+//     formData,
+//     {
+//       headers: { "Content-Type": "multipart/form-data" },
+//     }
+//   );
  
 
-  return response.data;
-};
+//   return response.data;
+// };
 
 export const verifyLoginOtp = async (data: { email: string; code: string }) => {
   const formData = new FormData();

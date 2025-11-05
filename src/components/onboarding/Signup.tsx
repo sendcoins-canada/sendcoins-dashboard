@@ -25,9 +25,13 @@ const Signup = () => {
   });
 
   const handleSignup = async (values: { email: string }) => {
-    const result = await dispatch(verifyEmailThunk({ email: values.email }));
+      const storedPurpose = localStorage.getItem("purpose");
+       const purpose: "login" | "registration" =
+    storedPurpose === "login" ? "login" : "registration";
+    const result = await dispatch(verifyEmailThunk({ email: values.email, purpose }));
 
     if (verifyEmailThunk.fulfilled.match(result)) {
+        localStorage.setItem("purpose", "registration");
       dispatch(setEmail(values.email));
       showSuccess("Verification link sent! Please check your email.");
       navigate("/verify", { state: { email: values.email } });
@@ -66,7 +70,7 @@ const Signup = () => {
         {/* <div className="">            
         <img src={Logoblack} alt="logo" />
 </div> */}
-        <div className="mx-auto max-w-md space-y-6 ">
+        <div className="mx-auto max-w-sm space-y-6 px-4">
           <div className="space-y-1 text-center mx-auto bg-brand mb-6">
             <h3 className="text-4xl font-semibold  mb-4">Welcome to Sendcoins</h3>
             <p className="text-base text-[#8C8C8C]  md:w-[80%] mx-auto ">

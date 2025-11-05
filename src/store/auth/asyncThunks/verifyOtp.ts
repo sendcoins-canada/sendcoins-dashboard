@@ -17,7 +17,7 @@ export const verifyOtpThunk = createAsyncThunk<
   VerifyOtpRequest,
   { rejectValue: string }
 >(
-  "auth/verifyOtp",
+  "auth/otp/verify",
   async (otpData, { rejectWithValue }) => {
     try {
       const response: VerifyOtpResponse = await verifyOtpApi(otpData);

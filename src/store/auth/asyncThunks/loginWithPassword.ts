@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { loginUser, verifyOtpQueryString } from "@/api/authApi";
+import { loginUser } from "@/api/authApi";
 import type { LoginRequest, LoginWithPasswordResponse } from "@/types/onboarding";
 
 interface LoginThunkPayload extends LoginRequest {}
@@ -25,16 +25,7 @@ export const loginWithPasswordThunk = createAsyncThunk<
       // Step 1: Call login API
       const response: LoginWithPasswordResponse = await loginUser(credentials);
 
-      // Step 2: Verify OTP query string
-      const verifyRes = await verifyOtpQueryString(
-        response.data.verifyOTPString
-      );
-
-      if (!verifyRes.data?.isSuccess) {
-        return rejectWithValue("Failed to verify query string");
-      }
-
-      // Return data needed for OTP verification page
+       // Return data needed for OTP verification page
       return {
         email: credentials.email,
         verifyOTPString: response.data.verifyOTPString,
