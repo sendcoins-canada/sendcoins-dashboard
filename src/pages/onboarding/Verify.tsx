@@ -4,7 +4,7 @@ import { showDanger, showSuccess } from "@/components/ui/toast";
 import { ArrowLeft2 } from "iconsax-react";
 import { PasswordCheck } from "iconsax-react";
 import Header from "@/components/onboarding/shared/Header";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import type { AppDispatch, RootState } from "@/store";
 import { setCode } from "@/store/registration/slice";
