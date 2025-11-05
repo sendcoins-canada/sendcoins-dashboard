@@ -26,11 +26,11 @@ const SendOptionsModal: React.FC<SendOptionsModalProps> = ({
       open={open}
       onOpenChange={onOpenChange}
     //   title="How do you want to send?"
-      className="max-w-md w-full bg-[#F5F5F5]"
+      className="max-w-md w-[90%] bg-[#F5F5F5]"
     >
         <h2 className="text-[28px] font-semibold text-center">How do you want to send?</h2>
       <div className="flex flex-col gap-3 mt-3 bg-white p-2 rounded-2xl">
-        {/* ✅ Crypto Option */}
+        {/*  Crypto Option */}
         <button
           onClick={() => handleSelect("crypto")}
           className={`flex justify-between items-start border rounded-xl px-2 py-4 text-left hover:bg-[#F5F5F5] transition gap-2 ${
@@ -47,7 +47,7 @@ const SendOptionsModal: React.FC<SendOptionsModalProps> = ({
           <ArrowRight2 size="18" color="black" />
         </button>
 
-        {/* ✅ Fiat Option */}
+        {/*  Fiat Option */}
         <button
           onClick={() => handleSelect("fiat")}
           className={`flex justify-between items-start border rounded-xl px-2 py-4 text-left hover:bg-[#F5F5F5] transition ${

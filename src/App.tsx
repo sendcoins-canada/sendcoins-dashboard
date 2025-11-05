@@ -26,6 +26,7 @@ import ForgotVerifyOtp from "./pages/onboarding/forgot/ForgotVerifyOtp.tsx";
 // import ConvertFlow from "./pages/dashboard/Home/Components/Convert/EnterConvertAmount";
 import AccountDeleted from "./components/AccountDeleted";
 import ChangePasscode from "./pages/dashboard/Settings/ChangePasscode.tsx";
+import RecipientDetailsPage from "./pages/dashboard/Recipients/components/RecepientDetailsPage.tsx";
 
 function App() {
   return (
@@ -107,6 +108,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Recipients />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/recipients/:id"
+          element={
+            <ProtectedRoute>
+              <RecipientDetailsPage />
             </ProtectedRoute>
           }
         />

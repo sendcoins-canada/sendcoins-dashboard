@@ -3,8 +3,7 @@ import { Share, Edit2, Star1 } from "iconsax-react";
 import { useState } from "react";
 
 interface RecipientDetailsProps {
-  recipient: any;
-  
+  recipient?: any;  
 }
 
 const RecipientDetails: React.FC<RecipientDetailsProps> = ({ recipient }) => {
@@ -50,9 +49,9 @@ const RecipientDetails: React.FC<RecipientDetailsProps> = ({ recipient }) => {
           tagColor: "bg-green-100",
         },
       ]);
-      console.log(recipient)
+    
   return (
-    <div className="px-6 py-10 flex flex-col md:flex-row gap-40 max-w-6xl">
+    <div className="px-6 py-10 flex flex-col md:flex-row md:gap-40 max-w-6xl">
       {/* Left Section */}
       <div className="flex-1/3">
       <p className="text-2xl font-semibold mb-8">Profile</p>

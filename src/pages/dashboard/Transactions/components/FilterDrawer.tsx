@@ -70,7 +70,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({ open, onClose }) => {
         <>
           {/* Overlay */}
           <motion.div
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 "
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -83,7 +83,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({ open, onClose }) => {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 260, damping: 25 }}
-            className="fixed top-0 right-0 h-full w-[25%] bg-white z-50 shadow-2xl flex flex-col"
+            className="fixed top-0 right-0 h-full md:w-[25%] w-[80%] bg-white z-50 shadow-2xl flex flex-col"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-5">

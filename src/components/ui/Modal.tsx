@@ -45,7 +45,7 @@ const Modal: React.FC<ModalProps> = ({
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
         <DialogOverlay className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40" />
       <DialogContent
-        className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white shadow-lg  ${className || ""}`}
+        className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl w-[80%] md:w-full bg-white shadow-lg  ${className || ""}`}
       >
         {/* ✅ Custom Close Icon */}
         {/* {showCloseIcon && (

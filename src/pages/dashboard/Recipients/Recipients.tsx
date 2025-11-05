@@ -5,6 +5,7 @@ import USDC from "@/assets/Usdc.svg"
 import ETH from "@/assets/Eth.svg"
 import RecipientDetails from "./components/RecepientDetails";
 import MinimalLayout from "@/components/MinimalLayout";
+import { useNavigate } from "react-router-dom";
 
 const recipientsData = [
   {
@@ -38,8 +39,9 @@ const recipientsData = [
 
 
 const Recipients = () => {
+  const navigate = useNavigate()
   const [search, setSearch] = useState("");
-  const [selectedRecipient, setSelectedRecipient] = useState<any | null>(null);
+  const [selectedRecipient, _setSelectedRecipient] = useState<any | null>(null);
   const filteredRecipients = recipientsData.filter((recipient) =>
     recipient.name.toLowerCase().includes(search.toLowerCase())
   );
@@ -103,7 +105,7 @@ const Recipients = () => {
               <p className="text-sm font-semibold text-gray-500 mb-4">{letter}</p>
               <div className="space-y-4">
                 {groupedRecipients[letter].map((recipient) => (
-                  <div key={recipient.id} onClick={() => setSelectedRecipient(recipient)} className="flex items-center justify-between cursor-pointer">
+                  <div key={recipient.id} onClick={() => navigate(`/dashboard/recipients/${recipient.id}`)} className="flex items-center justify-between cursor-pointer">
                     <div className="flex items-center gap-3">
                       <div className="relative w-10 h-10">
                         <div

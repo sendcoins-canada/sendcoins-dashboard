@@ -108,7 +108,7 @@ const CreateWallet: React.FC = () => {
                    </div>
 
       {/* Form */}
-      <div className="w-full md:w-[30%] mx-auto mt-10">
+      <div className="w-[80%] md:w-[30%] mx-auto mt-10">
         <h2 className="text-2xl font-semibold mb-4 text-center">
           Create New Wallet
         </h2>

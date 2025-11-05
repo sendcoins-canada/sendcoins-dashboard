@@ -61,7 +61,7 @@ const WalletModal: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="space-y-4 mt-4">
+    <div className="space-y-4 mt-4 ">
       <div className="flex flex-col gap-4 items-center">
         <h2 className="text-2xl font-semibold">Your wallets</h2>
         <button

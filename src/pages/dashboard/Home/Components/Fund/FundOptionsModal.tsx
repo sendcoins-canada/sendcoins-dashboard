@@ -35,7 +35,7 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      className="max-w-md w-full bg-[#F5F5F5]"
+      className="max-w-md w-[90%] bg-[#F5F5F5]"
     >
       {step === 1 && (
         <>
