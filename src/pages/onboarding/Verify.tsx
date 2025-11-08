@@ -37,12 +37,44 @@ const Verify: React.FC = () => {
     return () => clearInterval(t);
   }, []);
 
+  const distributeValue = (startIndex: number, val: string) => {
+    const digits = val.replace(/\D/g, "").slice(0, OTP_LENGTH - startIndex);
+    if (!digits) return;
+
+    setValues((prev) => {
+      const next = prev.slice();
+      for (let offset = 0; offset < OTP_LENGTH - startIndex; offset += 1) {
+        next[startIndex + offset] = digits[offset] ?? "";
+      }
+      return next;
+    });
+
+    const nextIndex = Math.min(startIndex + digits.length, OTP_LENGTH - 1);
+    inputsRef.current[nextIndex]?.focus();
+  };
+
   const onChange = (index: number, val: string) => {
-    const only = val.replace(/\D/g, "").slice(-1);
-    const next = values.slice();
-    next[index] = only;
-    setValues(next);
-    if (only && index < OTP_LENGTH - 1) inputsRef.current[index + 1]?.focus();
+    const digits = val.replace(/\D/g, "");
+
+    if (digits.length <= 1) {
+      const next = values.slice();
+      next[index] = digits;
+      setValues(next);
+      if (digits && index < OTP_LENGTH - 1)
+        inputsRef.current[index + 1]?.focus();
+      return;
+    }
+
+    distributeValue(index, digits);
+  };
+
+  const onPaste = (
+    index: number,
+    e: React.ClipboardEvent<HTMLInputElement>
+  ) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text");
+    distributeValue(index, pasted);
   };
 
   const onKeyDown = (
@@ -136,6 +168,7 @@ const Verify: React.FC = () => {
               value={v}
               onChange={(e) => onChange(i, e.target.value)}
               onKeyDown={(e) => onKeyDown(i, e)}
+              onPaste={(e) => onPaste(i, e)}
               className="md:h-[72px] md:w-[66px] h-14 w-12 text-center font-bold text-3xl rounded-md focus:outline-none bg-[#F5F5F5] focus:ring-1 focus:ring-[#57B5FF] focus-within:bg-white"
             />
           ))}

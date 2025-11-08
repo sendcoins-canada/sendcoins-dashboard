@@ -158,10 +158,8 @@ const handleGoogleSuccess = async (tokenResponse: any) => {
           </Formik>
         </div>
       </div>
-
-      <p className="text-center text-sm font-medium mb-8 text-[#262626]">
-        By registering, you accept our Terms of use and Privacy
-      </p>
+      <div />
+<div />
     </div>
   );
 };

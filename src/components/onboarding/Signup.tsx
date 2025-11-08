@@ -70,10 +70,10 @@ const Signup = () => {
         {/* <div className="">            
         <img src={Logoblack} alt="logo" />
 </div> */}
-        <div className="mx-auto max-w-sm space-y-6 px-4">
+        <div className="mx-auto max-w-md space-y-6 px-4">
           <div className="space-y-1 text-center mx-auto bg-brand mb-6">
             <h3 className="text-4xl font-semibold  mb-4">Welcome to Sendcoins</h3>
-            <p className="text-base text-[#8C8C8C]  md:w-[80%] mx-auto ">
+            <p className="text-base font-[300] text-[#8C8C8C]  md:w-[80%] mx-auto ">
               Move your money globally — fast, secure, and stress-free.{" "}
               <span className="font-semibold text-black">Sign in to get started.</span>
             </p>
@@ -97,7 +97,7 @@ const Signup = () => {
                 <div className="space-y-3 w-full">
                   <Button
                     type="submit"
-                    className="w-full cursor-pointer bg-[#0647F7] hover:bg-[#2563EB] text-white"
+                    className="w-full cursor-pointer font-[400] bg-[#0647F7] hover:bg-[#2563EB] text-white"
                     disabled={loading}
                     variant='primary'
                   >
@@ -127,7 +127,7 @@ const Signup = () => {
         </div>
 
       </div>
-      <p className="text-center text-sm font-medium mb-8 text-[#262626]">By registering, you accept our Terms of use and Privacy</p>
+      <p className="text-center text-sm font-[400] mb-8 text-[#777777]">By registering, you accept our Terms of use and Privacy</p>
     </div>
   );
 };
