@@ -5,7 +5,7 @@ import type { AuthToken, User } from "../slice";
 
 interface VerifyOtpReturn {
   token: AuthToken;
-  user: User;
+  user: User | null;
 }
 
 /**
@@ -23,16 +23,21 @@ export const verifyOtpThunk = createAsyncThunk<
       const response: VerifyOtpResponse = await verifyOtpApi(otpData);
       const data = response.data;
 
-      if (!data?.token || !data?.result) {
+      if (!data?.token) {
         return rejectWithValue("Invalid OTP response from server");
       }
+
+      const resolvedUser =
+        Array.isArray(data.result) && data.result.length > 0
+          ? data.result[0]
+          : null;
 
       return {
         token: {
           azer_token: data.token.azer_token,
           expires_at: data.token.expires_at,
         },
-        user: data.result[0],
+        user: resolvedUser,
       };
     } catch (error: any) {
       const message =

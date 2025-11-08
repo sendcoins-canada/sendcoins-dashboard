@@ -12,6 +12,7 @@ import {
   MessageQuestion,
   HambergerMenu,
   CloseSquare,
+  ArrowDown2
 } from "iconsax-react";
 import Logo from "../assets/Logosingle.png";
 import Code from "../assets/Code.png";
@@ -93,10 +94,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           >
             {({ isActive }) => (
               <>
-                <Home size="20" color={isActive ? "#0647F7" : "#8C8C8C"} />
+                <Home size="20" color={isActive ? "#0647F7" : "#262626"} />
                 <span
-                  className={`${textClasses} ${
-                    isActive ? "text-[#0647F7]" : "text-[#8C8C8C]"
+                  className={`${textClasses} text-[14px] font-normal ${
+                    isActive ? "text-[#0647F7]" : "text-[#262626]"
                   }`}
                 >
                   Home
@@ -114,10 +115,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           >
             {({ isActive }) => (
               <>
-                <User size="20" color={isActive ? "#0647F7" : "#8C8C8C"} />
+                <User size="20" color={isActive ? "#0647F7" : "#262626"} />
                 <span
-                  className={`${textClasses} ${
-                    isActive ? "text-[#0647F7]" : "text-[#8C8C8C]"
+                  className={`${textClasses} text-[14px] font-normal ${
+                    isActive ? "text-[#0647F7]" : "text-[#262626]"
                   }`}
                 >
                   Recipients
@@ -135,10 +136,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           >
             {({ isActive }) => (
               <>
-                <DocumentText size="20" color={isActive ? "#0647F7" : "#8C8C8C"} />
+                <DocumentText size="20" color={isActive ? "#0647F7" : "#262626"} />
                 <span
-                  className={`${textClasses} ${
-                    isActive ? "text-[#0647F7]" : "text-[#8C8C8C]"
+                  className={`${textClasses} text-[14px] font-normal ${
+                    isActive ? "text-[#0647F7]" : "text-[#262626]"
                   }`}
                 >
                   Transactions
@@ -155,8 +156,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               onClick={() => setOpenSettingsModal(true)}
               className="group flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
             >
-              <Setting size="20" color="#8C8C8C" />
-              <span className="text-[#8C8C8C]">Settings</span>
+              <Setting size="20" color="#262626" />
+              <span className="text-[#262626]  text-[14px] font-normal">Settings</span>
             </div>
 
             {openSettingsModal && (
@@ -249,10 +250,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
-            <div className="w-10 h-10 rounded-full bg-pink-300 flex items-center justify-center text-white font-bold cursor-pointer">
+          <div className="flex items-center space-x-2 p-1 pr-2 border rounded-full">
+            <div className="w-9 h-9 rounded-full bg-pink-300 flex items-center justify-center text-xs text-white font-[500] cursor-pointer">
               {initials}
             </div>
+            <ArrowDown2 size="16" color="#8C8C8C" />
           </div>
         </header>
 

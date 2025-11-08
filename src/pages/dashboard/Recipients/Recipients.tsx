@@ -67,7 +67,7 @@ const Recipients = () => {
 
   return (
     <DashboardLayout>
-      <div className="px-6 py-8 max-w-2xl">
+      <div className="w-full md:w-[50%]">
         <h2 className="text-[28px] font-bold mb-6">Recipients</h2>
 
         {/* Search Input */}

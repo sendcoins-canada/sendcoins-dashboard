@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Add, Send2, Convert, EyeSlash, Eye, ArrowSwapVertical, TransmitSqaure2, ArrowDown2 } from "iconsax-react";
-import Coins from "@/assets/coins.png"
+import Coins from "@/assets/coin.svg"
 import Search from "@/assets/search.png"
 import { Button } from "@/components/ui/button";
 import WalletModal from "./Components/FundWalletModal";

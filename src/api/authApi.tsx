@@ -27,19 +27,16 @@ export const verifyOtp = async (
   data: VerifyOtpRequest
 ): Promise<VerifyOtpResponse> => {
 
-  const response = await api.post<VerifyOtpResponse>(
-    "/auth/otp/verify",
-     {
-      email: data.email,
-      code: data.code,
-      purpose: data.purpose,
+  const formData = new FormData();
+  formData.append("email", data.email);
+  formData.append("otp", data.code);
+  formData.append("purpose", data.purpose);
+
+  const response = await api.post<VerifyOtpResponse>("/auth/otp/verify", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
     },
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
+  });
 
   return response.data;
 };
