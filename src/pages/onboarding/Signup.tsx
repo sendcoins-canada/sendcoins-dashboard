@@ -23,14 +23,14 @@ const Signup = () => {
   return (
     <div>
       <Header />
-      <div className="mx-auto max-w-md space-y-6 p-6">
-        <div className="space-y-1">
+      <div className="mx-auto max-w-lg border border-blue-500 space-y-6 p-6">
+        {/* <div className="space-y-1">
           <h2 className="text-xl font-semibold">Welcome to Sendcoins</h2>
           <p className="text-sm text-neutral-600">
             Move your money globally — fast, secure, and stress-free.{" "}
             <span className="font-semibold">Sign in to get started.</span>
           </p>
-        </div>
+        </div> */}
 
         <Formik
           initialValues={{

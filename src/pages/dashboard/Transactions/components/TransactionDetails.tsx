@@ -1,4 +1,4 @@
-import { CheckCircle2, Loader2, XCircle, Copy } from "lucide-react";
+import { CheckCircle2, Loader2, XCircle, Copy, CheckCircle } from "lucide-react";
 import Send from "@/assets/Send.svg";
 import { useState } from "react";
 
@@ -59,6 +59,13 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({ transaction }) 
   const { amount, currency, status } = transaction;
   const config = statusStyles[status] || statusStyles["Processing"];
    const [activeTab, setActiveTab] = useState<"timeline" | "details">("timeline");
+  const firstIncompleteIndex = config.steps.findIndex((step) => !step.done);
+  const failureIndex =
+    status === "Failed"
+      ? firstIncompleteIndex === -1
+        ? config.steps.length - 1
+        : firstIncompleteIndex
+      : -1;
 
   return (
     <div className="flex flex-col items-center justify-center px-4 pb-8">
@@ -91,7 +98,7 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({ transaction }) 
         </button>
         <button
           className={`px-4 py-1.5 text-sm font-medium rounded-full ${
-            activeTab === "details" ? "bg-black text-white" : "text-gray-500"
+            activeTab === "details" ? "bg-black text-white" : "text-[#262626]"
           }`}
           onClick={() => setActiveTab("details")}
         >
@@ -102,20 +109,48 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({ transaction }) 
       {/* Timeline View*/}
       {activeTab === "timeline" && (
 
-      <div className="w-full max-w-md bg-white border-6 border-[#F5F5F5] rounded-2xl p-6 ">
+      <div className="w-full max-w-xl bg-white border-6 border-[#F5F5F5] rounded-2xl p-6 ">
         {config.steps.map((step, idx) => (
-          <div key={idx} className="relative pl-8 pb-6 last:pb-0">
+          <div key={idx} className="relative pl-8 pb-10 last:pb-0">
             {idx !== config.steps.length - 1 && (
-              <div className="absolute left-[10px] top-5 h-full w-0.5 bg-gray-200" />
+              <div
+                className={`absolute left-[10px] top-5 h-full w-0.5 ${
+                  status === "Failed"
+                    ? idx < failureIndex
+                      ? "bg-green-500"
+                      : "bg-gray-200"
+                    : step.done
+                    ? "bg-green-500"
+                    : "bg-gray-200"
+                } ${
+                  status === "Failed" && idx === failureIndex ? "relative overflow-hidden bg-green-50" : ""
+                }`}
+              >
+                {status === "Failed" && idx === failureIndex && (
+                  <span className="absolute inset-x-0 top-0 h-1/2 w-full bg-red-500" />
+                )}
+              </div>
             )}
             <div
-              className={`absolute left-0 top-0 w-5 h-5 rounded-full ${
-                step.done ? "bg-green-500" : "bg-gray-300"
+              className={`absolute left-0 top-0 flex h-5 w-5 items-center justify-center rounded-full ${
+                step.done
+                  ? "bg-green-500"
+                  : status === "Failed" && idx === failureIndex
+                  ? "bg-green-50 border border-red-500"
+                  : "bg-green-50"
               }`}
-            />
+            >
+              {step.done ? (
+                <CheckCircle className="h-3 w-3 text-white" />
+              ) : status === "Failed" && idx === failureIndex ? (
+                <CheckCircle className="h-3 w-3 text-red-500" />
+              ) : (
+                <CheckCircle className="h-3 w-3 text-gray-400" />
+              )}
+            </div>
             <div>
               <p className="font-semibold text-gray-800">{step.label}</p>
-              <p className="text-sm text-gray-500">{step.desc}</p>
+              <p className="text-sm font-[300] text-gray-500">{step.desc}</p>
             </div>
           </div>
         ))}

@@ -15,15 +15,17 @@ import { resendOtpThunk } from "@/store/auth/asyncThunks/resendOtp";
 const OTP_LENGTH = 6;
 
 const Verify: React.FC = () => {
-  const [values, setValues] = React.useState<string[]>(
+  const [values, setValues] = React.useState<string[]>(() =>
     Array(OTP_LENGTH).fill("")
   );
   const inputsRef = React.useRef<Array<HTMLInputElement | null>>([]);
+  const [isVerifying, setIsVerifying] = React.useState(false);
   const [seconds, setSeconds] = React.useState(50);
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
 
   const { loading } = useSelector((state: RootState) => state.auth);
+  const isBusy = isVerifying || loading;
 
   // Get email from Redux with localStorage fallbacks
   const email =
@@ -37,24 +39,115 @@ const Verify: React.FC = () => {
     return () => clearInterval(t);
   }, []);
 
-  const onChange = (index: number, val: string) => {
-    const only = val.replace(/\D/g, "").slice(-1);
+  const submit = React.useCallback(
+    async (overrideCode?: string) => {
+      if (isBusy) return;
+      const finalCode = overrideCode ?? values.join("");
+      if (finalCode.length !== OTP_LENGTH) {
+        showDanger("Incorrect passcode. Please try again.");
+        return;
+      }
+
+      setIsVerifying(true);
+      console.time("verifyOtpRequest");
+      // Retrieve purpose — ensure it's always a valid string
+      const storedPurpose = localStorage.getItem("purpose");
+      const purpose: "login" | "registration" =
+        storedPurpose === "login" ? "login" : "registration";
+      // Send purpose in the request
+      try {
+        const result = await dispatch(
+          verifyOtpThunk({ email, code: finalCode, purpose })
+        );
+
+        if (verifyOtpThunk.fulfilled.match(result)) {
+          dispatch(setCode(finalCode));
+          showSuccess("Code verified!");
+
+          if (purpose === "login") {
+            navigate("/dashboard/home");
+          } else {
+            navigate("/country");
+          }
+        } else {
+          showDanger("Invalid OTP code. Please try again.");
+        }
+      } catch (err) {
+        showDanger("Something went wrong. Please try again.");
+      } finally {
+        console.timeEnd("verifyOtpRequest");
+        setIsVerifying(false);
+      }
+    },
+    [dispatch, email, isBusy, navigate, values]
+  );
+
+  const attemptSubmit = React.useCallback(
+    (nextValues: string[]) => {
+      if (isBusy) return;
+      if (nextValues.every((val) => val !== "")) {
+        submit(nextValues.join(""));
+      }
+    },
+    [isBusy, submit]
+  );
+
+  const distributeValue = (startIndex: number, val: string) => {
+    if (isBusy) return;
+    const digits = val.replace(/\D/g, "");
+    if (!digits) return;
+
     const next = values.slice();
-    next[index] = only;
+    for (let offset = 0; offset < OTP_LENGTH - startIndex; offset += 1) {
+      next[startIndex + offset] = digits[offset] ?? "";
+    }
     setValues(next);
-    if (only && index < OTP_LENGTH - 1) inputsRef.current[index + 1]?.focus();
+
+    const nextIndex = Math.min(startIndex + digits.length, OTP_LENGTH - 1);
+    inputsRef.current[nextIndex]?.focus();
+
+    attemptSubmit(next);
+  };
+
+  const onChange = (index: number, val: string) => {
+    if (isBusy) return;
+    const digits = val.replace(/\D/g, "");
+
+    if (digits.length <= 1) {
+      const next = values.slice();
+      next[index] = digits;
+      setValues(next);
+      if (digits && index < OTP_LENGTH - 1)
+        inputsRef.current[index + 1]?.focus();
+      attemptSubmit(next);
+      return;
+    }
+
+    distributeValue(index, digits);
+  };
+
+  const onPaste = (
+    index: number,
+    e: React.ClipboardEvent<HTMLInputElement>
+  ) => {
+    e.preventDefault();
+    if (isBusy) return;
+    const pasted = e.clipboardData.getData("text");
+    distributeValue(index, pasted);
   };
 
   const onKeyDown = (
     index: number,
     e: React.KeyboardEvent<HTMLInputElement>
   ) => {
+    if (isBusy) {
+      e.preventDefault();
+      return;
+    }
     if (e.key === "Backspace" && !values[index] && index > 0) {
       inputsRef.current[index - 1]?.focus();
     }
   };
-
-  const code = values.join("");
 
   // Resend OTP handler using Redux thunk
   const handleResendOtp = async () => {
@@ -69,39 +162,15 @@ const Verify: React.FC = () => {
     }
   };
 
-  const submit = async () => {
-  if (code.length !== OTP_LENGTH) {
-    showDanger("Incorrect passcode. Please try again.");
-    return;
-  }
-   // Retrieve purpose — ensure it's always a valid string
-  const storedPurpose = localStorage.getItem("purpose");
-  const purpose: "login" | "registration" =
-    storedPurpose === "login" ? "login" : "registration";
-  // Send purpose in the request
-  const result = await dispatch(verifyOtpThunk({ email, code, purpose }));
-
-  if (verifyOtpThunk.fulfilled.match(result)) {
-    dispatch(setCode(code));
-    showSuccess("Code verified!");
-
-    if (purpose === "login") {
-      navigate("/dashboard/home");
-    } else {
-      navigate("/country");
+  const resendLabel = React.useMemo(() => {
+    if (seconds > 0) {
+      return `Resend · 0:${seconds.toString().padStart(2, "0")}`;
     }
-  } else {
-    showDanger("Invalid OTP code. Please try again.");
-  }
-};
-
-
-  // Trigger submit automatically when all inputs are filled
-  React.useEffect(() => {
-    if (values.every((val) => val !== "") && !loading) {
-      submit();
+    if (loading && !isVerifying) {
+      return "Resending...";
     }
-  }, [values]);
+    return "Resend";
+  }, [isVerifying, loading, seconds]);
 
   return (
     <>
@@ -136,10 +205,19 @@ const Verify: React.FC = () => {
               value={v}
               onChange={(e) => onChange(i, e.target.value)}
               onKeyDown={(e) => onKeyDown(i, e)}
-              className="md:h-[72px] md:w-[66px] h-14 w-12 text-center font-bold text-3xl rounded-md focus:outline-none bg-[#F5F5F5] focus:ring-1 focus:ring-[#57B5FF] focus-within:bg-white"
+              onPaste={(e) => onPaste(i, e)}
+              disabled={isBusy}
+              className="md:h-[72px] md:w-[66px] h-14 w-12 text-center font-bold text-3xl rounded-md focus:outline-none bg-[#F5F5F5] focus:ring-1 focus:ring-[#57B5FF] focus-within:bg-white disabled:cursor-not-allowed disabled:opacity-60"
             />
           ))}
         </div>
+
+        {isBusy && (
+          <div className="mt-4 flex items-center justify-center gap-2 text-sm text-neutral-500">
+            <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#57B5FF] border-t-transparent" />
+            <span>Verifying code...</span>
+          </div>
+        )}
 
         {/* <div className="mt-6">
           <Button onClick={submit} className="w-full">
@@ -154,14 +232,10 @@ const Verify: React.FC = () => {
   <Button
     variant="outline"
     className="rounded-full px-4 py-2 text-xs cursor-pointer"
-    disabled={seconds > 0 || loading}
+    disabled={seconds > 0 || isBusy}
     onClick={handleResendOtp}
   >
-    {seconds > 0
-      ? `Resend · 0:${seconds.toString().padStart(2, "0")}`
-      : loading
-      ? "Resending..."
-      : "Resend"}
+    {resendLabel}
   </Button>
 </div>
 

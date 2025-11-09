@@ -78,7 +78,7 @@ const Transactions = () => {
 
   return (
     <DashboardLayout>
-      <div className="px-6 py-8 md:w-[50%]">
+      <div className="md:w-[50%]">
         <h2 className="text-[40px] font-bold mb-4">Transaction</h2>
         
         {/* Search */}
