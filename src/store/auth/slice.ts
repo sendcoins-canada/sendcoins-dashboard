@@ -144,16 +144,17 @@ const authSlice = createSlice({
       })
       .addCase(verifyOtpThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.token = action.payload.token;
-        state.user = action.payload.user;
+        state.token = action.payload.token ?? null;
+        state.user = action.payload.user ?? null;
         // Sync to localStorage
         localStorage.setItem("token", JSON.stringify(action.payload.token));
         localStorage.setItem("user", JSON.stringify(action.payload.user));
-        localStorage.setItem("azertoken", action.payload.token.azer_token);
+        // @ts-ignore
+        localStorage.setItem("azertoken", action?.payload?.token.azer_token);
       })
       .addCase(verifyOtpThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || "OTP verification failed";
+        state.error = action.payload ?? "OTP verification failed";
       });
 
     // Verify login OTP

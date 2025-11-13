@@ -1,11 +1,12 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { HeaderWithCancel } from "@/components/onboarding/shared/Header";
+import Header from "@/components/onboarding/shared/Header";
 import { Select } from "@/components/ui/select";
 import { assets } from "./SelectCryptoAsset";
 import { useNavigate } from "react-router-dom";
-import { Convert, Money, Money2 } from "iconsax-react";
+import { Convert, Money, Money2, ArrowLeft2 } from "iconsax-react";
+import WalletSelectionModal from "@/pages/dashboard/WalletSelectionModal";
 
 interface EnterAmountProps {
   asset: string;
@@ -20,6 +21,8 @@ const EnterAmount: React.FC<EnterAmountProps> = ({ onNext }) => {
   const [sendAsset, setSendAsset] = useState("cad");
   const [receiveAsset, setReceiveAsset] = useState("usdc");
   const [error, setError] = useState("");
+    const [isWalletModalOpen, setWalletModalOpen] = useState(false);
+
 
   const balance = 1500;
   const exchangeRate = "$1 = ₦2000";
@@ -38,23 +41,35 @@ const EnterAmount: React.FC<EnterAmountProps> = ({ onNext }) => {
     }
 
     setError("");
-    onNext(sendAmount);
+     setWalletModalOpen(true);
+    // onNext(sendAmount);
+  };
+   const handleWalletSelect = () => {
+    setWalletModalOpen(false);
+    onNext(sendAmount); 
   };
 
   return (
     <>
-      <HeaderWithCancel onCancel={() => navigate(-1)} />
-
+       <div className="hidden md:block">
+              <Header />
+            </div>
       <div className="flex flex-col items-center justify-center min-h-[75vh] px-4">
-        <div className="w-full max-w-md">
-          <h2 className="text-center text-[28px] font-semibold text-neutral-900 mb-6">
-            Enter amount
-          </h2>
+        <div className="w-full max-w-md mt-16 md:mt-0">
+          <div className="flex items-center md:justify-center gap-6 mb-8">
+                      <div className="absolute left-4 md:hidden flex items-center cursor-pointer border rounded-full justify-center p-2 w-fit" onClick={() => navigate(-1)}>
+                        <ArrowLeft2 size="20" color="black" className="" />
+                      </div>
+          
+                      <h2 className="md:text-2xl font-semibold text-center mx-auto w-fit">
+                        Enter amount
+                      </h2>
+                    </div>
 
           {/* Outer container */}
-          <div className="bg-[#F9FAFB] rounded-2xl shadow-sm p-5 space-y-4">
+          <div className="bg-[#F5F5F5] rounded-[20px] shadow-sm pb-5 pt-2 px-2 space-y-2">
             {/* Amount to send */}
-            <div className="bg-white rounded-2xl border border-neutral-200 px-4 py-3">
+            <div className="bg-white rounded-[20px] border border-neutral-200 px-4 py-3">
               <div className="flex justify-between items-center mb-2">
                 <label className="text-sm text-neutral-500">
                   Amount to send
@@ -87,7 +102,7 @@ const EnterAmount: React.FC<EnterAmountProps> = ({ onNext }) => {
             </div>
 
             {/* Amount they'll receive */}
-            <div className="bg-[#F5F5F5] rounded-2xl border border-transparent px-4 py-3">
+            <div className="bg-white rounded-2xl border border-transparent px-4 py-3">
               <div className="flex justify-between items-center mb-2">
                 <label className="text-sm text-neutral-500">
                   Amount they’ll receive
@@ -114,20 +129,20 @@ const EnterAmount: React.FC<EnterAmountProps> = ({ onNext }) => {
             </div>
 
             {/* Summary section */}
-            <div className="pt-2 space-y-2 text-sm text-neutral-700">
+            <div className="pt-2 space-y-2 text-sm text-neutral">
               <div className="flex justify-between">
                 <span><Convert size="16" color="#0088FF" className="inline"/> Exchange rate</span>
-                <span>{exchangeRate}</span>
+                <span className="text-primary">{exchangeRate}</span>
               </div>
               <div className="flex justify-between">
                 <span><Money2 size="16" color="#0088FF" className="inline"/> Platform fee</span>
-                <span>
+                <span className="text-primary">
                   {platformFee} {receiveAsset.toUpperCase()}
                 </span>
               </div>
               <div className="flex justify-between font-semibold">
                 <span><Money size="16" color="#0088FF" className="inline"/> Total amount</span>
-                <span>
+                <span className="text-primary">
                   {total || 0} {receiveAsset.toUpperCase()}
                 </span>
               </div>
@@ -151,6 +166,12 @@ const EnterAmount: React.FC<EnterAmountProps> = ({ onNext }) => {
           </div>
         </div>
       </div>
+       {/* Wallet selection modal */}
+      <WalletSelectionModal
+        open={isWalletModalOpen}
+        onOpenChange={setWalletModalOpen}
+        onSelect={handleWalletSelect}
+      />
     </>
   );
 };

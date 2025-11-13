@@ -6,21 +6,18 @@ import type { VerifyEmailRequest, VerifyEmailResponse, VerifyOtpRequest, VerifyO
 export const verifyEmail = async (
   data: VerifyEmailRequest
 ): Promise<VerifyEmailResponse> => {
-    const response = await api.post<VerifyEmailResponse>(
+  const formData = new FormData();
+  formData.append("email", data.email);
+  formData.append("purpose", data.purpose);
+
+  const response = await api.post<VerifyEmailResponse>(
     "/auth/otp/send",
-    {
-      email: data.email,
-      purpose: data.purpose,
-    },
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
+    formData
   );
 
   return response.data;
 };
+
 
 // verify otp
 export const verifyOtp = async (

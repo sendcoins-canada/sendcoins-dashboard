@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
-import MinimalLayout from "@/components/MinimalLayout";
 import RecipientDetails from "./RecepientDetails";
+import MinimalLayout from "@/components/MinimalLayout";
 import USDC from "@/assets/Usdc.svg";
 import ETH from "@/assets/Eth.svg";
 
@@ -37,18 +37,21 @@ const recipientsData = [
 const RecipientDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const recipient = recipientsData.find((r) => r.id === Number(id));
+  const isMobile = window.innerWidth < 768;
 
   if (!recipient) {
-    return (
-      <MinimalLayout>
-        <div className="px-6 py-10 text-center">
-          <h2 className="text-xl font-semibold text-red-500">Recipient not found</h2>
-        </div>
-      </MinimalLayout>
+    const NotFoundContent = (
+      <div className="px-6 py-10 text-center">
+        <h2 className="text-xl font-semibold text-danger">Recipient not found</h2>
+      </div>
     );
+    return isMobile ? NotFoundContent : <MinimalLayout>{NotFoundContent}</MinimalLayout>;
   }
 
-  return (
+  // No MinimalLayout on mobile
+  return isMobile ? (
+    <RecipientDetails recipient={recipient} />
+  ) : (
     <MinimalLayout>
       <RecipientDetails recipient={recipient} />
     </MinimalLayout>

@@ -72,8 +72,8 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
             >
               <BuyCrypto color="#0088FF" size={16} />
               <div>
-                <p className="font-medium text-gray-800">Crypto</p>
-                <p className="text-sm text-gray-500">
+                <p className="font-medium text-primary">Crypto</p>
+                <p className="text-sm text-neutral">
                   Send directly to their local bank account. Fast and reliable.
                 </p>
               </div>

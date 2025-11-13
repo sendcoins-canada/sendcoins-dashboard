@@ -25,10 +25,10 @@ const Signup = () => {
   });
 
   const handleSignup = async (values: { email: string }) => {
-      const storedPurpose = localStorage.getItem("purpose");
-       const purpose: "login" | "registration" =
-    storedPurpose === "login" ? "login" : "registration";
-    const result = await dispatch(verifyEmailThunk({ email: values.email, purpose }));
+    //   const storedPurpose = localStorage.getItem("purpose");
+    //    const purpose: "login" | "registration" =
+    // storedPurpose === "login" ? "login" : "registration";
+    const result = await dispatch(verifyEmailThunk({ email: values.email, purpose: "registration" }));
 
     if (verifyEmailThunk.fulfilled.match(result)) {
         localStorage.setItem("purpose", "registration");

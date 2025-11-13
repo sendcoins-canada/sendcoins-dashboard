@@ -5,9 +5,12 @@ export interface VerifyEmailRequest {
 }
 
 export interface VerifyEmailResponse {
-  message: string;
-  email: string;
-  isSuccess: boolean;
+  data: {
+
+    message: string;
+    email: string;
+    isSuccess: boolean;
+  }
 }
 
 export interface VerifyOtpRequest {
@@ -23,23 +26,28 @@ export interface VerifyOtpRequest {
 // }
 export interface VerifyOtpResponse {
   data: {
-  title: string;
-  token: {
-    azer_token: string;
-    expires_at: number;
+    title: string;
+    message: string;
+    isSuccess: boolean;
+    icon: string;
+
+    // For registration flow
+    authHash?: string;
+    expiresIn?: number;
+    purpose?: string;
+
+    // For login flow
+    token?: {
+      azer_token: string;
+      expires_at: number;
+    };
+
+    // Optional redirect URL if login response includes it
+    redirectUrl?: string;
   };
-  result: Array<{
-    oauth_id: number;
-    useremail: string;
-    device?: string;
-    // [key: string]: any;
-  }>;
-  message: string;
-  isSuccess: boolean;
-  icon?: string;
-  redirectUrl?: string;
 }
-}
+
+
 
 
 export interface RegisterRequest {

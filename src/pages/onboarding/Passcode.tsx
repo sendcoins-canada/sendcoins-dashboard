@@ -120,8 +120,8 @@ const SetupPasscode: React.FC = () => {
             disabled={!isComplete || loading}
             className={`px-6 py-2 rounded-full ${
               isComplete
-                ? "bg-blue-500 text-white cursor-pointer"
-                : "bg-blue-100 text-gray-400"
+                ? "bg-primaryblue text-white cursor-pointer"
+                : "bg-blue-100 text-neutral"
             }`}
           >
              {loading ? "Saving..." : "Continue"}

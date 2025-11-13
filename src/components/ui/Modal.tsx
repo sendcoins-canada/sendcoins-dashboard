@@ -7,9 +7,9 @@ import {
   DialogDescription,
   DialogTrigger,
   DialogClose,
-  DialogOverlay
+  DialogOverlay,
 } from "@/components/ui/dialog";
-// import { CloseCircle } from "iconsax-react";
+import { CloseCircle } from "iconsax-react";
 
 type ModalProps = {
   open: boolean;
@@ -37,32 +37,34 @@ const Modal: React.FC<ModalProps> = ({
   cancelLabel = "Cancel",
   onCancel,
   className,
-  // showCloseIcon = true,
-  // closeIconColor = "#8C8C8C",
+  showCloseIcon = true,
+  closeIconColor = "black",
 }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-        <DialogOverlay className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40" />
+      <DialogOverlay className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40" />
       <DialogContent
-        className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl w-[80%] md:w-full bg-white shadow-lg  ${className || ""}`}
+        className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl w-[90%] md:w-full bg-white shadow-lg  ${className || ""}` } showCloseButton={false}
       >
+        
         {/* ✅ Custom Close Icon */}
-        {/* {showCloseIcon && (
+        {showCloseIcon && (
           <DialogClose asChild>
             <button
-              className="absolute top-4 right-4 hover:opacity-80 transition"
+              data-custom
+              className="absolute top-4 right-4 cursor-pointer transition bg-white p-2 rounded-full"
               aria-label="Close"
             >
-              <CloseCircle size="24" color={closeIconColor} variant="Outline" />
+              <CloseCircle size="16" color={closeIconColor} variant="Outline" />
             </button>
           </DialogClose>
-        )} */}
+        )}
 
         {(title || description) && (
           <DialogHeader>
             {title && (
-              <DialogTitle className="text-lg font-semibold ">{title}</DialogTitle>
+              <DialogTitle className="text-lg font-semibold">{title}</DialogTitle>
             )}
             {description && (
               <DialogDescription className="text-gray-500">
@@ -74,7 +76,6 @@ const Modal: React.FC<ModalProps> = ({
 
         <div className="mt-4">{children}</div>
 
-        {/* ✅ Optional Cancel Button */}
         {showCancel && (
           <div className="flex justify-end mt-6">
             <DialogClose asChild>

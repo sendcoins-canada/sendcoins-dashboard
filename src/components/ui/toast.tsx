@@ -5,12 +5,14 @@ export const showSuccess = (message: string) =>
   toast.success(message, {
     className: "rounded-full bg-green-50 text-green-700",
     duration: 3000,
+    position: "top-center"
   });
 
 export const showWarning = (message: string) =>
   toast(message, {
     className: "rounded-full bg-yellow-50 text-yellow-800",
     duration: 3000,
+    position: "top-center"
   });
 
 
@@ -26,7 +28,8 @@ export const showDanger = (message: string) =>
       bg-[#FFE5E6] text-[#FF383C]
        w-fit !justify-start !items-center
     `,
-    duration: 4000,
+    duration: 4000,    
+    position: "top-center",
     style: {
       width: "fit-content",
       display: "flex", // ensure container uses flex

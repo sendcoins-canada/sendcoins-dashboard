@@ -28,7 +28,7 @@ const SendOptionsModal: React.FC<SendOptionsModalProps> = ({
     //   title="How do you want to send?"
       className="max-w-md w-[90%] bg-[#F5F5F5]"
     >
-        <h2 className="text-[28px] font-semibold text-center">How do you want to send?</h2>
+        <h2 className="text-[28px] text-primary font-semibold text-center mt-8">How do you want to send?</h2>
       <div className="flex flex-col gap-3 mt-3 bg-white p-2 rounded-2xl">
         {/*  Crypto Option */}
         <button
@@ -54,7 +54,7 @@ const SendOptionsModal: React.FC<SendOptionsModalProps> = ({
             selected === "fiat" ? "bg-[#F5F5F5]" : "border-gray-200"
           }`}
         >
-        <Moneys color="#0088FF" size={16}/>
+        <Moneys color="#28B747" size={16}/>
           <div>
             <p className="font-medium text-gray-800">Fiat</p>
             <p className="text-sm text-gray-500">

@@ -12,9 +12,13 @@ interface Wallet {
 }
 
 interface Network {
-  network_name: string;
-  [key: string]: any; // Allow additional properties from API
+  symbol: string;
+  network_full_name: string;
+  network_id: string;
+  network_type: string;
+  network_logo: string;
 }
+
 
 type WalletState = {
   wallets: Wallet[];

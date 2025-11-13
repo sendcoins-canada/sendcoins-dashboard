@@ -1,6 +1,7 @@
 // components/RecipientDetails.tsx
-import { Share, Edit2, Star1 } from "iconsax-react";
+import { Share, Edit2, Star1, ArrowLeft2 } from "iconsax-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface RecipientDetailsProps {
   recipient?: any;  
@@ -49,12 +50,16 @@ const RecipientDetails: React.FC<RecipientDetailsProps> = ({ recipient }) => {
           tagColor: "bg-green-100",
         },
       ]);
+      const navigate = useNavigate()
     
   return (
     <div className="px-6 py-10 flex flex-col md:flex-row md:gap-40 max-w-6xl">
       {/* Left Section */}
       <div className="flex-1/3">
-      <p className="text-2xl font-semibold mb-8">Profile</p>
+       <div className="absolute left-4 md:hidden flex items-center cursor-pointer border rounded-full justify-center p-2 w-fit" onClick={() => navigate(-1)}>
+                                       <ArrowLeft2 size="20" color="black" className="" />
+                                     </div>
+      <p className="md:text-2xl font-semibold mb-8 text-center">Profile</p>
               <div className="w-24 h-24 rounded-full flex items-center justify-center text-2xl font-semibold text-white mb-4 relative mx-auto text-center">
           <div
             className={`w-full h-full rounded-full ${recipient.color} flex items-center justify-center`}
@@ -76,7 +81,7 @@ const RecipientDetails: React.FC<RecipientDetailsProps> = ({ recipient }) => {
           <button className="bg-[#F5F5F5] px-4 py-2 rounded-xl w-28 h-24 flex flex-col items-center justify-center gap-1 text-[#262626]"><Star1 size="16" color="#777777"/>Favourited</button>
         </div>
 
-        <div className="text-sm text-gray-600 space-y-3 mb-6">
+        <div className="text-sm text-gray-600 space-y-3 md:mb-6">
           <div className="flex justify-between">
             <p className="text-sm mb-1">Wallet Address</p>
             <p className="font-mono">{recipient.address}</p>
@@ -95,7 +100,7 @@ const RecipientDetails: React.FC<RecipientDetailsProps> = ({ recipient }) => {
           </div>
         </div>
 
-        <button className="bg-primaryblue text-white px-6 py-2 rounded-full w-full hover:bg-[#003ad9]">
+        <button className="hidden md:block bg-primaryblue text-white px-6 py-2 rounded-full w-full hover:bg-[#003ad9]">
           Send money
         </button>
       </div>
@@ -135,6 +140,9 @@ const RecipientDetails: React.FC<RecipientDetailsProps> = ({ recipient }) => {
             </div>
           ))}
         </div>
+        <button className="md:hidden block bg-primaryblue text-white px-6 py-2 rounded-full mx-auto hover:bg-[#003ad9] mt-6">
+          Send money
+        </button>
       </div>
     </div>
   );

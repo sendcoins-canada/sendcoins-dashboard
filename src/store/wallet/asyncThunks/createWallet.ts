@@ -41,7 +41,7 @@ export const createWalletThunk = createAsyncThunk<
 
       const requestData = {
         symbol: payload.symbol,
-        network: payload.network,
+        network: payload.network.toLowerCase(),
         name: payload.name,
         token,
       };
@@ -53,7 +53,7 @@ export const createWalletThunk = createAsyncThunk<
         id: response?.data?.walletId || Date.now().toString(),
         name: payload.name,
         symbol: payload.symbol,
-        network: payload.network,
+        network: payload.network.toLowerCase(),
         address: response?.data?.address,
         balance: 0,
       };
@@ -65,9 +65,10 @@ export const createWalletThunk = createAsyncThunk<
     } catch (error: any) {
       const message =
         error.response?.data?.message ||
-        error.message ||
+        error.response?.statusText ||
         "Failed to create wallet. Please try again.";
       return rejectWithValue(message);
+      
     }
   }
 );

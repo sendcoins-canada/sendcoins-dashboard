@@ -5,7 +5,7 @@ import { CloseCircle } from "iconsax-react";
 const Header = () => {
     // const navigate = useNavigate()
   return (
-    <div className='w-full py-8 md:px-16 px-4'>
+    <div className='w-full py-8 md:px-16 px-4 mb-10'>
         <div className='flex md:px-8 justify-center'>
             <img src={Logoblack} alt="logo" />
             {/* <img src={backicon} alt="back-icon" onClick={() => navigate(-1)}/> */}

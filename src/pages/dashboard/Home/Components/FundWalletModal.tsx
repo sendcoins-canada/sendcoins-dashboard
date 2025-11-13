@@ -4,8 +4,9 @@ import Btc from "@/assets/Btc.svg"
 import Eth from "@/assets/Eth.svg"
 import matic from "@/assets/matic.svg"
 import usdc from "@/assets/Usdc.svg"
+import { Button } from "@/components/ui/button";
 
-const wallets = [
+export const wallets = [
   {
     name: "My Bitcoin wallet",
     address: "Dw49Rt...aJC3",
@@ -46,14 +47,7 @@ const wallets = [
     color: "bg-indigo-500",
     icon: matic,
   },
-  {
-    name: "Ethereum wallet 3",
-    address: "Dw49Rt...aJC3",
-    amountUSD: "$1,000",
-    amountBTC: "0.05 BTC",
-    color: "bg-blue-600",
-    icon: Eth,
-  },
+
 ];
 
 
@@ -63,20 +57,20 @@ const WalletModal: React.FC = () => {
   return (
     <div className="space-y-4 mt-4 ">
       <div className="flex flex-col gap-4 items-center">
-        <h2 className="text-2xl font-semibold">Your wallets</h2>
-        <button
+        <h2 className="md:text-2xl text-xl font-semibold">Your wallets</h2>
+        <Button
           onClick={() => navigate("/dashboard/create-wallet")}
-          className="bg-black text-white text-sm px-3 py-1.5 rounded-full hover:bg-gray-800 transition"
+          className="bg-black text-white text-sm rounded-full hover:bg-gray-800 transition"
         >
-          + Add Wallet
-        </button>
+          <span className="">+</span> Add Wallet
+        </Button>
       </div>
 
       <div className="space-y-3 max-h-[500px] overflow-y-auto">
         {wallets.map((wallet, i) => (
           <div
             key={i}
-            className="flex justify-between items-center border bg-secondarygray hover:bg-[#CDDAFE] p-3 rounded-xl cursor-pointer"
+            className="flex justify-between items-center border bg-[#F5F5F5] hover:bg-[#EBF0FE] p-3 rounded-xl cursor-pointer"
           >
             <div className="flex items-center space-x-3">
                <div className="w-8 h-8 flex items-center justify-center">

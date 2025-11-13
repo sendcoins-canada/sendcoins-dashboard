@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
-import type { RootState } from "@/store"; // <-- type from your store
+import type { RootState } from "@/store";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const token = useSelector((state: RootState) => state.auth.token);

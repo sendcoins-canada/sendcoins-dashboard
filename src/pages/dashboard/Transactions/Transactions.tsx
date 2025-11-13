@@ -5,6 +5,7 @@ import FilterDrawer from "./components/FilterDrawer";
 import TransactionDetails from "./components/TransactionDetails";
 import type { Transaction } from "./components/TransactionDetails";
 import MinimalLayout from "@/components/MinimalLayout";
+import Input from "@/components/ui/input";
 
 
 const Transactions = () => {
@@ -57,7 +58,7 @@ const Transactions = () => {
     },
   ]);
    const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-
+ const isMobile = window.innerWidth < 768;
   const filtered = transactions.filter((t) =>
     t.name.toLowerCase().includes(search.toLowerCase())
   );
@@ -65,15 +66,15 @@ const Transactions = () => {
   
   //  If a transaction is selected, show the details view instead
   if (selectedTransaction) {
-    return (
-      <MinimalLayout>
-        <div className="px-6 py-8 md:w-[50%]">
-  
-          <TransactionDetails transaction={selectedTransaction} />
-        </div>
-      </MinimalLayout>
-    );
-  }
+  const DetailsView = (
+    <div>
+      <TransactionDetails transaction={selectedTransaction} />
+    </div>
+  );
+
+  // ✅ No layout on mobile
+  return isMobile ? DetailsView : <MinimalLayout>{DetailsView}</MinimalLayout>;
+}
 
 
   return (
@@ -84,7 +85,7 @@ const Transactions = () => {
         {/* Search */}
         <div className="relative w-full  mb-6 flex gap-2 items-center">
           <SearchNormal1 className="absolute left-3 top-2 text-gray-400" size={18} color="#262626" />
-          <input
+          <Input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}

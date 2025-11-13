@@ -3,16 +3,16 @@ import type { ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   Home,
-  User,
-  DocumentText,
+  TransactionMinus,
   Setting,
   LogoutCurve,
   ShieldTick,
   Lock,
   MessageQuestion,
-  HambergerMenu,
-  CloseSquare,
-  ArrowDown2
+  Menu,
+  ArrowDown2,
+  People,
+  CloseCircle
 } from "iconsax-react";
 import Logo from "../assets/Logosingle.png";
 import Code from "../assets/Code.png";
@@ -68,23 +68,26 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
       <aside
-        className={`fixed md:static top-0 left-0 h-full w-64 bg-white flex flex-col px-8 pt-10 z-50 transform transition-transform duration-300
+        className={`fixed md:static top-0 left-0 h-full w-64 bg-white flex flex-col md:px-8 px-4 pt-10 z-50 transform transition-transform duration-300
         ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
       `}
       >
         {/* Logo and Close */}
-        <div className="flex items-center justify-between font-bold text-lg">         
-          <img src={Logo} alt="logo" />
+        <div className="flex justify-between font-bold text-lg">         
+          <img src={Logo} alt="logo" className="h-fit"/>
+          {/* <div className="bg-red-200"> */}
+
           <button
-            className="md:hidden text-gray-600"
+            className="md:hidden text-gray-600 border p-2 rounded-full h-fit mt-6"
             onClick={() => setIsSidebarOpen(false)}
-          >
-            <CloseSquare size="24" color="black"/>
+            >
+            <CloseCircle size={window.innerWidth < 640 ? 16 : 24}  color="black"/>
           </button>
+            {/* </div> */}
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 py-6 space-y-2 mt-10">
+        <nav className="flex-1 py-6 space-y-2 md:mt-10">
           <NavLink
             to="/dashboard/home"
             className={({ isActive }) =>
@@ -115,7 +118,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           >
             {({ isActive }) => (
               <>
-                <User size="20" color={isActive ? "#0647F7" : "#262626"} />
+                <People size="20" color={isActive ? "#0647F7" : "#262626"} />
                 <span
                   className={`${textClasses} text-[14px] font-normal ${
                     isActive ? "text-[#0647F7]" : "text-[#262626]"
@@ -136,7 +139,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           >
             {({ isActive }) => (
               <>
-                <DocumentText size="20" color={isActive ? "#0647F7" : "#262626"} />
+                <TransactionMinus size="20" color={isActive ? "#0647F7" : "#262626"} />
                 <span
                   className={`${textClasses} text-[14px] font-normal ${
                     isActive ? "text-[#0647F7]" : "text-[#262626]"
@@ -166,7 +169,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   className="fixed inset-0 z-40"
                   onClick={() => setOpenSettingsModal(false)}
                 ></div>
-                <div className="absolute bottom-10 left-0 bg-white border shadow-lg rounded-xl p-4 w-fit z-50">
+                <div className="absolute md:bottom-10 md:left-0 left-1/3 transform -translate-y-1/2 md:translate-y-0  bg-white border shadow-lg rounded-xl p-4 w-fit z-50">
                   <div className="flex flex-col items-center text-center space-y-4 cursor-pointer">
                     <div
                       className="flex gap-2 items-center justify-start hover:bg-[#F5F5F5] p-2 rounded-md"
@@ -183,9 +186,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                       </div>
                     </div>
 
-                    <div className="w-full space-y-1 text-sm text-left text-[#8C8C8C]">
+                    <div className="w-full space-y-1 text-sm text-left text-primary">
                       <div className="flex items-center gap-2 hover:bg-[#F5F5F5] rounded-md hover:text-black p-2">
-                        <ShieldTick size="18" color="#8C8C8C" /> KYC
+                        <ShieldTick size="18" color="#777777" /> KYC
                       </div>
                       <div
                         className="flex items-center gap-2 hover:bg-[#F5F5F5] rounded-md hover:text-black p-2"
@@ -194,13 +197,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                           navigate("/dashboard/change-passcode");
                         }}
                       >
-                        <Lock size="18" color="#8C8C8C" /> Change passcode
+                        <Lock size="18" color="#777777" /> Change passcode
                       </div>
                       <div className="flex items-center gap-2 hover:bg-[#F5F5F5] rounded-md hover:text-black p-2">
-                        <Lock size="18" color="#8C8C8C" /> Privacy
+                        <Lock size="18" color="#777777" /> Privacy
                       </div>
                       <div className="flex items-center gap-2 hover:bg-[#F5F5F5] rounded-md hover:text-black p-2">
-                        <MessageQuestion size="18" color="#8C8C8C" /> Contact support
+                        <MessageQuestion size="18" color="#777777" /> Contact support
                       </div>
                       <div
                         className="flex items-center justify-center gap-2 text-danger mt-2 cursor-pointer hover:bg-red-50 p-2 rounded-md"
@@ -232,25 +235,26 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         {/* Header */}
         <header className="flex justify-between items-center h-16 px-6 pt-9">
           <div className="flex items-center gap-4">
-            {/* Hamburger for mobile */}
-            <button
-              className="md:hidden text-gray-700"
-              onClick={() => setIsSidebarOpen(true)}
-            >
-              <HambergerMenu size="26" color="black" />
-            </button>
-
+           
             <div>
-              <p className="text-sm text-gray-500">Good Morning 👋</p>
-              <p className="font-semibold text-gray-800 text-lg">
+              <p className="md:text-sm text-xs text-gray-500">Good Morning 👋</p>
+              <p className="font-semibold text-gray-800 text-sm md:text-lg">
                 {user
                   ? `${user.data.first_name} ${user.data.last_name}`
                   : "Loading..."}
               </p>
             </div>
+           
           </div>
+          {/* Hamburger for mobile */}
+           <button
+              className="md:hidden border p-2 rounded-full h-fit"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <Menu size={window.innerWidth < 640 ? 16 : 24} color="black" />
+            </button>
 
-          <div className="flex items-center space-x-2 p-1 pr-2 border rounded-full">
+          <div className="hidden md:flex items-center space-x-2 p-1 pr-2 border rounded-full">
             <div className="w-9 h-9 rounded-full bg-pink-300 flex items-center justify-center text-xs text-white font-[500] cursor-pointer">
               {initials}
             </div>

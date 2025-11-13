@@ -21,15 +21,15 @@ export const verifyEmailThunk = createAsyncThunk<
     try {
       const response: VerifyEmailResponse = await verifyEmailApi(emailData);
 
-      if (!response?.isSuccess) {
+      if (!response?.data?.isSuccess) {
         return rejectWithValue(
-          response?.message || "Failed to send verification email"
+          response?.data.message || "Failed to send verification email"
         );
       }
 
       return {
         email: emailData.email,
-        message: response.message || "Verification link sent!",
+        message: response?.data?.message || "Verification link sent!",
       };
     } catch (error: any) {
       const message =

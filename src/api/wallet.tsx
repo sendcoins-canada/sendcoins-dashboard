@@ -11,11 +11,22 @@ export const getCoins = async () => {
 };
 
 export const getSupportedNetwork = async (symbol: string) => {
-  const response = await api.post<CurrencyResponse>("/wallet/supported/network", {
-    symbol,
-  });
+  const formData = new FormData();
+  formData.append("symbol", symbol);
+
+  const response = await api.post(
+    "/wallet/supported/network",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
   return response.data;
 };
+
 
 // Create a new wallet
 export const createWallet = async (data: {
@@ -24,6 +35,17 @@ export const createWallet = async (data: {
   token: string;
   name: string;
 }) => {
-  const response = await api.post("/user/create/wallet", data);
+  const formData = new FormData();
+  formData.append("symbol", data.symbol);
+  formData.append("network", data.network);
+  formData.append("token", data.token);
+  formData.append("name", data.name);
+
+  const response = await api.post("/user/create/wallet", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
   return response.data;
 };

@@ -26,7 +26,6 @@ const CreateWallet: React.FC = () => {
   const { coins, networks, loading } = useSelector((state: RootState) => state.wallet);
   
 
-  
   //  Fetch currencies when component mounts (kept as GET request)
   useEffect(() => {
     const fetchCoins = async () => {
@@ -51,13 +50,19 @@ const CreateWallet: React.FC = () => {
       if (!currency) return;
       try {
         const res = await getSupportedNetwork(currency);
-        // res.data is the array of networks
-        dispatch(setNetworks((res?.data || []) as any));
+        dispatch(setNetworks(res?.data?.data || []));
       } catch (err) {
-        console.error("Error fetching networks:", err);
-        showDanger("Failed to fetch supported networks.");
-      }
-    };
+      const errorMessage =
+        (typeof err === "object" &&
+          err !== null &&
+          "response" in err &&
+          (err as any).response?.data?.data?.message) ||
+        "Failed to fetch supported networks.";
+
+      console.error("Error fetching networks:", errorMessage);
+      showDanger(errorMessage);
+    }
+  };
     fetchNetworks();
   }, [currency, dispatch]);
 
@@ -81,7 +86,7 @@ const CreateWallet: React.FC = () => {
     }
   };
 
-    // Success State: show success screen
+  // Success State: show success screen
   if (isSuccess) {
     return (
       <SuccessPage
@@ -99,19 +104,26 @@ const CreateWallet: React.FC = () => {
 
   return (
     <>
-      {/* Header with Cancel */}
-      <HeaderWithCancel onCancel={() => navigate(-1)} />
+      <div className="hidden md:block">
+        <HeaderWithCancel onCancel={() => navigate(-1)} />
+      </div>
 
       {/* Back Button */}
-     <div className="flex items-center cursor-pointer border rounded-full w-fit md:ml-28 ml-6 justify-center py-2 px-4"  onClick={() => navigate(-1)}>
-                <ArrowLeft2 size="16" color="black" className=""/><p className="text-sm font-semibold">Back</p>
-                   </div>
+      <div className="hidden md:flex items-center cursor-pointer border rounded-full w-fit md:ml-28 ml-6 justify-center py-2 px-4" onClick={() => navigate(-1)}>
+        <ArrowLeft2 size="16" color="black" className="" /><p className="text-sm font-semibold">Back</p>
+      </div>
 
       {/* Form */}
-      <div className="w-[80%] md:w-[30%] mx-auto mt-10">
-        <h2 className="text-2xl font-semibold mb-4 text-center">
-          Create New Wallet
-        </h2>
+      <div className="w-[90%] md:w-[25%] mx-auto mt-20">
+        <div className="flex items-center md:justify-center gap-6 mb-8">
+          <div className="md:hidden flex items-center cursor-pointer border rounded-full justify-center p-2  w-fit" onClick={() => navigate(-1)}>
+            <ArrowLeft2 size="20" color="black" className="" />
+          </div>
+
+          <h2 className="md:text-2xl font-semibold text-center">
+            Create New Wallet
+          </h2>
+        </div>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
           {/* Wallet Name */}
@@ -125,7 +137,7 @@ const CreateWallet: React.FC = () => {
               placeholder="Enter wallet name"
               className="w-full"
               value={walletName}
-              onChange={(e) => setWalletName(e.target.value)} 
+              onChange={(e) => setWalletName(e.target.value)}
             />
           </div>
 
@@ -141,26 +153,26 @@ const CreateWallet: React.FC = () => {
               placeholder="Select currency"
             /> */}
             <Select
-  value={currency}
-  onChange={setCurrency}
-  options={Object.values(coins).map((coin) => ({
-    value: coin.symbol.toLowerCase(), // e.g. "btc"
-    // label: coin.currency_name.toUpperCase(), 
-    label: (
-      <div className="flex items-center gap-2">
-        <img
-          src={coin.logo}
-          alt={coin.name}
-          className="w-5 h-5 rounded-full"
-        />
-        <span className="capitalize">
-          {coin.symbol} ({coin.name_display.toUpperCase()})
-        </span>
-      </div>
-    ),
-  }))}
-  placeholder="Select currency"
-/>
+              value={currency}
+              onChange={setCurrency}
+              options={Object.values(coins).map((coin) => ({
+                value: coin.symbol.toLowerCase(), // e.g. "btc"
+                // label: coin.currency_name.toUpperCase(), 
+                label: (
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={coin.logo}
+                      alt={coin.name}
+                      className="w-5 h-5 rounded-full"
+                    />
+                    <span className="capitalize">
+                      {coin.symbol} ({coin.name_display.toUpperCase()})
+                    </span>
+                  </div>
+                ),
+              }))}
+              placeholder="Select currency"
+            />
           </div>
 
           {/* Network */}
@@ -168,34 +180,34 @@ const CreateWallet: React.FC = () => {
             <label className="block text-sm text-gray-600 mb-1">
               Network
             </label>
-            {/* <Select
+
+            <Select
               value={network}
               onChange={setNetwork}
-              options={networkOptions}
+              options={networks.map((net) => ({
+                value: net.network_id,
+                label: (
+                  <div className="flex items-center gap-2">
+                    <img src={net.network_logo} alt={net.network_full_name} className="w-5 h-5 rounded-full" />
+                    <span>{net.network_full_name} ({net.network_id})</span>
+                  </div>
+                ),
+              }))}
               placeholder="Select network"
-            /> */}
-            <Select
-  value={network}
-  onChange={setNetwork}
-  options={networks.map((net: any) => ({
-    value: net.network_name.toLowerCase(), // e.g. "trc20"
-    label: net.network_name.toUpperCase(), // e.g. "TRC20"
-  }))}
-  placeholder="Select network"
-/>
+            />
           </div>
 
           {/* Submit Button */}
           <div className=" flex mt-20">
-          <Button
-            type="submit"
-            variant="primary"
-            size="lg"
-            className="w-[40%] mx-auto text-center rounded-full bg-primaryblue hover:bg-blue-700 text-white "
-            disabled={loading}
-          >
-            Create Wallet
-          </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
+              className="w-[40%] mx-auto text-center rounded-full bg-primaryblue hover:bg-blue-700 text-white "
+              disabled={loading}
+            >
+              Create Wallet
+            </Button>
           </div>
         </form>
       </div>

@@ -45,6 +45,9 @@
   --color-bggray: #F5F5F5;
   --color-secondarygray: #EDEDED;
   --color-danger: #FF4D4F;
+  --color-primary: #262626;
+  --color-neutral: #777777;
+  --color-green: #28B747;
 }
 
 :root {

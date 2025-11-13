@@ -1,9 +1,10 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { TransmitSqaure2 } from "iconsax-react";
-import { HeaderWithCancel } from "@/components/onboarding/shared/Header";
+import { TransmitSqaure2, ArrowLeft2, Edit2 } from "iconsax-react";
+import Header from "@/components/onboarding/shared/Header";
 import { Convert, Money, Money2 } from "iconsax-react";
 import Eth from "@/assets/Eth.svg"
+import { useNavigate } from "react-router-dom";
 
 
 type Props = {
@@ -23,30 +24,28 @@ const ConfirmSend: React.FC<Props> = ({
   const exchangeRate = "$1 = 1 USDC";
   const platformFee = "Not applied";
   const estimatedArrival = "3 mins";
+  const navigate = useNavigate()
 
   return (
     <>
-    <HeaderWithCancel />
-    <div className=" flex flex-col items-center justify-center px-4 py-10">
-      {/* Back button */}
-      {/* <div className="absolute top-6 left-6">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900"
-        >
-          ← Back
-        </button>
-      </div> */}
-
-      {/* Header */}
-      <div className="flex flex-col items-center mb-6">
+<div className="hidden md:block">
+              <Header />
+            </div>    
+            <div className=" flex flex-col items-center justify-center px-4 py-10 md:py-0">
+          <div className="flex flex-col items-center mb-6">
 
         
-        <h2 className="text-xl font-semibold text-gray-900 mb-1">
-          Transaction details
-        </h2>
+        <div className="flex items-center md:justify-center gap-6 mb-8 md:mb-2">
+                             <div className="absolute left-4 md:hidden flex items-center cursor-pointer border rounded-full justify-center p-2  w-fit" onClick={() => navigate(-1)}>
+                               <ArrowLeft2 size="20" color="black" className="" />
+                             </div>
+                 
+                             <h2 className="md:text-2xl font-semibold text-center mx-auto w-fit">
+                               Transaction summary
+                             </h2>
+                           </div>
           <TransmitSqaure2 size="64" color="#0647F7" variant="Bold"/>
-        <p className="text-[#777777] text-sm">You sent</p>
+        <p className="text-[#777777] text-sm">You are sending</p>
         <p className="text-4xl font-bold text-gray-900">{amount} {asset}</p>
         <p className="text-sm text-[#0052FF] mt-1">~5 USD</p>
       </div>
@@ -101,28 +100,36 @@ const ConfirmSend: React.FC<Props> = ({
       </div>
 
       {/* Summary */}
-      <div className="w-full max-w-md bg-white rounded-2xl mt-4 divide-y divide-gray-200">
+      <div className="w-full max-w-md bg-white rounded-2xl mt-4 divide-y divide-gray-200 text-neutral">
         <div className="flex items-center justify-between p-3 text-sm">
           <span className="flex items-center gap-2">
             <Convert size="16" color="#777777" className="inline"/> Exchange rate
           </span>
-          <span>{exchangeRate}</span>
+          <span className="text-primary">{exchangeRate}</span>
         </div>
         <div className="flex items-center justify-between p-3 text-sm">
           <span className="flex items-center gap-2">
              <Money2 size="16" color="#777777" className="inline"/> Platform fee
           </span>
-          <span>{platformFee}</span>
+          <span className="text-primary">{platformFee}</span>
         </div>
         <div className="flex items-center justify-between p-3 text-sm font-semibold">
           <span className="flex items-center gap-2">
              <Money size="16" color="#777777" className="inline"/> Amount Received
           </span>
-          <span>
+          <span className="text-primary">
             {amount} {asset}
-            <span className="text-xs text-gray-500 ml-1">(≈5 USD)</span>
+            <span className="text-xs text-neutral ml-1">(≈5 USD)</span>
           </span>
         </div>
+      </div>
+      <div className="w-full max-w-md bg-white rounded-2xl mt-4 divide-y divide-gray-200 text-neutral">
+        <div className="flex flex-col justify-between p-3 text-sm">
+            <p className="inline"> Write memo <Edit2 size="16" color="#777777" className="inline"/></p>
+          
+          <span className="text-primary">Write Memo</span>
+        </div>
+        
       </div>
 
       </div>

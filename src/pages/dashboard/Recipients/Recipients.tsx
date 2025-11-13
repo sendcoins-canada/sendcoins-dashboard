@@ -4,8 +4,8 @@ import { SearchNormal1 } from "iconsax-react";
 import USDC from "@/assets/Usdc.svg"
 import ETH from "@/assets/Eth.svg"
 import RecipientDetails from "./components/RecepientDetails";
-import MinimalLayout from "@/components/MinimalLayout";
 import { useNavigate } from "react-router-dom";
+import Input from "@/components/ui/input";
 
 const recipientsData = [
   {
@@ -57,11 +57,11 @@ const Recipients = () => {
 
   if (selectedRecipient) {
     return (
-      <MinimalLayout>
+
         <RecipientDetails
           recipient={selectedRecipient}
         />
-      </MinimalLayout>
+
     );
   }
 
@@ -73,7 +73,7 @@ const Recipients = () => {
         {/* Search Input */}
         <div className="relative w-full mb-6 flex gap-2 items-center">
           <SearchNormal1 className="absolute left-3 top-2 text-gray-400" size={18} color="#262626" />
-          <input
+          <Input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}

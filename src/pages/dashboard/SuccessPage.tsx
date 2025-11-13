@@ -13,6 +13,7 @@ interface SuccessPageProps {
   onSecondaryClick?: () => void;
   backgroundColor?: string;
   iconColor?: string;
+  showSecondaryButton?: boolean;
 }
 
 const SuccessPage: React.FC<SuccessPageProps> = ({
@@ -23,6 +24,7 @@ const SuccessPage: React.FC<SuccessPageProps> = ({
   onPrimaryClick,
   onSecondaryClick,
   backgroundColor = "#00E676",
+  showSecondaryButton = true
   // iconColor = "#0647F7",
 }) => {
   const navigate = useNavigate();
@@ -58,13 +60,16 @@ const SuccessPage: React.FC<SuccessPageProps> = ({
           {primaryButtonText}
         </Button>
 
-        <Button
-          onClick={onSecondaryClick || (() => navigate(-1))}
-          variant="ghost"
-          className="rounded-full  text-black hover:bg-[#262626] hover:text-white px-6 py-2"
-        >
-          {secondaryButtonText}
-        </Button>
+         {/* Only show secondary button if desired */}
+        {showSecondaryButton && (
+          <Button
+            onClick={onSecondaryClick || (() => navigate(-1))}
+            variant="ghost"
+            className="rounded-full text-black hover:bg-[#262626] hover:text-white px-6 py-2"
+          >
+            {secondaryButtonText}
+          </Button>
+        )}
       </div>
     </div>
   );

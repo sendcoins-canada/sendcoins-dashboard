@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Add, Send2, Convert, EyeSlash, Eye, ArrowSwapVertical, TransmitSqaure2, ArrowDown2 } from "iconsax-react";
 import Coins from "@/assets/coin.svg"
+import CoinsMobile from "@/assets/CoinsMobile.png"
 import Search from "@/assets/search.png"
 import { Button } from "@/components/ui/button";
 import WalletModal from "./Components/FundWalletModal";
@@ -80,12 +81,12 @@ const Home: React.FC = () => {
     <DashboardLayout>
       {/* Balance Section */}
       <div className="md:w-[50%]">
-        <div className="mb-6 mt-10 ">
+        <div className="mb-6 md:mt-10 ">
           <div className="flex items-start justify-between">
             <div>
-              <h3 onClick={() => setWalletOpen(true)} className="text-gray-500 text-sm cursor-pointer">ETH <ArrowDown2 size="14" color="#262626" className="inline"/></h3>
-              <p className="text-3xl text-[#777777]">
-                <span className="mr-2 text-black"> {showBalance ? "0.50" : <span className="#D2D2D2"> ***** </span>}</span>
+              <h3 onClick={() => setWalletOpen(true)} className="text-primary text-xs cursor-pointer mb-4">ETH <ArrowDown2 size="14" color="#262626" className="inline"/></h3>
+              <p className="text-[28px] text-[#777777]">
+                <span className="text-primary text-5xl"> {showBalance ? "0.50" : <span className="text-[#D2D2D2]"> ***** </span>}</span>
                 USD
               </p>
               <p className="text-gray-400 text-sm mt-1">
@@ -95,9 +96,9 @@ const Home: React.FC = () => {
             </div>
             <button onClick={handleToggle} className="cursor-pointer">
               {showBalance ? (
-                <Eye size="24" color="#777777" />
+                <Eye size="16" color="#777777" />
               ) : (
-                <EyeSlash size="24" color="#0647F7" />
+                <EyeSlash size="16" color="#0647F7" />
               )}
             </button>
           </div>
@@ -105,27 +106,37 @@ const Home: React.FC = () => {
           {/* Action Buttons */}
           <div className="flex space-x-3 mt-4">
             <button  onClick={() => setIsFundingOpen(true)} className="flex items-center space-x-2 px-4 py-2 bg-primaryblue text-white rounded-full hover:bg-blue-700">
-              <span>Fund</span><Add size={18} color="white" />
+              <span>Fund</span><Add size={16} color="white" />
             </button>
-            <button onClick={() => setIsSendModalOpen(true)} className="flex items-center space-x-2 px-4 py-2 bg-bggray text-gray-700 rounded-full hover:bg-gray-200">
-              <span>Send</span> <Send2 size={18} color="black" />
+            <button onClick={() => setIsSendModalOpen(true)} className="flex items-center space-x-2 px-4 py-2 bg-bggray text-primary rounded-full">
+              <span>Send</span> <Send2 size={16} color="black" />
             </button>
-            <button onClick={() => navigate('/dashboard/convert')} className="flex items-center space-x-2 px-4 py-2 bg-bggray text-gray-700 rounded-full hover:bg-gray-200">
-              <span>Convert</span><Convert size={18} color="black" />
+            <button onClick={() => navigate('/dashboard/convert')} className="flex items-center space-x-2 px-4 py-2 bg-bggray text-primary rounded-full">
+              <span>Convert</span><Convert size={16} color="black" />
             </button>
           </div>
         </div>
 
         {/* Reminder Card */}
-        <div className="bg-bggray rounded-xl px-4 flex items-start justify-between mb-6">
+        <div className="bg-bggray rounded-xl px-4 hidden md:flex items-start justify-between mb-6">
           <div>
-            <h2 className="font-bold text-gray-800 pt-4">Almost there! 🚀</h2>
-            <p className=" text-gray-500 mt-2">
+            <h2 className="font-[500] text-primary pt-4">Almost there! 🚀</h2>
+            <p className=" text-neutral mt-2">
               Finish setting up your details to start sending!
             </p>
           </div>
 
           <img src={Coins} />
+        </div>
+        <div className="bg-bggray rounded-xl px-4 flex gap-2 md:hidden items-center justify-between mb-6 py-4">
+          <img src={CoinsMobile} />
+          <div>
+            <h2 className="font-[500] text-primary text-sm">Almost there! 🚀</h2>
+            <p className=" text-neutral mt-1 text-sm">
+              Finish setting up your details to start sending!
+            </p>
+          </div>
+
         </div>
 
         {/* Transactions Section */}
@@ -147,7 +158,7 @@ const Home: React.FC = () => {
                   key={tx.id}
                   className="flex justify-between items-center py-3 px-2"
                 >
-                  <div className="flex items-center space-x-3 gap-4">
+                  <div className="flex items-center space-x-3 gap-2">
                     <div
                       className={`w-12 h-12 rounded-full flex items-center justify-center relative ${tx.color}`}
                     >
@@ -157,22 +168,22 @@ const Home: React.FC = () => {
                           .map((n) => n[0])
                           .join("")}
                       </span>
-                      <div className={`${tx.tagColor} p-1 rounded-full absolute left-10 top-6`}>
+                      <div className={`${tx.tagColor} p-1 rounded-full absolute left-8 top-6`}>
 
                         <TransmitSqaure2 size="14" color="#697689" variant="Outline" className="" />
                       </div>
                     </div>
                     <div>
-                      <p className="font-medium text-gray-800">{tx.name}</p>
+                      <p className="font-medium text-gray-800 text-sm md:text-base">{tx.name}</p>
                       <p
-                        className={`text-sm ${tx.textColor}  mt-1`}
+                        className={`text-xs md:text-sm ${tx.textColor}  mt-1`}
                       >
                         {tx.status}
                         <span className="text-gray-400 ml-1">. {tx.time}</span>
                       </p>
                     </div>
                   </div>
-                  <p className="font-semibold text-gray-800">{tx.amount}</p>
+                  <p className="text-primary text-sm md:text-base">{tx.amount}</p>
                 </div>
               ))}
             </div>
@@ -198,10 +209,8 @@ const Home: React.FC = () => {
         <Modal
           open={walletOpen}
           onOpenChange={setWalletOpen}
-          // title="Your wallets"
-          className="max-w-md"
           showCloseIcon
-          closeIconColor="#0647F7"
+          // closeIconColor="#0647F7"
         >
           <WalletModal />
         </Modal>

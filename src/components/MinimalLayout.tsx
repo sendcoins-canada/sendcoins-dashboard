@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
-import { Home, User, DocumentText, Setting, ArrowLeft2, LogoutCurve, ShieldTick, Lock, MessageQuestion, CloseSquare } from "iconsax-react";
+import { Home, TransactionMinus, People, Setting, ArrowLeft2, LogoutCurve, ShieldTick, Lock, MessageQuestion, CloseSquare } from "iconsax-react";
 import Logo from "../assets/Logosingle.png";
 import Code from "../assets/Code.png"
 import { useNavigate } from "react-router-dom";
@@ -109,7 +109,7 @@ const MinimalLayout: React.FC<MinimalLayoutProps> = ({ children }) => {
           >
             {({ isActive }) => (
               <>
-                <User
+                <People
                   size="20"
                   color={isActive ? "#0647F7" : "#8C8C8C"}
                   className="transition-colors"
@@ -133,7 +133,7 @@ const MinimalLayout: React.FC<MinimalLayoutProps> = ({ children }) => {
           >
             {({ isActive }) => (
               <>
-                <DocumentText
+                <TransactionMinus
                   size="20"
                   color={isActive ? "#0647F7" : "#8C8C8C"}
                   className="transition-colors"

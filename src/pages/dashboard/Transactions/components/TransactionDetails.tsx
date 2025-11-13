@@ -1,6 +1,8 @@
 import { CheckCircle2, Loader2, XCircle, Copy, CheckCircle } from "lucide-react";
 import Send from "@/assets/Send.svg";
 import { useState } from "react";
+import { ArrowLeft2 } from "iconsax-react";
+import { useNavigate } from "react-router-dom";
 
 type TransactionStatus = "Processing" | "Successful" | "Failed";
 
@@ -22,7 +24,7 @@ interface TransactionDetailsProps {
 
 const statusStyles = {
   Processing: {
-    icon: <Loader2 className="animate-spin text-yellow-500" size={20} />,
+    icon: <Loader2 className="animate-spin text-yellow-500" size={12} />,
     mainColor: "text-yellow-500",
     label: "Processing",
     steps: [
@@ -33,7 +35,7 @@ const statusStyles = {
     ],
   },
   Successful: {
-    icon: <CheckCircle2 className="text-green-500" size={20} />,
+    icon: <CheckCircle2 className="text-green-500" size={12} />,
     mainColor: "text-green-500",
     label: "Completed",
     steps: [
@@ -44,12 +46,13 @@ const statusStyles = {
     ],
   },
   Failed: {
-    icon: <XCircle className="text-red-500" size={20} />,
+    icon: <XCircle className="text-danger" size={12} />,
     mainColor: "text-red-500",
     label: "Failed",
     steps: [
       { label: "Initiated", desc: "You started this transfer.", done: true },
       { label: "Processing", desc: "We attempted to move funds through the network.", done: true },
+      { label: "Converting failed", desc: "Exchanging USDC to NGN at today's rate.", done: true, failed: true },
       { label: "Failed", desc: "The transaction could not be completed.", done: false },
     ],
   },
@@ -57,6 +60,7 @@ const statusStyles = {
 
 const TransactionDetails: React.FC<TransactionDetailsProps> = ({ transaction }) => {
   const { amount, currency, status } = transaction;
+  const navigate = useNavigate()
   const config = statusStyles[status] || statusStyles["Processing"];
    const [activeTab, setActiveTab] = useState<"timeline" | "details">("timeline");
   const firstIncompleteIndex = config.steps.findIndex((step) => !step.done);
@@ -68,7 +72,11 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({ transaction }) 
       : -1;
 
   return (
-    <div className="flex flex-col items-center justify-center px-4 pb-8">
+    // <div className="bg-green-500 w-full">
+          <div className="flex flex-col items-center justify-center px-4 pb-8 mt-10 md:mt-0">
+             <div className="absolute top-0 left-6 md:hidden flex items-center cursor-pointer border rounded-full justify-center p-2 w-fit mt-10 md:mt-0" onClick={() => navigate(-1)}>
+                                                   <ArrowLeft2 size="20" color="black" className="" />
+                                                 </div>
       {/* Header with main send icon + small status icon */}
       <div className="text-center mb-8">
         <div className="relative w-16 h-16 mx-auto mb-3">
@@ -143,7 +151,7 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({ transaction }) 
               {step.done ? (
                 <CheckCircle className="h-3 w-3 text-white" />
               ) : status === "Failed" && idx === failureIndex ? (
-                <CheckCircle className="h-3 w-3 text-red-500" />
+                <CheckCircle className="h-3 w-3 text-danger" />
               ) : (
                 <CheckCircle className="h-3 w-3 text-gray-400" />
               )}
@@ -238,6 +246,7 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({ transaction }) 
         </div>
       )}
     </div>
+    // </div>
   );
 };
 
