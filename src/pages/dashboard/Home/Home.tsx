@@ -6,7 +6,6 @@ import {
   Convert,
   EyeSlash,
   Eye,
-  ArrowSwapVertical,
   TransmitSqaure2,
   ArrowDown2,
 } from "iconsax-react";
