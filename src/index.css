@@ -11,3 +11,193 @@
   }
 }
 
+@layer utilities {
+  /* Body/sm/regular */
+  .text-body-sm-regular {
+    font-family: Geist, sans-serif;
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 21px;
+    letter-spacing: 0px;
+  }
+
+  /* Body/sm/strong */
+  .text-body-sm-strong {
+    font-family: Geist, sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 21px;
+    letter-spacing: 0px;
+  }
+
+  /* Body/md/regular */
+  .text-body-md-regular {
+    font-family: Geist, sans-serif;
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0px;
+  }
+
+  /* Body/md/strong */
+  .text-body-md-strong {
+    font-family: Geist, sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0px;
+  }
+
+  /* Body/md/bold */
+  .text-body-md-bold {
+    font-family: Geist, sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0px;
+  }
+
+  /* Body/lg/regular */
+  .text-body-lg-regular {
+    font-family: Geist, sans-serif;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 27px;
+    letter-spacing: 0px;
+  }
+
+  /* Body/lg/strong */
+  .text-body-lg-strong {
+    font-family: Geist, sans-serif;
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 27px;
+    letter-spacing: 0px;
+  }
+
+  /* Body/lg/bold */
+  .text-body-lg-bold {
+    font-family: Geist, sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 27px;
+    letter-spacing: 0px;
+  }
+
+  /* Headings/H-1 */
+  .text-heading-h1 {
+    font-family: Geist, sans-serif;
+    font-weight: 600;
+    font-size: 40px;
+    line-height: 50px;
+    letter-spacing: 0px;
+  }
+
+  /* Headings/H-2 */
+  .text-heading-h2 {
+    font-family: Geist, sans-serif;
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 40px;
+    letter-spacing: 0px;
+  }
+
+  /* Headings/H-3 */
+  .text-heading-h3 {
+    font-family: Geist, sans-serif;
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 32px;
+    letter-spacing: 0px;
+  }
+
+  /* Headings/H-4 */
+  .text-heading-h4 {
+    font-family: Geist, sans-serif;
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 42px;
+    letter-spacing: 0px;
+  }
+
+  /* Headings/H-5 */
+  .text-heading-h5 {
+    font-family: Geist, sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 28px;
+    letter-spacing: 0px;
+  }
+
+  /* Headings/H-6 */
+  .text-heading-h6 {
+    font-family: Geist, sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 26px;
+    letter-spacing: 0px;
+  }
+
+  /* Heading XL (48px) */
+  .text-heading-xl {
+    font-family: Geist, sans-serif;
+    font-weight: 500;
+    font-size: 48px;
+    line-height: 60px;
+    letter-spacing: 0px;
+  }
+
+  /* Thicker stroke for icons */
+  .share-icon-thick svg path,
+  .share-icon-thick svg circle,
+  .share-icon-thick svg line,
+  .share-icon-thick svg polyline,
+  .share-icon-thick svg polygon {
+    stroke-width: 4 !important;
+  }
+
+  /* Hide native date picker icon */
+  .date-input-no-icon {
+    -webkit-appearance: none !important;
+    -moz-appearance: textfield !important;
+    appearance: none !important;
+    padding-right: 1rem !important;
+  }
+
+  .date-input-no-icon::-webkit-calendar-picker-indicator {
+    display: none !important;
+    -webkit-appearance: none !important;
+    opacity: 0 !important;
+    position: absolute !important;
+    right: -9999px !important;
+    width: 0 !important;
+    height: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .date-input-no-icon::-moz-calendar-picker-indicator {
+    display: none !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .date-input-no-icon::-ms-calendar-picker-indicator {
+    display: none !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* Body/xs/semibold */
+  .text-body-xs-semibold {
+    font-family: Geist, sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 18px;
+    letter-spacing: 0px;
+  }
+}
+
