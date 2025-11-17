@@ -1,18 +1,26 @@
 import React, { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Add, Send2, Convert, EyeSlash, Eye, ArrowSwapVertical, TransmitSqaure2, ArrowDown2 } from "iconsax-react";
-import Coins from "@/assets/coin.svg"
-import CoinsMobile from "@/assets/CoinsMobile.png"
-import Search from "@/assets/search.png"
+import {
+  Add,
+  Send2,
+  Convert,
+  EyeSlash,
+  Eye,
+  TransmitSqaure2,
+  ArrowDown2,
+} from "iconsax-react";
+import Coins from "@/assets/coin.svg";
+import Search from "@/assets/search.png";
 import { Button } from "@/components/ui/button";
 import WalletModal from "./Components/FundWalletModal";
 import Modal from "@/components/ui/Modal";
 import SendOptionsModal from "./Components/Send/SendModal";
 import { useNavigate } from "react-router-dom";
 import FundOptionsModal from "./Components/Fund/FundOptionsModal";
-
+import Arrow from "../../../assets/swap_vert.svg";
+import Eth from "@/assets/Eth.svg";
 const Home: React.FC = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [showBalance, setShowBalance] = useState(false);
   const [transactions, _setTransactions] = useState([
     {
@@ -23,7 +31,7 @@ const Home: React.FC = () => {
       amount: "+$20,000",
       color: "bg-[#CCE9FF]",
       textColor: "text-red-500",
-      tagColor: "bg-red-100"
+      tagColor: "bg-red-100",
     },
     {
       id: 2,
@@ -33,7 +41,7 @@ const Home: React.FC = () => {
       amount: "+$20,000",
       color: "bg-[#DCFCE7]",
       textColor: "text-green-500",
-      tagColor: "bg-green-100"
+      tagColor: "bg-green-100",
     },
     {
       id: 3,
@@ -43,7 +51,7 @@ const Home: React.FC = () => {
       amount: "+$20,000",
       color: "bg-[#FAE6FE]",
       textColor: "text-yellow-500",
-      tagColor: "bg-yellow-100"
+      tagColor: "bg-yellow-100",
     },
     {
       id: 4,
@@ -53,13 +61,12 @@ const Home: React.FC = () => {
       amount: "+$20,000",
       color: "bg-[#FEF9C3]",
       textColor: "text-yellow-500",
-      tagColor: "bg-green-100"
-
+      tagColor: "bg-green-100",
     },
   ]);
   const [walletOpen, setWalletOpen] = useState(false);
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
-  const [isFundingOpen, setIsFundingOpen] = useState(false)
+  const [isFundingOpen, setIsFundingOpen] = useState(false);
 
   const handleSelectOption = (option: "crypto" | "fiat") => {
     setIsSendModalOpen(false);
@@ -71,7 +78,6 @@ const Home: React.FC = () => {
       console.log("Go to Fiat Send page");
     }
   };
-  
 
   const handleToggle = () => {
     setShowBalance((prev) => !prev);
@@ -80,18 +86,31 @@ const Home: React.FC = () => {
   return (
     <DashboardLayout>
       {/* Balance Section */}
-      <div className="md:w-[50%]">
-        <div className="mb-6 md:mt-10 ">
+      <div className="max-w-[651px]">
+        <div className="mb-6 mt-10 ">
           <div className="flex items-start justify-between">
             <div>
-              <h3 onClick={() => setWalletOpen(true)} className="text-primary text-xs cursor-pointer mb-4">ETH <ArrowDown2 size="14" color="#262626" className="inline"/></h3>
-              <p className="text-[28px] text-[#777777]">
-                <span className="text-primary text-5xl"> {showBalance ? "0.50" : <span className="text-[#D2D2D2]"> ***** </span>}</span>
+              <h3
+                onClick={() => setWalletOpen(true)}
+                className="text-[#262626] text-[12px] cursor-pointer flex items-center gap-1"
+              >
+                <img src={Eth} alt="ETH" className="w-4 h-4" />
+                ETH <ArrowDown2 size="16" color="#262626" className="inline" />
+              </h3>
+              <p className="text-[28px] font-[200] text-[#777777]">
+                <span className="mr-2 text-black mb-2">
+                  {" "}
+                  {showBalance ? (
+                    "0.50"
+                  ) : (
+                    <span className="text-[#D2D2D2]"> ***** </span>
+                  )}
+                </span>
                 USD
               </p>
-              <p className="text-gray-400 text-sm mt-1">
+              <p className="text-gray-400 text-sm mt-1 flex items-center gap-0">
                 {showBalance ? "0.0 USDC" : "*******"}
-                <ArrowSwapVertical size="14" color="black" variant="Outline" className="inline ml-2" />
+                <img src={Arrow} alt="wave" />
               </p>
             </div>
             <button onClick={handleToggle} className="cursor-pointer">
@@ -105,14 +124,25 @@ const Home: React.FC = () => {
 
           {/* Action Buttons */}
           <div className="flex space-x-3 mt-4">
-            <button  onClick={() => setIsFundingOpen(true)} className="flex items-center space-x-2 px-4 py-2 bg-primaryblue text-white rounded-full hover:bg-blue-700">
-              <span>Fund</span><Add size={16} color="white" />
+            <button
+              onClick={() => setIsFundingOpen(true)}
+              className="flex items-center space-x-2 px-4 py-2 bg-primaryblue text-white rounded-full hover:bg-blue-700"
+            >
+              <span>Fund</span>
+              <Add size={18} color="white" />
             </button>
-            <button onClick={() => setIsSendModalOpen(true)} className="flex items-center space-x-2 px-4 py-2 bg-bggray text-primary rounded-full">
-              <span>Send</span> <Send2 size={16} color="black" />
+            <button
+              onClick={() => setIsSendModalOpen(true)}
+              className="flex items-center space-x-2 px-4 py-2 bg-bggray text-gray-700 rounded-full hover:bg-gray-200"
+            >
+              <span>Send</span> <Send2 size={18} color="black" />
             </button>
-            <button onClick={() => navigate('/dashboard/convert')} className="flex items-center space-x-2 px-4 py-2 bg-bggray text-primary rounded-full">
-              <span>Convert</span><Convert size={16} color="black" />
+            <button
+              onClick={() => navigate("/dashboard/convert")}
+              className="flex items-center space-x-2 px-4 py-2 bg-bggray text-gray-700 rounded-full hover:bg-gray-200"
+            >
+              <span>Convert</span>
+              <Convert size={18} color="black" />
             </button>
           </div>
         </div>
@@ -120,34 +150,33 @@ const Home: React.FC = () => {
         {/* Reminder Card */}
         <div className="bg-bggray rounded-xl px-4 hidden md:flex items-start justify-between mb-6">
           <div>
-            <h2 className="font-[500] text-primary pt-4">Almost there! 🚀</h2>
-            <p className=" text-neutral mt-2">
+            <h2 className="text-body-md-strong text-gray-800 pt-4">
+              Almost there! 🚀
+            </h2>
+            <p className=" text-gray-500 mt-2 text-body-sm-regular">
               Finish setting up your details to start sending!
             </p>
           </div>
 
           <img src={Coins} />
         </div>
-        <div className="bg-bggray rounded-xl px-4 flex gap-2 md:hidden items-center justify-between mb-6 py-4">
-          <img src={CoinsMobile} />
-          <div>
-            <h2 className="font-[500] text-primary text-sm">Almost there! 🚀</h2>
-            <p className=" text-neutral mt-1 text-sm">
-              Finish setting up your details to start sending!
-            </p>
-          </div>
-
-        </div>
 
         {/* Transactions Section */}
         <div>
           <div className="flex justify-between items-center mb-3">
-            <h2 className="font-semibold text-gray-800">Recent transaction</h2>
+            <h2 className="text-body-md-bold text-gray-800">
+              Recent transaction
+            </h2>
             {transactions.length > 0 && (
               // <button className="text-sm text-[#0647F7] hover:underline">
               //   See all
               // </button>
-              <Button variant={'outline'} onClick={() => navigate('/dashboard/transactions')}>See all</Button>
+              <Button
+                variant={"outline"}
+                onClick={() => navigate("/dashboard/transactions")}
+              >
+                See all
+              </Button>
             )}
           </div>
 
@@ -160,30 +189,40 @@ const Home: React.FC = () => {
                 >
                   <div className="flex items-center space-x-3 gap-2">
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center relative ${tx.color}`}
+                      className={`w-[49px] h-[49px] rounded-full flex items-center justify-center relative ${tx.color}`}
                     >
-                      <span className="text-xs font-semibold text-gray-700">
+                      <span className="text-[14.29px] font-[500] text-gray-700">
                         {tx.name
                           .split(" ")
                           .map((n) => n[0])
                           .join("")}
                       </span>
-                      <div className={`${tx.tagColor} p-1 rounded-full absolute left-8 top-6`}>
-
-                        <TransmitSqaure2 size="14" color="#697689" variant="Outline" className="" />
+                      <div
+                        className={`${tx.tagColor} p-1 rounded-full absolute left-10 top-6`}
+                      >
+                        <TransmitSqaure2
+                          size="14"
+                          color="#697689"
+                          variant="Outline"
+                          className=""
+                        />
                       </div>
                     </div>
                     <div>
-                      <p className="font-medium text-gray-800 text-sm md:text-base">{tx.name}</p>
+                      <p className="text-body-md-strong text-gray-800">
+                        {tx.name}
+                      </p>
                       <p
-                        className={`text-xs md:text-sm ${tx.textColor}  mt-1`}
+                        className={`text-body-sm-regular ${tx.textColor}  mt-1`}
                       >
                         {tx.status}
-                        <span className="text-gray-400 ml-1">. {tx.time}</span>
+                        <span className="text-[#777777] ml-1">. {tx.time}</span>
                       </p>
                     </div>
                   </div>
-                  <p className="text-primary text-sm md:text-base">{tx.amount}</p>
+                  <p className="font-normal text-[16px] text-gray-800">
+                    {tx.amount}
+                  </p>
                 </div>
               ))}
             </div>
@@ -223,10 +262,8 @@ const Home: React.FC = () => {
         <FundOptionsModal
           open={isFundingOpen}
           onOpenChange={setIsFundingOpen}
-      
         />
       </div>
-
     </DashboardLayout>
   );
 };
