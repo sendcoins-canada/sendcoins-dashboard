@@ -99,8 +99,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               <>
                 <Home size="20" color={isActive ? "#0647F7" : "#262626"} />
                 <span
-                  className={`${textClasses} ${
-                    isActive ? "text-[#0647F7] text-body-sm-strong" : "text-[#262626] text-body-sm-regular"
+                  className={`${textClasses} text-[14px] font-normal ${
+                    isActive ? "text-[#0647F7]" : "text-[#262626]"
                   }`}
                 >
                   Home
@@ -235,32 +235,31 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         {/* Header */}
         <header className="flex justify-between items-center h-16 px-6 pt-9">
           <div className="flex items-center gap-4">
-            {/* Hamburger for mobile */}
-            <button
-              className="md:hidden border p-2 rounded-full h-fit"
-              onClick={() => setIsSidebarOpen(true)}
-            >
-              <Menu size={window.innerWidth < 640 ? 16 : 24} color="black" />
-            </button>
+           
             <div>
-              <p className="text-body-sm-regular text-gray-500">Good Morning 👋</p>
-              <p className="text-body-lg-strong text-gray-800">
+              <p className="md:text-sm text-xs text-gray-500">Good Morning 👋</p>
+              <p className="font-semibold text-gray-800 text-sm md:text-lg">
                 {user
                   ? `${user.data.first_name} ${user.data.last_name}`
                   : "Loading..."}
               </p>
             </div>
+           
           </div>
+          {/* Hamburger for mobile */}
+           <button
+              className="md:hidden border p-2 rounded-full h-fit"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <Menu size={window.innerWidth < 640 ? 16 : 24} color="black" />
+            </button>
 
-          <button 
-            onClick={() => setOpenModal(true)}
-            className="flex items-center space-x-2 p-1 pr-2 border rounded-full hover:bg-gray-50 transition-colors cursor-pointer"
-          >
-            <div className="w-9 h-9 rounded-full bg-pink-300 flex items-center justify-center text-xs text-white font-[500]">
+          <div className="hidden md:flex items-center space-x-2 p-1 pr-2 border rounded-full">
+            <div className="w-9 h-9 rounded-full bg-pink-300 flex items-center justify-center text-xs text-white font-[500] cursor-pointer">
               {initials}
             </div>
             <ArrowDown2 size="16" color="#8C8C8C" />
-          </button>
+          </div>
         </header>
 
         {/* Content Area */}
