@@ -2,12 +2,14 @@ import * as React from "react";
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogDescription,
   DialogTrigger,
-  DialogClose
+  DialogClose,
+  DialogOverlay,
 } from "@/components/ui/dialog";
-import { ArrowLeft2 } from "iconsax-react";
-import { XIcon } from "lucide-react";
+import { CloseCircle } from "iconsax-react";
 
 type ModalProps = {
   open: boolean;
@@ -22,8 +24,6 @@ type ModalProps = {
   className?: string;
   showCloseIcon?: boolean;
   closeIconColor?: string;
-  showBackArrow?: boolean;
-  onBack?: () => void;
 };
 
 const Modal: React.FC<ModalProps> = ({
@@ -38,63 +38,43 @@ const Modal: React.FC<ModalProps> = ({
   onCancel,
   className,
   showCloseIcon = true,
-  closeIconColor = "#8C8C8C",
-  showBackArrow = false,
-  onBack,
+  closeIconColor = "black",
 }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+      <DialogOverlay className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40" />
       <DialogContent
-        className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl w-[80%] md:w-full bg-white shadow-lg z-[70] ${className || ""}`}
-        showCloseButton={false}
+        className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl w-[90%] md:w-full bg-white shadow-lg  ${className || ""}` } showCloseButton={false}
       >
-        {/* Header with Back Arrow, Title, and Close Button */}
-        {(showBackArrow || title || showCloseIcon) && (
-          <div className="flex items-center justify-between w-full mb-4">
-            {/* Back Arrow */}
-            <div className="flex-1 flex justify-start">
-              {showBackArrow && onBack && (
-                <button
-                  onClick={onBack}
-                  className="p-2 hover:bg-gray-100 border rounded-full transition-colors"
-                  aria-label="Back"
-                >
-                  <ArrowLeft2 size="16" color="#262626" />
-                </button>
-              )}
-            </div>
+        
+        {/* ✅ Custom Close Icon */}
+        {showCloseIcon && (
+          <DialogClose asChild>
+            <button
+              data-custom
+              className="absolute top-4 right-4 cursor-pointer transition bg-white p-2 rounded-full"
+              aria-label="Close"
+            >
+              <CloseCircle size="16" color={closeIconColor} variant="Outline" />
+            </button>
+          </DialogClose>
+        )}
 
-            {/* Title */}
+        {(title || description) && (
+          <DialogHeader>
             {title && (
-              <div className="flex-1 flex justify-center">
-                <h2 className="text-body-md-bold">{title}</h2>
-              </div>
+              <DialogTitle className="text-lg font-semibold">{title}</DialogTitle>
             )}
-
-            {/* Close Button */}
-            <div className="flex-1 flex justify-end">
-              {showCloseIcon && (
-                <DialogClose asChild>
-                  <button
-                    className="p-2 border hover:bg-gray-100 rounded-full transition-colors"
-                    aria-label="Close"
-                  >
-                    <XIcon size="16" color={closeIconColor} />
-                  </button>
-                </DialogClose>
-              )}
-            </div>
-          </div>
+            {description && (
+              <DialogDescription className="text-gray-500">
+                {description}
+              </DialogDescription>
+            )}
+          </DialogHeader>
         )}
 
-        {description && (
-          <DialogDescription className="text-gray-500 mb-4">
-            {description}
-          </DialogDescription>
-        )}
-
-        <div>{children}</div>
+        <div className="mt-4">{children}</div>
 
         {showCancel && (
           <div className="flex justify-end mt-6">
