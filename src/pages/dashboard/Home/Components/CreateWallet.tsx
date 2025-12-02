@@ -166,7 +166,7 @@ const CreateWallet: React.FC = () => {
                       className="w-5 h-5 rounded-full"
                     />
                     <span className="capitalize">
-                      {coin.symbol} ({coin.name_display.toUpperCase()})
+                      {coin.symbol} ({coin.name_display})
                     </span>
                   </div>
                 ),

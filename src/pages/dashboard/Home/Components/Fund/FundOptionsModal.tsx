@@ -1,12 +1,21 @@
-import React, { useState } from "react";
-import  Modal  from "@/components/ui/Modal";
-import { Apple, ArrowRight2, Bank, BuyCrypto } from "iconsax-react";
+import React, { useState, useEffect } from "react";
+import Modal from "@/components/ui/Modal";
+import { Apple, ArrowRight2, Bank, BuyCrypto, Copy, TickCircle } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 import Select from "@/components/ui/select";
-// import { BuyCrypto, Moneys } from "iconsax-react";
-import { assets } from "../Send/SelectCryptoAsset";
-import QR from "@/assets/QR Code.svg"
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "@/store";
+import { getAllBalanceThunk } from "@/store/wallet/asyncThunks/getBalances";
+import { showSuccess } from "@/components/ui/toast";
+import { QRCodeSVG } from 'qrcode.react';
+import logo from "@/assets/Logosingle.png"
 
+interface WalletOption {
+  name: string;
+  symbol: string;
+  address: string;
+  logo: string;
+}
 interface FundOptionsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -16,9 +25,89 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
   open,
   onOpenChange,
 }) => {
-     const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2>(1);
   const [selected, setSelected] = useState<"bank" | "crypto" | "apple" | null>(null);
-   const [fundNetwork, setFundNetwork] = useState("usdc");
+  const dispatch = useDispatch()
+  // State to hold the currently selected wallet address for funding
+  const [selectedWalletAddress, setSelectedWalletAddress] = useState<string>("");
+
+  // State to track which wallet is selected in the dropdown (using its symbol)
+  const [fundWalletSymbol, setFundWalletSymbol] = useState<string>("");
+
+  // State for copy operation
+  const [copied, setCopied] = useState(false);
+
+  // 1. Get all balances from the Redux store
+  const { allBalances } = useSelector(
+    (state: RootState) => state.wallet
+  );
+
+  useEffect(() => {
+    if (open && !allBalances) {
+      const token = localStorage.getItem("azertoken");
+      if (token) {
+        dispatch(getAllBalanceThunk({ token }) as any);
+      }
+    }
+  }, [open, allBalances, dispatch]);
+
+  // 2. Process wallet data for dropdown and details
+  const walletMap = allBalances?.data?.balances || {};
+
+  // Convert fetched balances into a clean list of options
+  const walletOptions: WalletOption[] = Object.keys(walletMap)
+    .map(key => {
+      // Assuming the structure is { 'BTC': { 'BTC_mainnet': { ... wallet data ... } } }
+      const walletData = walletMap[key];
+      if (walletData && walletData.isWalletAvailable) {
+        return {
+          name: walletData.name,
+          symbol: walletData.symbol,
+          address: walletData.walletAddress,
+          logo: walletData.logo,
+        };
+      }
+      return null;
+    })
+    .filter((w): w is WalletOption => w !== null);
+
+  // Prepare options array for the Select component
+  const selectOptions = walletOptions.map((w) => ({
+    value: w.symbol,
+    label: w.name,
+    icon: <img src={w.logo} alt={w.name} className="w-4 h-4" />,
+  }));
+
+  // Find the currently selected wallet object based on the symbol state
+  const selectedWallet = walletOptions.find(w => w.symbol === fundWalletSymbol);
+
+  // Set initial state if wallets are available and no wallet is selected yet
+  useEffect(() => {
+    if (walletOptions.length > 0 && !fundWalletSymbol) {
+      setFundWalletSymbol(walletOptions[0].symbol);
+      setSelectedWalletAddress(walletOptions[0].address);
+    }
+  }, [walletOptions, fundWalletSymbol]);
+
+
+  // Handle network change: Update the address based on the selected symbol
+  const handleNetworkChange = (symbol: string) => {
+    setFundWalletSymbol(symbol);
+    const wallet = walletOptions.find(w => w.symbol === symbol);
+    if (wallet) {
+      setSelectedWalletAddress(wallet.address);
+    }
+  };
+
+  const handleCopy = () => {
+    if (selectedWalletAddress) {
+      document.execCommand('copy');
+      navigator.clipboard.writeText(selectedWalletAddress);
+      showSuccess("Wallet address copied successfully!");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   const handleSelect = (option: "bank" | "crypto" | "apple") => {
     setSelected(option);
@@ -26,10 +115,11 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
     setStep(2);
   };
 
-    const handleBack = () => {
+  const handleBack = () => {
     setStep(1);
     setSelected(null);
   };
+
 
   return (
     <Modal
@@ -47,9 +137,8 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
             {/* Bank */}
             <button
               onClick={() => handleSelect("bank")}
-              className={`flex justify-between items-start border rounded-xl px-2 py-4 text-left hover:bg-[#F5F5F5] transition ${
-                selected === "bank" ? "bg-[#F5F5F5]" : "border-gray-200"
-              }`}
+              className={`flex justify-between items-start border rounded-xl px-2 py-4 text-left hover:bg-[#F5F5F5] transition ${selected === "bank" ? "bg-[#F5F5F5]" : "border-gray-200"
+                }`}
             >
               <div className="flex gap-2">
                 <Bank color="#0088FF" size={16} />
@@ -66,9 +155,8 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
             {/* Crypto */}
             <button
               onClick={() => handleSelect("crypto")}
-              className={`flex justify-between items-start border rounded-xl px-2 py-4 text-left hover:bg-[#F5F5F5] transition ${
-                selected === "crypto" ? "bg-[#F5F5F5]" : "border-gray-200"
-              }`}
+              className={`flex justify-between items-start border rounded-xl px-2 py-4 text-left hover:bg-[#F5F5F5] transition ${selected === "crypto" ? "bg-[#F5F5F5]" : "border-gray-200"
+                }`}
             >
               <BuyCrypto color="#0088FF" size={16} />
               <div>
@@ -83,9 +171,8 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
             {/* Apple */}
             <button
               onClick={() => handleSelect("apple")}
-              className={`flex justify-between items-start border rounded-xl px-2 py-4 text-left hover:bg-[#F5F5F5] transition ${
-                selected === "apple" ? "bg-[#F5F5F5]" : "border-gray-200"
-              }`}
+              className={`flex justify-between items-start border rounded-xl px-2 py-4 text-left hover:bg-[#F5F5F5] transition ${selected === "apple" ? "bg-[#F5F5F5]" : "border-gray-200"
+                }`}
             >
               <div className="flex gap-2">
                 <Apple color="#0088FF" size={16} variant="Bold" />
@@ -104,88 +191,111 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
 
       {step === 2 && selected === "bank" && (
         <>
-        <h2 className="text-[28px] font-semibold text-center">
+          <h2 className="text-[28px] font-semibold text-center">
             Bank Details
           </h2>
           <button onClick={handleBack} className="pl-2 text-gray-600 mb-3">
-             Back
+            Back
           </button>
-        <div className="p-2 bg-white rounded-2xl text-center">
-          <div className="bg-[#F5F5F5] rounded-2xl py-2">
-          
-          <div className="flex-col gap-4 space-y-4">
+          <div className="p-2 bg-white rounded-2xl text-center">
+            <div className="bg-[#F5F5F5] rounded-2xl py-2">
 
-          <div className="flex justify-between px-4">
-            <p className="text-sm text-[#777777]">Bank name</p>
-            <p>Scotiabank</p>
-          </div>
-          <div className="flex justify-between px-4">
-            <p className="text-sm text-[#777777]">Account name</p>
-            <p>Michael Scott</p>
-          </div>
-          <div className="flex justify-between px-4">
-            <p className="text-sm text-[#777777]">Account Number</p>
-            <p>1234567812</p>
-          </div>
-          <div className="flex justify-between px-4">
-            <p className="text-sm text-[#777777]">Transit Number</p>
-            <p>23123</p>
-          </div>
-          <div className="flex justify-between px-4">
-            <p className="text-sm text-[#777777]">Institution Number</p>
-            <p>995</p>
-          </div>
-          <div className="flex justify-between px-4">
-            <p className="text-sm text-[#777777]">Reference Code</p>
-            <p>SC-99GT43G3</p>
-          </div>
-          </div>
-          <p className="text-sm text-[#777777] mt-4 mb-2">Expires in <span className="text-[#21963B]">29:50</span></p>
+              <div className="flex-col gap-4 space-y-4">
 
+                <div className="flex justify-between px-4">
+                  <p className="text-sm text-[#777777]">Bank name</p>
+                  <p>Scotiabank</p>
+                </div>
+                <div className="flex justify-between px-4">
+                  <p className="text-sm text-[#777777]">Account name</p>
+                  <p>Michael Scott</p>
+                </div>
+                <div className="flex justify-between px-4">
+                  <p className="text-sm text-[#777777]">Account Number</p>
+                  <p>1234567812</p>
+                </div>
+                <div className="flex justify-between px-4">
+                  <p className="text-sm text-[#777777]">Transit Number</p>
+                  <p>23123</p>
+                </div>
+                <div className="flex justify-between px-4">
+                  <p className="text-sm text-[#777777]">Institution Number</p>
+                  <p>995</p>
+                </div>
+                <div className="flex justify-between px-4">
+                  <p className="text-sm text-[#777777]">Reference Code</p>
+                  <p>SC-99GT43G3</p>
+                </div>
+              </div>
+              <p className="text-sm text-[#777777] mt-4 mb-2">Expires in <span className="text-[#21963B]">29:50</span></p>
+
+            </div>
+            <Button className="bg-[#F5F5F5] my-2">I have sent the money</Button>
           </div>
-         <Button className="bg-[#F5F5F5] my-2">I have sent the money</Button>
-        </div>
         </>
       )}
 
       {step === 2 && selected === "crypto" && (
-         <>
-        <h2 className="text-[28px] font-semibold text-center">
+        <>
+          <h2 className="text-[28px] font-semibold text-center">
             Wallet Details
           </h2>
-          <button onClick={handleBack} className="pl-2 text-gray-600 mb-3">
-             Back
-          </button>
-        <div className="p-2 bg-white rounded-2xl text-center">
-          <div className="bg-[#F5F5F5] rounded-2xl p-2">
-          
-          <div className="flex items-center justify-between gap-4 space-y-4 bg-white p-2 rounded-xl">
 
-         <p className="text-[#777777] text-sm">Network</p>
-                    <Select
-                  value={fundNetwork}
-                  onChange={setFundNetwork}
-                  options={assets.map((a) => ({
-                    value: a.id,
-                    label: a.name,
-                    icon: <img src={a.icon} alt={a.name} className="w-4 h-4" />,
-                  }))}
+          <div className="p-2 bg-white rounded-2xl text-center my-4">
+            <div className="bg-[#F5F5F5] rounded-2xl p-2 mb-4 pb-6">
+
+              <div className="flex items-center justify-between gap-4 space-y-4 bg-white p-2 rounded-xl">
+
+                <p className="text-[#777777] text-sm">Network</p>
+                <Select
+                  value={fundWalletSymbol}
+                  onChange={handleNetworkChange}
+                  options={selectOptions}
                   className="w-[150px]"
                 />
-                          </div>
+              </div>
 
-            <img src={QR} alt="QR code"  className="mx-auto mt-4"/>
+              {/* <img src={QR} alt="QR code"  className="mx-auto mt-4"/> */}
+              {/* DYNAMIC QR CODE HERE */}
+              {selectedWalletAddress ? (
+                <QRCodeSVG
+                  value={selectedWalletAddress}
+                  size={160} // Similar to w-40 h-40
+                  level="H"  // Highest correction level
+                  includeMargin={true}
+                  className="mx-auto mt-4"
+                  imageSettings={{
+                    src: logo,  // Replace with your logo path
+                    x: undefined,
+                    y: undefined,
+                    height: 20,
+                    width: 20,
+                    excavate: true, // clears the background behind logo
+                  }}
+                />
+              ) : (
+                // Placeholder/Fallback when address is not yet loaded
+                <div className="mx-auto mt-4 w-40 h-40 flex items-center justify-center text-gray-500 border border-dashed rounded-lg">
+                  Select Wallet
+                </div>
+              )}
 
-          <p className="text-sm text-[#777777] mt-4 mb-2">Your USDC wallet address</p>
-          <p className="text-sm ">0x89f830x89f8a1C30x89f830x89f8a1C3</p>
+              <p className="text-sm text-[#777777] mt-4 mb-2">Your {selectedWallet?.symbol || 'Crypto'} wallet address</p>
+              <p className="text-sm break-all">{selectedWalletAddress || 'Select a wallet to see address...'}</p>
 
+
+            </div>
+            <div className="flex justify-center gap-4">
+
+              <Button className="bg-[#F5F5F5] my-2">Share</Button>
+              <Button
+                onClick={handleCopy}
+                className={`bg-[#0647F7] my-2 text-white`}
+              >
+                {copied ? 'Copied!' : 'Copy'}
+                {copied ? <TickCircle size={18} className="mr-1" color="white" /> : <Copy size={18} className="mr-1" color="white" />}
+              </Button>          </div>
           </div>
-          <div className="flex justify-center gap-4">
-
-         <Button className="bg-[#F5F5F5] my-2">Share</Button>
-         <Button className="bg-[#0647F7] my-2 text-white">Copy</Button>
-          </div>
-        </div>
         </>
       )}
     </Modal>

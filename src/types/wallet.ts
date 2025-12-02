@@ -33,3 +33,18 @@ export interface SupportedCoins {
         }
     ]
 }
+
+export interface WalletBalance {
+  name: string;
+  walletAddress: string;
+  TotalAvailableBalancePrice: number | string;
+  totalAvailableBalance: number | string;
+  symbol: string;
+  logo: string;
+}
+
+export interface BalancesResponse {
+  [key: string]: {
+    [inner: string]: WalletBalance;
+  };
+}

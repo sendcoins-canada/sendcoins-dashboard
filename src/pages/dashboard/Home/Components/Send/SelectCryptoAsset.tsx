@@ -1,13 +1,19 @@
-import React, { useState } from "react";
+import  { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import Btc from "@/assets/Btc.svg";
-import Eth from "@/assets/Eth.svg";
-import Usdc from "@/assets/Usdc.svg";
-import Matic from "@/assets/matic.svg";
 import { TickCircle, SearchNormal1, ArrowLeft2 } from "iconsax-react";
 import Header from "@/components/onboarding/shared/Header";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "@/store";
+import { getAllBalanceThunk } from "@/store/wallet/asyncThunks/getBalances";
+import Btc from "@/assets/Btc.svg";
+
+import Eth from "@/assets/Eth.svg";
+
+import Usdc from "@/assets/Usdc.svg";
+
+import Matic from "@/assets/matic.svg";
 
 type Asset = {
   id: string;
@@ -21,22 +27,74 @@ type Props = {
 };
 
 export const assets: Asset[] = [
+
   { id: "bnb", name: "BNB", icon: Btc },
+
   { id: "eth", name: "Ethereum", icon: Eth },
+
   { id: "polygon", name: "Polygon", icon: Matic },
+
   { id: "usdc", name: "USDC", icon: Usdc },
+
   { id: "eth2", name: "Ethereum", icon: Eth },
+
   { id: "polygon2", name: "Polygon", icon: Matic },
+
   { id: "usdc2", name: "USDC", icon: Usdc },
+
 ];
 
-const SelectCryptoAsset: React.FC<Props> = ({ onContinue }) => {
+
+const SelectCryptoAsset = ({ onContinue }: Props) => {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
   const navigate = useNavigate()
-  const filtered = assets.filter((asset) =>
-    asset.name.toLowerCase().includes(search.toLowerCase())
+  const dispatch = useDispatch()
+
+   const { allBalances, loading } = useSelector(
+    (state: RootState) => state.wallet
   );
+
+  // 2. Process wallet data into the Asset[] structure
+  const walletMap = allBalances?.data?.balances || {};
+  
+  const fetchedAssets: Asset[] = Object.keys(walletMap)
+    .map(key => {
+      // Access the wallet data directly (based on the previous fix)
+      const walletData = walletMap[key]; 
+      
+      if (walletData && walletData.isWalletAvailable) {
+        return {
+          id: walletData.symbol, // Use symbol as the unique ID for selection
+          name: walletData.name,
+          icon: walletData.logo,
+          balance: `${walletData.totalAvailableBalance} ${walletData.symbol}`,
+          symbol: walletData.symbol,
+        } as Asset; 
+      }
+      return null;
+    })
+    .filter((w): w is Asset => w !== null);
+
+  // 3. Fetch data if not already loaded (initial load)
+  useEffect(() => {
+    if (!allBalances && !loading) {
+      const token = localStorage.getItem("azertoken");
+      if (token) {
+        dispatch(getAllBalanceThunk({ token }) as any);
+      }
+    }
+  }, [allBalances, loading, dispatch]);
+
+
+  // 4. Filter logic now applied to fetchedAssets
+   const filtered = fetchedAssets.filter((asset) =>
+ asset.name.toLowerCase().includes(search.toLowerCase()) 
+ );
+    
+ 
+
+ 
 
   return (
     <>
@@ -97,5 +155,6 @@ const SelectCryptoAsset: React.FC<Props> = ({ onContinue }) => {
     </>
   );
 };
+
 
 export default SelectCryptoAsset;

@@ -37,7 +37,6 @@ const MinimalLayout: React.FC<MinimalLayoutProps> = ({ children }) => {
     ? `${user.data.first_name?.[0] ?? ""}${user.data.last_name?.[0] ?? ""}`.toUpperCase()
     : "??";
 
-
   const linkClasses =
     "group flex items-center gap-2 p-2 rounded-lg hover:bg-blue-100 transition-colors";
   const textClasses = "transition-colors";
@@ -87,12 +86,12 @@ const MinimalLayout: React.FC<MinimalLayoutProps> = ({ children }) => {
               <>
                 <Home
                   size="20"
-                  color={isActive ? "#0647F7" : "#8C8C8C"}
-                  className="transition-colors"
+                  color={isActive ? "#0647F7" : "#262626"}
                 />
-                <span
-                  className={`${textClasses} ${isActive ? "text-primaryblue" : "text-[#8C8C8C]"
-                    }`}
+                 <span
+                  className={`${textClasses} text-[14px] font-normal ${
+                    isActive ? "text-[#0647F7]" : "text-[#262626]"
+                  }`}
                 >
                   Home
                 </span>
@@ -111,12 +110,13 @@ const MinimalLayout: React.FC<MinimalLayoutProps> = ({ children }) => {
               <>
                 <People
                   size="20"
-                  color={isActive ? "#0647F7" : "#8C8C8C"}
+                  color={isActive ? "#0647F7" : "#262626"}
                   className="transition-colors"
                 />
-                <span
-                  className={`${textClasses} ${isActive ? "text-[#0647F7]" : "text-[#8C8C8C]"
-                    }`}
+                 <span
+                  className={`${textClasses} text-[14px] font-normal ${
+                    isActive ? "text-[#0647F7]" : "text-[#262626]"
+                  }`}
                 >
                   Recipients
                 </span>
@@ -135,12 +135,13 @@ const MinimalLayout: React.FC<MinimalLayoutProps> = ({ children }) => {
               <>
                 <TransactionMinus
                   size="20"
-                  color={isActive ? "#0647F7" : "#8C8C8C"}
+                  color={isActive ? "#0647F7" : "#262626"}
                   className="transition-colors"
                 />
-                <span
-                  className={`${textClasses} ${isActive ? "text-[#0647F7]" : "text-[#8C8C8C]"
-                    }`}
+                 <span
+                  className={`${textClasses} text-[14px] font-normal ${
+                    isActive ? "text-[#0647F7]" : "text-[#262626]"
+                  }`}
                 >
                   Transactions
                 </span>

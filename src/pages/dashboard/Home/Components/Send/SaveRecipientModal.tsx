@@ -2,8 +2,12 @@ import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Modal from "@/components/ui/Modal";
-import { showSuccess, showWarning } from "@/components/ui/toast"; // assuming shadcn toast
+import { showSuccess, showWarning, showDanger } from "@/components/ui/toast"; // assuming shadcn toast
 import { Coin, KyberNetwork, Wallet2 } from "iconsax-react";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState, AppDispatch } from "@/store";
+import { addRecipientThunk } from "@/store/recipients/asyncThunks/addrecipient";
+import { getRecipientsThunk } from "@/store/recipients/asyncThunks/getAllRecipients";
 
 interface SaveRecipientModalProps {
   open: boolean;
@@ -21,15 +25,43 @@ const SaveRecipientModal: React.FC<SaveRecipientModalProps> = ({
   asset,
 }) => {
   const [name, setName] = useState("");
-
-  const handleSave = () => {
+const dispatch = useDispatch<AppDispatch>()
+  const token = useSelector((state: RootState) => state.auth.token?.azer_token);
+  const handleSave = async () => {
     if (!name.trim()) {
       showWarning("Please enter a recipient name.");
       return;
     }
-    // Simulate API call or local save
-    showSuccess(`Recipient "${name}" saved successfully.`);
-    onOpenChange(false);
+
+      if (!token) {
+      showDanger("Authentication error. Please log in again.");
+      return;
+    }
+
+    const result = await dispatch(
+      addRecipientThunk({
+        token,
+        name,
+        network,
+        asset,
+        walletAddress: address,
+      })
+    );
+  if (addRecipientThunk.fulfilled.match(result)) {
+      showSuccess("Recipient saved successfully.");
+
+      // Optional: Refresh recipients list
+      dispatch(getRecipientsThunk({ token }));
+
+      onOpenChange(false);
+      setName("");
+    } else {
+      const errorMsg =
+        (result.payload as string) ||
+        "Failed to save recipient. Please try again.";
+
+      showDanger(errorMsg);
+    }
   };
 
   return (

@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Coin } from "@/types/wallet";
 import { createWalletThunk } from "./asyncThunks/createWallet";
+import { getAllBalanceThunk, getBNBBalanceThunk, getBTCBalanceThunk, getETHBalanceThunk, getUSDCBalanceThunk, getUSDTBalanceThunk } from "./asyncThunks/getBalances";
 
 interface Wallet {
   id: string;
@@ -19,6 +20,12 @@ interface Network {
   network_logo: string;
 }
 
+type SelectedBalance = {
+  usd: string;
+  amount: string; 
+  symbol: string;
+  logo: string
+};
 
 type WalletState = {
   wallets: Wallet[];
@@ -26,6 +33,8 @@ type WalletState = {
   networks: Network[];
   loading: boolean;
   error?: string;
+  allBalances?: any;
+  selectedBalance: SelectedBalance | null;
 };
 
 const initialState: WalletState = {
@@ -33,6 +42,22 @@ const initialState: WalletState = {
   coins: {},
   networks: [],
   loading: false,
+  allBalances: undefined,
+  selectedBalance: {
+    symbol: "ETH",
+    usd: "0.50",
+    amount: "0.0 USDC",
+    logo: "https://sendcoins.ca/images/ethereum-eth-logo.png?v=029"
+  },
+};
+
+type SingleWalletData = {
+    isWalletAvailable: boolean;
+    symbol: string;
+    TotalAvailableBalancePrice: string;
+    totalAvailableBalance: number;
+    logo: string
+    // ... other properties
 };
 
 const walletSlice = createSlice({
@@ -56,6 +81,10 @@ const walletSlice = createSlice({
       state.coins = {};
       state.networks = [];
     },
+    // <-- NEW: Reducer to set the currently displayed wallet balance
+    setSelectedBalance(state, action: PayloadAction<SelectedBalance>) {
+      state.selectedBalance = action.payload;
+    },
   },
   extraReducers: (builder) => {
     // Create wallet
@@ -73,10 +102,168 @@ const walletSlice = createSlice({
       .addCase(createWalletThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to create wallet";
-      });
+      })
+
+       // ===== BTC ===================================================
+    .addCase(getBTCBalanceThunk.pending, (state) => {
+      state.loading = true;
+    })
+    .addCase(getBTCBalanceThunk.fulfilled, (state, action) => {
+    state.loading = false;
+    // Extract the specific coin data (e.g., action.payload.data.bitcoin)
+    const coinData = action.payload?.data?.bitcoin; 
+
+    if (coinData) {
+        state.coins["BTC"] = coinData;
+        // Update the selectedBalance with the fresh data
+        if (state.selectedBalance?.symbol === 'BTC') {
+            state.selectedBalance = {
+                usd: coinData.TotalAvailableBalancePrice,
+                amount: `${coinData.totalAvailableBalance} ${coinData.symbol}`,
+                symbol: coinData.symbol,
+                logo: coinData.logo
+            };
+        }
+    }
+})
+    .addCase(getBTCBalanceThunk.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    })
+
+    // ===== ETH ===================================================
+    .addCase(getETHBalanceThunk.pending, (state) => {
+      state.loading = true;
+    })
+    .addCase(getETHBalanceThunk.fulfilled, (state, action) => {
+      state.loading = false;
+      const coinData = action.payload?.data?.ethereum || action.payload?.data?.eth; 
+
+    if (coinData) {
+        state.coins["ETH"] = coinData;
+        if (state.selectedBalance?.symbol === 'ETH') {
+            state.selectedBalance = {
+                usd: coinData.TotalAvailableBalancePrice,
+                amount: `${coinData.totalAvailableBalance} ${coinData.symbol}`,
+                symbol: coinData.symbol,
+                logo: coinData.logo
+            };
+        }
+    }
+    })
+    .addCase(getETHBalanceThunk.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    })
+
+    // ===== BNB ===================================================
+    .addCase(getBNBBalanceThunk.pending, (state) => {
+      state.loading = true;
+    })
+    .addCase(getBNBBalanceThunk.fulfilled, (state, action) => {
+      state.loading = false;
+      const coinData = action.payload?.data?.Binancecoin; 
+
+    if (coinData) {
+        state.coins["BNB"] = coinData;
+        if (state.selectedBalance?.symbol === 'BNB') {
+            state.selectedBalance = {
+                usd: coinData.TotalAvailableBalancePrice,
+                amount: `${coinData.totalAvailableBalance} ${coinData.symbol}`,
+                symbol: coinData.symbol,
+                                logo: coinData.logo
+
+            };
+        }
+    }
+    })
+    .addCase(getBNBBalanceThunk.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    })
+
+    // ===== USDT ===================================================
+    .addCase(getUSDTBalanceThunk.pending, (state) => {
+      state.loading = true;
+    })
+    .addCase(getUSDTBalanceThunk.fulfilled, (state, action) => {
+      state.loading = false;
+      const coinData = action.payload?.data?.Tether; 
+
+    if (coinData) {
+        state.coins["USDT"] = coinData;
+        if (state.selectedBalance?.symbol === 'USDT') {
+            state.selectedBalance = {
+                usd: coinData.TotalAvailableBalancePrice,
+                amount: `${coinData.totalAvailableBalance} ${coinData.symbol}`,
+                symbol: coinData.symbol,
+                                logo: coinData.logo
+
+            };
+        }
+    }
+    })
+    .addCase(getUSDTBalanceThunk.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    })
+
+    // ===== USDC ===================================================
+    .addCase(getUSDCBalanceThunk.pending, (state) => {
+      state.loading = true;
+    })
+    .addCase(getUSDCBalanceThunk.fulfilled, (state, action) => {
+      state.loading = false;
+      const coinData = action.payload?.data?.USDC; 
+
+    if (coinData) {
+        state.coins["USDC"] = coinData;
+        if (state.selectedBalance?.symbol === 'USDC') {
+            state.selectedBalance = {
+                usd: coinData.TotalAvailableBalancePrice,
+                amount: `${coinData.totalAvailableBalance} ${coinData.symbol}`,
+                symbol: coinData.symbol,
+                                logo: coinData.logo
+
+            };
+        }
+    }
+    })
+    .addCase(getUSDCBalanceThunk.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    })
+
+    // ===== ALL BALANCES ==========================================
+    .addCase(getAllBalanceThunk.pending, (state) => {
+      state.loading = true;
+    })
+    .addCase(getAllBalanceThunk.fulfilled, (state, action) => {
+      state.loading = false;
+      state.allBalances = action.payload; // all balances at once
+      // Optionally set an initial selected balance from the first wallet found
+          const firstBalanceKey = Object.keys(action.payload.data?.balances || {})[0];
+          if (firstBalanceKey) {
+            const firstWallet = Object.values(action.payload.data.balances[firstBalanceKey])[0] as SingleWalletData;
+            if (firstWallet.isWalletAvailable) {
+                state.selectedBalance = {
+                    symbol: firstWallet.symbol,
+                    usd: firstWallet.TotalAvailableBalancePrice,
+                    amount: `${firstWallet.totalAvailableBalance} ${firstWallet.symbol}`,
+                                    logo: firstWallet.logo
+
+                };
+            }
+          }
+    })
+    .addCase(getAllBalanceThunk.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    });
+
   },
 });
 
-export const { setWallets, addWallet, setCoins, setNetworks, clearWallets } =
+export const { setWallets, addWallet, setCoins, setNetworks, clearWallets, setSelectedBalance } =
   walletSlice.actions;
 export default walletSlice.reducer;

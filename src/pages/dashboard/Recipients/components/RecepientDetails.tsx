@@ -3,6 +3,7 @@ import { Share, Edit2, Star1, ArrowLeft2 } from "iconsax-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+
 interface RecipientDetailsProps {
   recipient?: any;  
 }
@@ -51,6 +52,11 @@ const RecipientDetails: React.FC<RecipientDetailsProps> = ({ recipient }) => {
         },
       ]);
       const navigate = useNavigate()
+      console.log(recipient)
+      const shortenAddress = (address: string) => {
+    if (!address) return "N/A";
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
     
   return (
     <div className="px-6 py-10 flex flex-col md:flex-row md:gap-40 max-w-6xl">
@@ -66,11 +72,11 @@ const RecipientDetails: React.FC<RecipientDetailsProps> = ({ recipient }) => {
           >
             {recipient.initials}
           </div>
-          {/* <img
+          <img
             src={recipient.coinIcon}
             alt="coin"
             className="w-5 h-5 absolute bottom-0 right-0 bg-white rounded-full p-0.5"
-          /> */}
+          />
         </div>
 
         <h2 className="text-xl font-semibold mb-4 text-center">{recipient.name}</h2>
@@ -84,18 +90,18 @@ const RecipientDetails: React.FC<RecipientDetailsProps> = ({ recipient }) => {
         <div className="text-sm text-gray-600 space-y-3 md:mb-6">
           <div className="flex justify-between">
             <p className="text-sm mb-1">Wallet Address</p>
-            <p className="font-mono">{recipient.address}</p>
+            <p className="font-mono">{shortenAddress(recipient.walletAddress)}</p>
           </div>
           <div className="flex justify-between items-center gap-2 ">
             <p>Network</p>
             <div className="flex gap-1">
 
             <img
-              src={recipient.coinIcon}
+              src={recipient.logo}
               className="w-4 h-4"
               alt="network"
               />
-            <span>{recipient.currency}</span>
+            <span>{recipient.asset}</span>
               </div>
           </div>
         </div>

@@ -59,10 +59,8 @@ const Verify: React.FC = () => {
         const result = await dispatch(
           verifyOtpThunk({ email, code: finalCode, purpose })
         );
-         console.log("THUNK RESULT:", result);
 
         if (verifyOtpThunk.fulfilled.match(result)) {
-           console.log("OTP Verified Successfully", result.payload);
           dispatch(setCode(finalCode));
           showSuccess("Code verified!");
 

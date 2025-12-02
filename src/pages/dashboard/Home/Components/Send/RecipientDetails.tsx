@@ -1,13 +1,15 @@
 // src/components/send/RecipientDetails.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 // import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/onboarding/shared/Header";
 import { useNavigate } from "react-router-dom";
 import { Scanner, ArrowLeft2 } from "iconsax-react";
 import { Select } from "@/components/ui/select";
-import { assets } from "./SelectCryptoAsset";
 import SaveRecipientModal from "./SaveRecipientModal";
+import { getRecipientsThunk } from "@/store/recipients/asyncThunks/getAllRecipients";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState, AppDispatch } from "@/store";
 // import { showSuccess } from "@/components/ui/toast";
 
 type Props = {
@@ -18,10 +20,20 @@ type Props = {
 
 const RecipientDetails: React.FC<Props> = ({ asset, onNext }) => {
   const navigate = useNavigate();
-  const [network, setNetwork] = useState("eth");
   const [address, setAddress] = useState("");
   const [openSaveModal, setOpenSaveModal] = useState(false);
-
+  const dispatch = useDispatch<AppDispatch>();
+  const token = useSelector((state: RootState) => state.auth.token?.azer_token);
+  const recipients = useSelector((state: RootState) => state.recipients.recipients);
+  
+  // extract unique networks
+  const availableNetworks = Array.from(
+    new Map(
+      recipients.map(r => [r.network, r]) // use Map to deduplicate by network
+    ).values()
+  );
+  const [network, setNetwork] = useState<string>(availableNetworks[0]?.network ?? "");
+  
   const valid = address.trim() !== "";
 
   const handlePaste = async () => {
@@ -32,6 +44,11 @@ const RecipientDetails: React.FC<Props> = ({ asset, onNext }) => {
       alert("Clipboard access denied. Please paste manually.");
     }
   };
+  useEffect(() => {
+    if (token) {
+      dispatch(getRecipientsThunk({ token }));
+    }
+  }, [dispatch, token]);
 
   return (
     <>
@@ -61,14 +78,18 @@ const RecipientDetails: React.FC<Props> = ({ asset, onNext }) => {
             <label className="text-sm text-neutral-600">Network</label>
             <Select
               value={network}
-              onChange={setNetwork}
-              options={assets.map((a) => ({
-                value: a.id,
-                label: a.name,
-                icon: <img src={a.icon} alt={a.name} className="w-5 h-5" />,
+              onChange={(value: string) => {
+                setNetwork(value);
+                // auto-fill wallet address
+                const recipient = availableNetworks.find(r => r.network === value);
+                if (recipient) setAddress(recipient.walletAddress);
+              }}
+              options={availableNetworks.map(r => ({
+                value: r.network,
+                label: r.network,
               }))}
-              className="mt-1"
             />
+
           </div>
 
           {/* Wallet Address Input */}

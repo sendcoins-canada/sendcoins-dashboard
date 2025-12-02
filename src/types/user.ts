@@ -1,6 +1,5 @@
 export type User = {
   data: { 
-  
   azer_id: number;
   first_name: string;
   last_name: string;

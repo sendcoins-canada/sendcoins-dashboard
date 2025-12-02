@@ -22,7 +22,7 @@ const EnterAmount: React.FC<EnterAmountProps> = ({ onNext }) => {
   const [receiveAsset, setReceiveAsset] = useState("usdc");
   const [error, setError] = useState("");
     const [isWalletModalOpen, setWalletModalOpen] = useState(false);
-
+console.log(sendAsset, receiveAsset)
 
   const balance = 1500;
   const exchangeRate = "$1 = ₦2000";
