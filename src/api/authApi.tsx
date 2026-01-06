@@ -219,3 +219,32 @@ export const changePasscode = async (data: { oldCode: string; newCode: string })
   const response = await api.post("/auth/change-passcode", data);
   return response.data;
 };
+
+// Step 1: Request Reset (requires token, newPasscode, confirmPasscode)
+export const requestPasscodeReset = async (data: { 
+  token: string; 
+  newPasscode: string; 
+  confirmPasscode: string 
+}) => {
+  const formData = new FormData();
+  formData.append("token", data.token);
+  formData.append("newPasscode", data.newPasscode);
+  formData.append("confirmPasscode", data.confirmPasscode);
+
+  const response = await api.post("/auth/passcode/reset/request", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
+// Step 2: Confirm Reset (requires authHash and newPasscode)
+export const confirmPasscodeReset = async (data: { 
+  authHash: string; 
+  newPasscode: string 
+}) => {
+  const response = await api.post("/auth/passcode/reset", {
+    authHash: data.authHash,
+    newPasscode: data.newPasscode,
+  });
+  return response.data;
+};

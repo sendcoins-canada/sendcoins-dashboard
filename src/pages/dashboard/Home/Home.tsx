@@ -14,76 +14,41 @@ import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "@/store";
 import { getTransactionsThunk } from "@/store/transactions/asyncThunks/getTransactions";
 import { mapListToDisplay } from "@/types/transaction";
+import { getAllBalanceThunk } from "@/store/wallet/asyncThunks/getBalances";
 
 
 const Home: React.FC = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const [showBalance, setShowBalance] = useState(false);
-  // const [transactions, _setTransactions] = useState([
-  //   {
-  //     id: 1,
-  //     name: "Dwight Schrute",
-  //     status: "Failed",
-  //     time: "Today, 4:29pm",
-  //     amount: "+$20,000",
-  //     color: "bg-[#CCE9FF]",
-  //     textColor: "text-red-500",
-  //     tagColor: "bg-red-100"
-  //   },
-  //   {
-  //     id: 2,
-  //     name: "Michael Scott",
-  //     status: "Successful",
-  //     time: "Today, 4:29pm",
-  //     amount: "+$20,000",
-  //     color: "bg-[#DCFCE7]",
-  //     textColor: "text-green-500",
-  //     tagColor: "bg-green-100"
-  //   },
-  //   {
-  //     id: 3,
-  //     name: "Pam Beesly",
-  //     status: "Processing",
-  //     time: "Today, 4:29pm",
-  //     amount: "+$20,000",
-  //     color: "bg-[#FAE6FE]",
-  //     textColor: "text-yellow-500",
-  //     tagColor: "bg-yellow-100"
-  //   },
-  //   {
-  //     id: 4,
-  //     name: "Kevin Malone",
-  //     status: "Processing",
-  //     time: "Today, 4:29pm",
-  //     amount: "+$20,000",
-  //     color: "bg-[#FEF9C3]",
-  //     textColor: "text-yellow-500",
-  //     tagColor: "bg-green-100"
-
-  //   },
-  // ]);
   const [walletOpen, setWalletOpen] = useState(false);
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
   const [isFundingOpen, setIsFundingOpen] = useState(false)
   // 1. Get transaction data and loading state from the Redux store
     const { transactions: fetchedTransactions, loading: transactionsLoading, error: transactionsError   } = useSelector((state: RootState) => state.transaction);
     
-  const selectedBalance = useSelector((state: RootState) => state.wallet.selectedBalance)
+const {selectedBalance } = useSelector((state: RootState) => state.wallet);
   const displayedBalance = selectedBalance || {
-    symbol: "Select Wallet",
+    symbol: "Loading......",
     usd: "$0.00",
     amount: "0.00 XXX",
     logo: ""
   };
   
   // 3. Fetch transactions on component mount
-    useEffect(() => {
-        const token = localStorage.getItem("azertoken");
-        if (token) {
-            dispatch(getTransactionsThunk({ token: token }) as any);
-        }
-    }, [dispatch]);
+   useEffect(() => {
+  const token = localStorage.getItem("azertoken");
+  if (token) {
+    // 1. Fetch transactions immediately
+    dispatch(getTransactionsThunk({ token }) as any);
+
+    if (!selectedBalance) {
+      dispatch(getAllBalanceThunk({ token }) as any);
+    }
+  }
+}, [dispatch]); 
+
+
     const processedTransactions = fetchedTransactions.map(mapListToDisplay);
 
   const handleSelectOption = (option: "crypto" | "fiat") => {
@@ -127,7 +92,7 @@ const Home: React.FC = () => {
               <p className="text-[28px] text-[#777777]">
                 <span className="text-primary text-5xl">
                   {showBalance
-                    ? String(displayedBalance.usd).replace('$', '') //  Use Redux USD value
+                    ? String(displayedBalance.usd).replace('$', '') 
                     : <span className="text-[#D2D2D2]"> ***** </span>}
                 </span>
                 {displayedBalance.symbol}

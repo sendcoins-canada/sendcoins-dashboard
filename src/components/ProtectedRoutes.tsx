@@ -7,9 +7,6 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
   const accessToken = auth.token?.azer_token;
 
-  console.log("Auth state:", auth);
-  console.log("Access token:", accessToken);
-
   // wait for redux-persist / hydration
   if (auth.loading) {
     return null;
