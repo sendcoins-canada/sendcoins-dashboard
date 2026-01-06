@@ -10,14 +10,17 @@ export interface RawApiTransactionList {
     keychain: string; // Used for fetching details
     asset_amount: string;
     status: 'completed' | 'pending' | 'processing' | string;
-    transaction_type: 'buy' | 'sell' | string;
+    type: 'OUTGOING' | 'INCOMING' | string;
     timestamp: string;
+}
+export interface Merchant {
+
 }
 
 // --- B. Raw API Input Type (Transaction Detail Endpoint) ---
 export interface RawTransactionDetail {
     history_id: number;
-    merchant_keychain: string;
+    merchant: Merchant;
     reference: string;
     keychain: string;
     crypto_sign: string;
@@ -32,7 +35,7 @@ export interface RawTransactionDetail {
     // Add other fields needed for UI display, e.g., fees, exchange rates, etc.
     exchange_rate: string;
     location: string;
-    created_at: string; // Used for date/time conversion
+    createdAt: string; // Used for date/time conversion
     // ...
 }
 
@@ -41,82 +44,134 @@ export interface RawTransactionDetail {
 export type DisplayTransactionType = UITransaction;
 
 // mapListToDisplay for Home.tsx/Transactions.tsx List View
-export const mapListToDisplay = (tx: RawApiTransactionList) => {
-    // Determine status text, color, and tag color based on tx.status
-    let textColor = 'text-gray-500';
-    let tagColor = 'bg-gray-100';
-    let statusText = 'Unknown';
-    
-    switch (tx.status.toLowerCase()) {
-        case 'completed':
-            textColor = "text-green-500"; tagColor = "bg-green-100"; statusText = "Successful";
-            break;
-        case 'pending':
-        case 'processing':
-            textColor = "text-yellow-500"; tagColor = "bg-yellow-100"; statusText = "Processing";
-            break;
-        default:
-            textColor = "text-red-500"; tagColor = "bg-red-100"; statusText = "Failed";
-    }
+export const mapListToDisplay = (tx: any) => {
+  const statusMap = {
+    completed: { text: "Successful", textColor: "text-green-500", tagColor: "bg-green-100" },
+    pending: { text: "Processing", textColor: "text-yellow-500", tagColor: "bg-yellow-100" },
+    processing: { text: "Processing", textColor: "text-yellow-500", tagColor: "bg-yellow-100" },
+  };
 
-    const amountSign = tx.transaction_type === 'sell' ? '-' : '+';
-    const amountValue = tx.asset_amount; 
-    const currency = tx.crypto_sign.toUpperCase();
-    const dateObj = new Date(tx.timestamp);
+  const status = statusMap[tx.status?.toLowerCase() as keyof typeof statusMap] || {
+    text: "Failed",
+    textColor: "text-red-500",
+    tagColor: "bg-red-100",
+  };
 
-    return {
-        id: tx.history_id,
-        keychain: tx.keychain, // Keep keychain here for fetching details later
-        name: tx.reference.slice(0, 8), // Basic display name
-        status: statusText, 
-        time: dateObj.toLocaleString(),
-        amount: `${amountSign}${amountValue} ${currency}`, // e.g., +0.00100000 BTC
-        color: 'bg-[#DCFCE7]', // Fixed list color
-        textColor: textColor,
-        tagColor: tagColor,
-        // Minimal fields required for the list item click handler:
-        currency: currency, 
-        transaction_type: tx.transaction_type
-    };
+  return {
+    id: tx.id,
+    name: tx.destination?.name ?? "Wallet Transfer",
+    status: status.text,
+    time: new Date(tx.createdAt).toLocaleString(),
+    amount: `${tx.type === "OUTGOING" ? "-" : "+"}${tx.amount.crypto} ${tx.currency.crypto}`,
+    color: "bg-[#DCFCE7]",
+    textColor: status.textColor,
+    tagColor: status.tagColor,
+    txId: tx.txId,
+    // keychain: tx.merchant?.keychain,
+
+    // For details page
+    currency: tx.currency.crypto,
+    transaction_type: tx.type,
+  };
 };
+
 
 // mapDetailToDisplay for TransactionDetails.tsx
-export const mapDetailToDisplay = (tx: RawTransactionDetail): DisplayTransactionType => {
-    
-    // --- Status/Time Logic ---
-    let transactionStatus: "Successful" | "Failed" | "Processing";
-    
-    switch (tx.status.toLowerCase()) {
-        case 'completed': transactionStatus = "Successful"; break;
-        case 'pending':
-        case 'processing': transactionStatus = "Processing"; break;
-        default: transactionStatus = "Failed";
-    }
-    
-    const dateObj = new Date(Number(tx.created_at) * 1000); // Assuming created_at is Unix timestamp (seconds)
-    const transactionDate = dateObj.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-    const transactionTime = dateObj.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+export const mapDetailToDisplay = (tx: any): DisplayTransactionType => {
+  // --- Status Mapping ---
+  let transactionStatus: "Successful" | "Failed" | "Processing";
 
-    // --- Final Display Object (must match TransactionDetails.tsx interface) ---
-    return {
-        id: tx.history_id,
-        name: tx.merchant_bank_name || 'N/A', // Recipient name (Merchant Name)
-        status: transactionStatus,
-        time: dateObj.toLocaleString(),
-        amount: tx.crypto_amount, // Amount without sign for details view
-        currency: tx.crypto_sign.toUpperCase(),
-        color: 'bg-green-500', // Placeholder for color
-        textColor: 'text-green-500', // Placeholder
-        tagColor: 'bg-green-100', // Placeholder
+  switch (tx.status?.toLowerCase()) {
+    case "completed":
+      transactionStatus = "Successful";
+      break;
+    case "pending":
+    case "processing":
+      transactionStatus = "Processing";
+      break;
+    default:
+      transactionStatus = "Failed";
+  }
 
-        // --- Detail-Specific Fields ---
-        senderWalletAddress: tx.keychain,
-        recipientWalletAddress: tx.merchant_keychain,
-        networkName: tx.network || tx.crypto_sign.toUpperCase(),
-        transactionId: tx.reference,
-        transactionDate: transactionDate,
-        transactionTime: transactionTime,
-        usdEquivalent: `${tx.currency_amount} ${tx.currency_sign.toUpperCase()}`,
-        memo: `Exchanged at ${tx.exchange_rate} ${tx.currency_sign}`,
-    };
+  // --- Date Handling (ISO String) ---
+  const dateObj = new Date(tx.createdAt);
+  const transactionDate = dateObj.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  const transactionTime = dateObj.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+
+  // --- Determine Display Name ---
+  const name =
+    tx.merchant?.name || // BUY_SELL merchant name
+    tx.destination?.name || // External wallet recipient
+    tx.source?.name || // For merchant source transfers
+    "Transaction";
+
+  // --- Determine Sender/Recipient ---
+  const senderWalletAddress =
+    tx.source?.address ?? ""; // For BUY_SELL or WALLET
+
+  const recipientWalletAddress =
+    tx.destination?.address ??
+    tx.merchant?.bankAccount ??
+    "";
+
+  // --- Determine Network ---
+  const networkName =
+    tx.network ||
+    tx.currency?.crypto?.toUpperCase() ||
+    "Unknown";
+
+  // --- USD / Fiat Equivalent ---
+  const usdEquivalent = tx.amount?.display ?? ""; // e.g. N745,000
+
+  // --- Memo / Extra Info ---
+  const memo =
+    tx.paymentMethod ||
+    tx.statusNotes ||
+    "";
+
+  return {
+    id: tx.id,
+    name,
+    status: transactionStatus,
+    time: dateObj.toLocaleString(),
+    amount: tx.amount?.crypto ?? 0,
+    currency: (tx.currency?.crypto || "").toUpperCase(),
+    color: "bg-green-500",
+    textColor: "text-green-500",
+    tagColor: "bg-green-100",
+
+    // Detail-specific fields
+    senderWalletAddress,
+    recipientWalletAddress,
+    networkName,
+    transactionId: tx.txId,
+    transactionDate,
+    transactionTime,
+    usdEquivalent,
+    memo,
+  };
 };
+
+// gas fees
+export interface GetGasFee {
+  token?: string;
+  TransactionType?: string; // e.g., 'DEPOSIT', 'WITHDRAWAL', 'TRANSFER'
+  asset: string;           // The specific asset/currency identifier
+  symbol: string;          // The symbol for the asset (e.g., 'BTC', 'ETH', 'USD')
+  amount: number | string; // The amount to transact
+}
+
+export interface GasFeeData {
+  isSuccess: boolean | string;
+  amount: string;
+  initialFeeUsd: number;
+  gasFee: number;
+  symbol: string;
+  plusFee: number;
+  minusFee: number;
+  usdConversion: number;
+}
+
+export interface GasFeeResponse {
+  data: GasFeeData;
+}

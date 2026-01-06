@@ -2,6 +2,8 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { getTransactionsThunk } from "./asyncThunks/getTransactions"; 
 import { getTransactionDetailThunk } from "./asyncThunks/getTransactionDetail";
 import type { RawTransactionDetail, RawApiTransactionList } from "@/types/transaction";
+import type { GasFeeData } from "@/types/transaction";
+import { getGasFeeThunk } from "./asyncThunks/getGasFee";
 
 // Define the structure of a single transaction item based on typical needs
 // NOTE: Adjust this interface based on the exact structure of your API response data
@@ -22,7 +24,7 @@ interface TransactionState {
   loading: boolean;
   error: string | null;
   hasLoaded: boolean;
-
+  gasFeeData: GasFeeData | null;
   selectedDetail: RawTransactionDetail | null; // Stores the raw detail data
   detailLoading: boolean;
   detailError: string | null;
@@ -36,6 +38,7 @@ const initialState: TransactionState = {
   selectedDetail: null,
   detailLoading: false,
   detailError: null,
+  gasFeeData: null
 };
 
 const transactionSlice = createSlice({
@@ -101,6 +104,21 @@ const transactionSlice = createSlice({
         state.detailLoading = false;
         state.detailError = action.payload as string || "Failed to load transaction detail.";
         state.selectedDetail = null;
+    })
+    .addCase(getGasFeeThunk.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    })
+    .addCase(getGasFeeThunk.fulfilled, (state, action) => {
+      state.loading = false;
+      state.gasFeeData = action.payload;
+    })
+    .addCase(getGasFeeThunk.rejected, (state, action) => {
+      state.loading = false;
+      state.error =
+        (action.payload as string) ||
+        action.error.message ||
+        "Failed to get gas fee";
     });
   },
 });

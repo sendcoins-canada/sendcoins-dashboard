@@ -15,7 +15,7 @@ import type { RootState, AppDispatch } from "@/store";
 type Props = {
   asset: string;
   onBack: () => void;
-  onNext: (data: { network: string; address: string }) => void;
+  onNext: (data: { network: string; address: string; keychain: string }) => void;
 };
 
 const RecipientDetails: React.FC<Props> = ({ asset, onNext }) => {
@@ -27,12 +27,17 @@ const RecipientDetails: React.FC<Props> = ({ asset, onNext }) => {
   const recipients = useSelector((state: RootState) => state.recipients.recipients);
   
   // extract unique networks
-  const availableNetworks = Array.from(
-    new Map(
-      recipients.map(r => [r.network, r]) // use Map to deduplicate by network
-    ).values()
-  );
-  const [network, setNetwork] = useState<string>(availableNetworks[0]?.network ?? "");
+const availableNetworks = Array.from(
+  new Map(recipients.map(r => [`${r.network}-${r.asset}`, r])).values()
+).map(r => ({
+  label: `${r.network} (${r.asset})`,
+  value: `${r.network}-${r.asset}`,
+  network: r.network,
+  walletAddress: r.walletAddress,
+  asset: r.asset
+}));
+
+  const [network, setNetwork] = useState<string>(availableNetworks[0]?.value ?? "");
   
   const valid = address.trim() !== "";
 
@@ -81,12 +86,12 @@ const RecipientDetails: React.FC<Props> = ({ asset, onNext }) => {
               onChange={(value: string) => {
                 setNetwork(value);
                 // auto-fill wallet address
-                const recipient = availableNetworks.find(r => r.network === value);
+                const recipient = availableNetworks.find(r => r.value === value);
                 if (recipient) setAddress(recipient.walletAddress);
               }}
               options={availableNetworks.map(r => ({
-                value: r.network,
-                label: r.network,
+                value: r.value,
+                label: r.label,
               }))}
             />
 
@@ -130,7 +135,7 @@ const RecipientDetails: React.FC<Props> = ({ asset, onNext }) => {
           {/* Continue button */}
           <div className="flex justify-center mt-30">
             <Button
-              onClick={() => onNext({ network, address })}
+              onClick={() => onNext({ network, address, keychain: '' })}
               disabled={!valid}
               className="rounded-full bg-[#0052FF] hover:bg-[#0040CC] text-white px-10 py-2"
             >

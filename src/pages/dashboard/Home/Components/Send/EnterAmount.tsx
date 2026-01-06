@@ -2,32 +2,48 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/onboarding/shared/Header";
-import { Select } from "@/components/ui/select";
-import { assets } from "./SelectCryptoAsset";
 import { useNavigate } from "react-router-dom";
 import { Convert, Money, Money2, ArrowLeft2 } from "iconsax-react";
 import WalletSelectionModal from "@/pages/dashboard/WalletSelectionModal";
+import { useGasFee } from "@/store/hooks/useGasFee";
+
 
 interface EnterAmountProps {
   asset: string;
   onBack: () => void;
   onNext: (amount: string) => void;
+  recipient: {
+    name: string;
+    address?: string;
+    network?: string;
+  };
 }
 
-const EnterAmount: React.FC<EnterAmountProps> = ({ onNext }) => {
+
+const EnterAmount: React.FC<EnterAmountProps> = ({ asset, onNext, recipient }) => {
   const navigate = useNavigate();
   const [sendAmount, setSendAmount] = useState("");
   const [receiveAmount, setReceiveAmount] = useState("");
-  const [sendAsset, setSendAsset] = useState("cad");
-  const [receiveAsset, setReceiveAsset] = useState("usdc");
+  const [sendAsset, _setSendAsset] = useState(asset);
+  const [receiveAsset, _setReceiveAsset] = useState("usdc");
   const [error, setError] = useState("");
-    const [isWalletModalOpen, setWalletModalOpen] = useState(false);
-console.log(sendAsset, receiveAsset)
+  const [isWalletModalOpen, setWalletModalOpen] = useState(false);
+
+
+console.log(sendAsset, recipient)
+
+const { gasFee, total } = useGasFee({
+  amount: sendAmount,
+  asset: 'crypto',
+  symbol: sendAsset.toLowerCase()
+});
+
+console.log(gasFee) 
 
   const balance = 1500;
   const exchangeRate = "$1 = ₦2000";
   const platformFee = 5;
-  const total = Number(sendAmount || 0) + platformFee;
+  // const total = Number(sendAmount || 0) + platformFee;
 
   const handleContinue = () => {
     if (!sendAmount.trim() || isNaN(Number(sendAmount))) {
@@ -74,16 +90,20 @@ console.log(sendAsset, receiveAsset)
                 <label className="text-sm text-neutral-500">
                   Amount to send
                 </label>
-                <Select
+                <p className="bg-[#F5F5F5] px-6 py-1 rounded-full text-primary">{sendAsset}</p>
+
+                {/* <Select
                   value={sendAsset}
                   onChange={setSendAsset}
-                  options={assets.map((a) => ({
-                    value: a.id,
-                    label: a.name,
-                    icon: <img src={a.icon} alt={a.name} className="w-4 h-4" />,
-                  }))}
+                  // options={assets.map((a) => ({
+                  //   value: a.id,
+                  //   label: a.name,
+                  //   icon: <img src={a.icon} alt={a.name} className="w-4 h-4" />,
+                  // }))}
+                  
                   className="w-[150px]"
-                />
+                  disabled={true}                 
+                /> */}
               </div>
 
               <input
@@ -107,16 +127,18 @@ console.log(sendAsset, receiveAsset)
                 <label className="text-sm text-neutral-500">
                   Amount they’ll receive
                 </label>
-                <Select
+                <p className="bg-[#F5F5F5] px-6 py-1 rounded-full text-primary">{recipient.network}</p>
+                {/* <Select
                   value={receiveAsset}
                   onChange={setReceiveAsset}
-                  options={assets.map((a) => ({
-                    value: a.id,
-                    label: a.name,
-                    icon: <img src={a.icon} alt={a.name} className="w-4 h-4" />,
-                  }))}
+                  // options={assets.map((a) => ({
+                  //   value: a.id,
+                  //   label: a.name,
+                  //   icon: <img src={a.icon} alt={a.name} className="w-4 h-4" />,
+                  // }))}
                   className="w-[150px]"
-                />
+                  disabled={true}
+                /> */}
               </div>
 
               <input

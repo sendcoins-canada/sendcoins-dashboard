@@ -9,7 +9,7 @@ import { showSuccess, showDanger } from "@/components/ui/toast";
 import { createPasscodeThunk } from "@/store/auth/asyncThunks/createPasscode";
 
 interface EnterPasscodeProps {
-  onSuccess?: () => void;
+  onSuccess?: (passcode: string) => void;
 }
 
 const EnterPasscode: React.FC<EnterPasscodeProps> = ({ onSuccess }) => {
@@ -26,7 +26,7 @@ const EnterPasscode: React.FC<EnterPasscodeProps> = ({ onSuccess }) => {
     const result = await dispatch(createPasscodeThunk({ code }));
     if (createPasscodeThunk.fulfilled.match(result)) {
       showSuccess(result.payload.message || "Passcode created successfully!");
-      onSuccess?.();
+      onSuccess?.(code);
     } else {
       showDanger(result.payload || "Failed to create passcode.");
     }
@@ -57,7 +57,6 @@ const EnterPasscode: React.FC<EnterPasscodeProps> = ({ onSuccess }) => {
       if (passcode.join("") === firstPasscode.join("")) {
         handleCreatePasscode(passcode.join(""));
         showSuccess("Passcode confirmed!");
-        onSuccess?.();
       } else {
         showDanger("Code doesn't match");
         setPasscode([]);

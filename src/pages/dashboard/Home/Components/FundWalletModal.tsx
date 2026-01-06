@@ -1,9 +1,5 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Btc from "@/assets/Btc.svg"
-import Eth from "@/assets/Eth.svg"
-import matic from "@/assets/matic.svg"
-import usdc from "@/assets/Usdc.svg"
 import { Button } from "@/components/ui/button";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllBalanceThunk, getBNBBalanceThunk, getBTCBalanceThunk, getETHBalanceThunk, getUSDCBalanceThunk, getUSDTBalanceThunk } from "@/store/wallet/asyncThunks/getBalances";
@@ -11,49 +7,7 @@ import type { RootState } from "@/store";
 import type { BalancesResponse } from "@/types/wallet";
 import { setSelectedBalance } from "@/store/wallet/slice";
 
-export const wallets = [
-  {
-    name: "My Bitcoin wallet",
-    address: "Dw49Rt...aJC3",
-    amountUSD: "$1,000",
-    amountBTC: "0.05 BTC",
-    color: "bg-orange-500",
-    icon: Btc,
-  },
-  {
-    name: "Default wallet 1",
-    address: "Dw49Rt...aJC3",
-    amountUSD: "$1,000",
-    amountBTC: "0.05 BTC",
-    color: "bg-gray-400",
-    icon: Eth,
-  },
-  {
-    name: "USDC Wallet",
-    address: "Dw49Rt...aJC3",
-    amountUSD: "$1,000",
-    amountBTC: "0.05 BTC",
-    color: "bg-blue-500",
-    icon: usdc,
-  },
-  {
-    name: "Savings Eth wallet",
-    address: "Dw49Rt...aJC3",
-    amountUSD: "$1,000",
-    amountBTC: "0.05 BTC",
-    color: "bg-purple-500",
-    icon: Eth,
-  },
-  {
-    name: "Matic",
-    address: "Dw49Rt...aJC3",
-    amountUSD: "$1,000",
-    amountBTC: "0.05 BTC",
-    color: "bg-indigo-500",
-    icon: matic,
-  },
 
-];
 
 type ParsedWallet = {
   name: string;

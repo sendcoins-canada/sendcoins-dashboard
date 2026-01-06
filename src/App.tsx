@@ -28,6 +28,7 @@ import AccountDeleted from "./components/AccountDeleted";
 import ChangePasscode from "./pages/dashboard/Settings/ChangePasscode.tsx";
 import RecipientDetailsPage from "./pages/dashboard/Recipients/components/RecepientDetailsPage.tsx";
 import TransactionDetails from "./pages/dashboard/Transactions/components/TransactionDetails.tsx";
+// import FiatRecipientSelect from "./pages/dashboard/Home/Components/Send/FiatRecipientSelection.tsx";
 
 function App() {
   return (
@@ -129,7 +130,7 @@ function App() {
           }
         />
         <Route
-          path="/dashboard/transactions/:keychain"
+          path="/dashboard/transactions/:txId"
           element={
             <ProtectedRoute>
               <TransactionDetails />
@@ -145,7 +146,15 @@ function App() {
           }
         />
         <Route
-          path="/dashboard/send"
+          path="/dashboard/send-crypto"
+          element={
+            <ProtectedRoute>
+              <SendFlow />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/send-fiat"
           element={
             <ProtectedRoute>
               <SendFlow />

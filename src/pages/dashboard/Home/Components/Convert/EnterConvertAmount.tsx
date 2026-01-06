@@ -2,11 +2,41 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/onboarding/shared/Header";
 import { Select } from "@/components/ui/select";
-import { assets } from "../Send/SelectCryptoAsset";
+// import { assets } from "../Send/SelectCryptoAsset";
 import { useNavigate } from "react-router-dom";
 import { Convert, Money, Money2, FlashCircle, ArrowLeft2 } from "iconsax-react";
 import SuccessPage from "@/pages/dashboard/SuccessPage";
 import WalletSelectionModal from "@/pages/dashboard/WalletSelectionModal";
+import Btc from "@/assets/Btc.svg";
+import Eth from "@/assets/Eth.svg";
+import Usdc from "@/assets/Usdc.svg";
+import Matic from "@/assets/matic.svg";
+
+
+type Asset = {
+  id: string;
+  name: string;
+  icon: string;
+  balance?: string;
+};
+
+export const assets: Asset[] = [
+
+  { id: "bnb", name: "BNB", icon: Btc },
+
+  { id: "eth", name: "Ethereum", icon: Eth },
+
+  { id: "polygon", name: "Polygon", icon: Matic },
+
+  { id: "usdc", name: "USDC", icon: Usdc },
+
+  { id: "eth2", name: "Ethereum", icon: Eth },
+
+  { id: "polygon2", name: "Polygon", icon: Matic },
+
+  { id: "usdc2", name: "USDC", icon: Usdc },
+
+];
 
 const ConvertFlow: React.FC = () => {
   const navigate = useNavigate();

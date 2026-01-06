@@ -1,13 +1,19 @@
 // src/components/send/SendFlow.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SendOptionsModal from "./SendModal";
 import SelectCryptoAsset from "./SelectCryptoAsset";
 import RecipientDetails from "./RecipientDetails";
 import ConfirmSend from "./ConfirmSend";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import EnterAmount from "./EnterAmount";
 import EnterPasscode from "./EnterPasscode";
 import SuccessPage from "@/pages/dashboard/SuccessPage";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
+import FiatRecipientSelect from "./FiatRecipientSelection";
+import FiatCountrySelection from "./FiatCountrySelect";
+import EnterBankDetails from "./FiatBankDetails";
+import { sendFiat } from "@/api/sendfiat";
 
 /**
  * Place this component on route /send or render it in a page.
@@ -15,32 +21,44 @@ import SuccessPage from "@/pages/dashboard/SuccessPage";
  */
 const SendFlow: React.FC = () => {
   const navigate = useNavigate();
+   const location = useLocation();
 
+ const isFiatRoute = location.pathname.includes('send-fiat');
   // flow state
   const [isSendModalOpen, setIsSendModalOpen] = useState(false); // if triggered from Home
-  const [step, setStep] = useState<"options" | "select-asset" | "recipient" | "amount" | "confirm" | "passcode" | "success">(
-    "select-asset"
-  );
+  const [step, setStep] = useState<"options" | "select-asset" | "recipient" | "amount" | "confirm"| "fiat-country" 
+  | "fiat"
+    | "fiat-bank-details"
+    | "confirm-fiat" | "passcode" | "success">(isFiatRoute ? "fiat" : "select-asset");
+
 
   // data collected through the flow
   const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
-  const [recipient, setRecipient] = useState({name: "", network: "", address: "", });
+   const [notes, _setNotes] = useState<string>(""); 
+  const [recipient, setRecipient] = useState({name: "", network: "", address: "", keychain: "", transitNumber: "" });
   const [amount, setAmount] = useState<string>("");
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null); 
+   const token = useSelector((state: RootState) => state.auth.token?.azer_token);
 
-  // const openFromHome = () => {
-  //   setIsSendModalOpen(true);
-  //   setStep("options");
-  // };
+   useEffect(() => {
+    if (isFiatRoute && (step === "select-asset" || step === "options")) {
+      setStep("fiat");
+    } else if (!isFiatRoute && step === "fiat") {
+      setStep("select-asset");
+    }
+  }, [isFiatRoute]);
 
   // called when SendOptionsModal option is chosen
   const handleSelectOption = (option: "crypto" | "fiat") => {
     setIsSendModalOpen(false);
     if (option === "crypto") {
       setStep("select-asset");
+      navigate("/dashboard/send-crypto");
       // If you want to route instead: navigate("/send/select-asset")
     } else {
       // handle fiat flow or navigate to fiat route
-      navigate("/send/fiat");
+      setStep("fiat")
+      navigate("/dashboard/send-fiat");
     }
   };
 
@@ -50,16 +68,11 @@ const SendFlow: React.FC = () => {
     setStep("recipient");
   };
 
-  const handleRecipientNext = (data: { network: string; address: string }) => {
-    setRecipient({ name: "", network: data.network, address: data.address });
+  const handleRecipientNext = (data: { network: string; address: string; keychain: string }) => {
+    setRecipient({ name: "", network: data.network, address: data.address, keychain: data.keychain, transitNumber: ""  });
     // setAmount(data.amount);
     setStep("amount");
   };
-
-  // const handleAmountNext = (amountValue: string) => {
-  //   setAmount(amountValue);
-  //   setStep("confirm");
-  // };
 
   const handleConfirm = () => {
     // Do API call to create/send transaction
@@ -67,11 +80,97 @@ const SendFlow: React.FC = () => {
       setStep("passcode");
   };
 
-
-  const handlePasscodeSuccess = () => {
-    // After successful passcode entry, show success page
-     setStep("success");
+  
+  // --- FIAT FLOW HANDLERS ---
+  const handleCountrySelect = (countryCode: string) => {
+    setSelectedCountry(countryCode);
+    setSelectedAsset(countryCode);
+    setStep("fiat-bank-details"); 
+    // The country code acts as the currency/asset code (e.g., CAD, NGN)
   };
+
+  const handleFiatRecipientSelect = (data: {
+    keychain: string;
+    name: string;
+    network: string; // Bank Name
+    address: string; // Account Number
+  }) => {
+setRecipient({
+      ...data,
+      transitNumber: "" 
+    });    setSelectedAsset(selectedCountry || "CAD");
+    setStep("amount");
+  };
+
+  const handleNewRecipientStart = () => {
+    setStep("fiat-country");
+  };
+
+  const handleBankDetailsSubmit = (data: {
+    name: string;
+    bankName: string;
+    accountNumber: string;
+    transitNumber: string; // Not used in state but passed to API later
+    country: string;
+  }) => {
+    // Generate a temporary keychain for a new, unsaved recipient
+    const newRecipientKeychain = `new-fiat-${Date.now()}`;
+    setRecipient({
+      keychain: newRecipientKeychain,
+      name: data.name,
+      network: data.bankName,
+      address: data.accountNumber, 
+       transitNumber: data.transitNumber
+    });
+    setSelectedAsset(data.country);
+    setStep("amount");
+  };
+
+  // --- COMMON HANDLERS ---
+
+  // const handleAmountNext = (amount: string) => {
+  //   setAmount(amount);
+  //   // Determine which confirm step to go to
+  //   if (selectedCountry) {
+  //     setStep("confirm-fiat");
+  //   } else {
+  //     setStep("confirm"); // Crypto flow confirm
+  //   }
+  // };
+
+  // const handleFiatConfirm = () => {
+  //   setStep("passcode");
+  // };
+
+
+const handlePasscodeSuccess = async (capturedPasscode: string) => {
+  if (!token) return;
+
+  try {
+    const result = await sendFiat({
+      token,
+      passcode: capturedPasscode,
+      destinationCountry: selectedCountry || "",
+      currency: selectedAsset || "",
+      amount: amount,
+      fullName: recipient.name,
+      bankName: recipient.network,
+      accountNumber: recipient.address,
+      transitNumber: recipient.transitNumber, 
+      notes: notes, 
+    });
+
+    if (result.status === "success") {
+      setStep("success");
+    }
+  } catch (error) {
+    console.error("Fiat transfer error:", error);
+    // handle error (e.g., show message)
+  }
+};
+
+
+
 
     //  Final Success Page
   if (step === "success") {
@@ -92,9 +191,7 @@ const SendFlow: React.FC = () => {
 
   return (
     <>
-      {/* If you want to trigger modal from some button externally, call openFromHome */}
-      {/* Example: <button onClick={openFromHome}>Open send modal</button> */}
-
+     
       {/* 1) Send Options Modal */}
       <SendOptionsModal
         open={isSendModalOpen}
@@ -111,14 +208,16 @@ const SendFlow: React.FC = () => {
         <RecipientDetails
           asset={selectedAsset}
           onBack={() => setStep("select-asset")}
-          onNext={(data) => handleRecipientNext(data)}
-        />
+onNext={(data: { network: string; address: string; keychain: string }) => 
+      handleRecipientNext(data)
+    }        />
       )}
 
       {step === "amount" && selectedAsset && (
   <EnterAmount
     asset={selectedAsset}
     onBack={() => setStep("recipient")}
+    recipient={recipient}
     onNext={(amount) => {
       setAmount(amount);
       setStep("confirm");
@@ -136,6 +235,33 @@ const SendFlow: React.FC = () => {
           onConfirm={handleConfirm}
         />
       )}
+
+       {/* --------------------------- FIAT FLOW STEPS --------------------------- */}
+ {step === "fiat" && (
+          <FiatRecipientSelect
+            country={selectedCountry || ""}
+            onBack={() => setStep("options")}
+            onSelectRecipient={handleFiatRecipientSelect}
+            onAddNew={handleNewRecipientStart}
+          />
+        )}
+
+        {step === "fiat-country" && (
+          <FiatCountrySelection
+            onBack={() => setStep("fiat")}
+            onCountrySelect={handleCountrySelect}
+          />
+        )}
+
+       
+
+        {step === "fiat-bank-details" && selectedCountry && (
+          <EnterBankDetails
+            country={selectedCountry}
+            onBack={() => setStep("fiat-country")}
+            onSubmit={handleBankDetailsSubmit}
+          />
+        )}
 
       {step === "passcode" && (
         <EnterPasscode onSuccess={handlePasscodeSuccess}  />

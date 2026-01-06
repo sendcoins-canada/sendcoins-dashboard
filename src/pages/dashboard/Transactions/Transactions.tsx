@@ -61,10 +61,10 @@ const Transactions = () => {
   const handleTransactionSelect = (item: DisplayTransaction) => {
     
     // Use the keychain from the list item for the detail fetch
-    const keychain = item.keychain;
+    const txId = item.txId;
 
-    if (keychain) {
- navigate(`/dashboard/transactions/${keychain}`); //  Navigate to the new page
+    if (txId) {
+ navigate(`/dashboard/transactions/${txId}`); //  Navigate to the new page
  } else {
  console.error("Cannot view details: Missing transaction keychain.");
  }

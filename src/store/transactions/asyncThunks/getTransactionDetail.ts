@@ -4,9 +4,9 @@ import { getTransactionDetail } from "@/api/transactions";
 
 interface DetailFetchData {
     token: string;
-    // 💡 Update this name to keychain to match the API's expectation, 
+    //  Update this name to keychain to match the API's expectation, 
     // or map it if you prefer transactionId in the component level.
-    keychain: string; 
+    txId: string; 
 }
 
 export const getTransactionDetailThunk = createAsyncThunk(

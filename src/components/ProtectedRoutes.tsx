@@ -3,10 +3,19 @@ import { Navigate } from "react-router-dom";
 import type { RootState } from "@/store";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const token = useSelector((state: RootState) => state.auth.token);
-  
+  const auth = useSelector((state: RootState) => state.auth);
 
-  if (!token) {
+  const accessToken = auth.token?.azer_token;
+
+  console.log("Auth state:", auth);
+  console.log("Access token:", accessToken);
+
+  // wait for redux-persist / hydration
+  if (auth.loading) {
+    return null;
+  }
+
+  if (!accessToken) {
     return <Navigate to="/login" replace />;
   }
 

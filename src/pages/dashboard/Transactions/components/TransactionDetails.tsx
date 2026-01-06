@@ -22,7 +22,7 @@ export interface TransactionDetail {
   textColor: string;
   tagColor: string;
   currency: string; // E.g., "USDC"
-  // 👇 Added necessary fields for the Details tab (Assuming they exist on the Transaction object)
+  //  Added necessary fields for the Details tab (Assuming they exist on the Transaction object)
   senderWalletAddress: string; // E.g., "0x89f8...a1C3"
   recipientWalletAddress: string; // E.g., "0x89f8...a1C3"
   networkName: string; // E.g., "Ethereum"
@@ -84,8 +84,8 @@ const TransactionDetails: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
   // 1. Get transaction ID (keychain) from URL params
-  const { keychain } = useParams<{ keychain: string }>();
-  const transactionKey = keychain; // Use keychain as the unique ID
+  const { txId } = useParams<{ txId: string }>();
+  const transactionKey = txId; // Use keychain as the unique ID
 
   // 2. Get state from Redux
   const { selectedDetail, detailLoading, detailError } = useSelector(
@@ -97,7 +97,7 @@ const TransactionDetails: React.FC = () => {
     if (transactionKey) {
       const token = localStorage.getItem("azertoken");
       if (token) {
-        dispatch(getTransactionDetailThunk({ token, keychain: transactionKey }) as any);
+        dispatch(getTransactionDetailThunk({ token, txId: transactionKey }) as any);
       }
     }
   }, [dispatch, transactionKey]);
@@ -122,8 +122,8 @@ const TransactionDetails: React.FC = () => {
   if (detailError) {
     return (
       <div className="p-10 text-center">
-        <XCircle className="text-red-500 mx-auto mb-4" size={32} />
-        <h3 className="font-semibold text-red-700">Error Loading Transaction</h3>
+        <XCircle className="text-danger mx-auto mb-4" size={32} />
+        <h3 className="font-semibold text-danger">Error Loading Transaction</h3>
         <p className="text-sm text-gray-500">{detailError}</p>
         <button onClick={() => navigate(-1)} className="mt-4 text-blue-600 hover:underline">Go Back</button>
       </div>
@@ -133,7 +133,7 @@ const TransactionDetails: React.FC = () => {
   // 5. Handle case where data is missing after loading
   if (!transaction) {
     if (!transactionKey) {
-      return <div className="p-10 text-center text-red-500">No transaction ID provided in URL.</div>;
+      return <div className="p-10 text-center text-danger">No transaction ID provided in URL.</div>;
     }
     return <div className="p-10 text-center text-gray-500">Transaction details not found.</div>;
   }
@@ -179,7 +179,7 @@ const TransactionDetails: React.FC = () => {
           {amount} {currency}
         </h2>
         <p className="text-sm text-[#0647F7] mt-1">
-          ~${Number(amount.replace(/[^0-9.-]+/g, "")).toFixed(2)} USD
+          ~${Number(amount).toFixed(2)} USD
         </p>
       </div>
 

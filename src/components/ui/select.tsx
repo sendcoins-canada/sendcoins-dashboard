@@ -107,6 +107,7 @@ export type SelectProps = {
   options: SelectOption[];
   placeholder?: string;
   className?: string;
+  disabled?: boolean
 };
 
 export const Select: React.FC<SelectProps> = ({
@@ -115,6 +116,7 @@ export const Select: React.FC<SelectProps> = ({
   options,
   placeholder,
   className,
+  disabled
 }) => {
   const [open, setOpen] = React.useState(false);
   const selected = options.find((o) => o.value === value);
@@ -134,10 +136,11 @@ export const Select: React.FC<SelectProps> = ({
       {/* --- Trigger Button --- */}
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        disabled={disabled}
+        onClick={() => !disabled && setOpen((v) => !v)}
         className={cn(
-          "w-full rounded-full bg-[#F5F5F5] px-[14px] py-[10px] text-left text-[15px] flex items-center justify-between gap-2 ",
-          " transition-colors duration-150"
+          "w-full rounded-full bg-[#F5F5F5] px-[14px] py-[10px] text-left text-[15px] flex items-center justify-between gap-2 transition-colors duration-150",
+           disabled && "opacity-50 cursor-not-allowed"
         )}
       >
         <div className="flex items-center gap-2 overflow-hidden">
@@ -165,7 +168,7 @@ export const Select: React.FC<SelectProps> = ({
       </button>
 
       {/* --- Dropdown Menu --- */}
-      {open && (
+      {open && !disabled && (
         <div className="absolute z-20 mt-1 w-full rounded-xl border border-neutral-200 bg-[#F5F5F5] py-2">
           <div className="max-h-56 overflow-auto py-1">
             {options.map((opt) => (

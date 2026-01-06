@@ -7,13 +7,6 @@ import Header from "@/components/onboarding/shared/Header";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import { getAllBalanceThunk } from "@/store/wallet/asyncThunks/getBalances";
-import Btc from "@/assets/Btc.svg";
-
-import Eth from "@/assets/Eth.svg";
-
-import Usdc from "@/assets/Usdc.svg";
-
-import Matic from "@/assets/matic.svg";
 
 type Asset = {
   id: string;
@@ -25,25 +18,6 @@ type Asset = {
 type Props = {
   onContinue: (asset: string) => void;
 };
-
-export const assets: Asset[] = [
-
-  { id: "bnb", name: "BNB", icon: Btc },
-
-  { id: "eth", name: "Ethereum", icon: Eth },
-
-  { id: "polygon", name: "Polygon", icon: Matic },
-
-  { id: "usdc", name: "USDC", icon: Usdc },
-
-  { id: "eth2", name: "Ethereum", icon: Eth },
-
-  { id: "polygon2", name: "Polygon", icon: Matic },
-
-  { id: "usdc2", name: "USDC", icon: Usdc },
-
-];
-
 
 const SelectCryptoAsset = ({ onContinue }: Props) => {
   const [search, setSearch] = useState("");
@@ -92,8 +66,6 @@ const SelectCryptoAsset = ({ onContinue }: Props) => {
  asset.name.toLowerCase().includes(search.toLowerCase()) 
  );
     
- 
-
  
 
   return (

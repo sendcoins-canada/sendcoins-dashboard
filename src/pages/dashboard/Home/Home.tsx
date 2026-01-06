@@ -90,10 +90,10 @@ const Home: React.FC = () => {
     setIsSendModalOpen(false);
     if (option === "crypto") {
       // Navigate to crypto send flow
-      navigate("/dashboard/send");
+      navigate("/dashboard/send-crypto");
     } else {
       // Navigate to fiat send flow
-      console.log("Go to Fiat Send page");
+      navigate("/dashboard/send-fiat");
     }
   };
 

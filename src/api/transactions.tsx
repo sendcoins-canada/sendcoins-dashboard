@@ -17,10 +17,10 @@ export const getTransactions = async (token: string) => {
 
   return response.data;
 };
-export const getTransactionDetail = async (data: {token: string; keychain: string}) => {
+export const getTransactionDetail = async (data: {token: string; txId: string}) => {
   const formData = new FormData();
   formData.append("token", data.token);
-  formData.append("keychain", data.keychain);
+  formData.append("txId", data.txId);
 
   const response = await api.post(
     "/user/transactions/details",
@@ -34,4 +34,13 @@ export const getTransactionDetail = async (data: {token: string; keychain: strin
 
   return response.data;
 };
+
+export const GetGasFees = (formData: FormData) => {
+  return api.post("/user/get/gasfees", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
 
