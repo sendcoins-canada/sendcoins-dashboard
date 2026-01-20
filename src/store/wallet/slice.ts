@@ -24,7 +24,8 @@ type SelectedBalance = {
   usd: string;
   amount: string; 
   symbol: string;
-  logo: string
+  logo: string;
+  isWalletAvailable?: boolean
 };
 
 type WalletState = {
@@ -262,7 +263,7 @@ const walletSlice = createSlice({
   state.allBalances = action.payload;
 
   const balances = action.payload?.data?.balances;
-  const fetchedKeys = action.payload?.data?.fetchedSuccessfully; // ['btc', 'eth', ...]
+  const fetchedKeys = action.payload?.data?.fetchedSuccessfully; 
 
   if (balances && fetchedKeys && fetchedKeys.length > 0) {
     // Only auto-select if we don't have a selection yet
@@ -271,16 +272,16 @@ const walletSlice = createSlice({
       // Get the first successful key (e.g., 'btc')
       const firstKey = fetchedKeys[0];
       const firstWallet = balances[firstKey];
-      console.log(firstWallet)
 
-      if (firstWallet && firstWallet.isWalletAvailable) {
+      if (firstWallet ) {
         // Map the API fields to your SelectedBalance type
         state.selectedBalance = {
           symbol: firstWallet.symbol,
           // Use the price field from your API log 
           usd: firstWallet.TotalAvailableBalancePrice || "$0.00",
           amount: `${firstWallet.totalAvailableBalance} ${firstWallet.symbol}`,
-          logo: firstWallet.logo
+          logo: firstWallet.logo,
+          isWalletAvailable: firstWallet.isWalletAvailable
         };
       }
     }

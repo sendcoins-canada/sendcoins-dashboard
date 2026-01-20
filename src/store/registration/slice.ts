@@ -4,7 +4,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 
 interface RegistrationState {
   email: string;
-  code: string;
+  authHash: string;
   country: string;
   firstName: string;
   lastName: string;
@@ -14,7 +14,7 @@ interface RegistrationState {
 
 const initialState: RegistrationState = {
   email: "",
-  code: "",
+  authHash: "",
   country: "",
   firstName: "",
   lastName: "",
@@ -29,8 +29,8 @@ const registrationSlice = createSlice({
     setEmail(state, action: PayloadAction<string>) {
       state.email = action.payload;
     },
-    setCode(state, action: PayloadAction<string>) {
-      state.code = action.payload;
+    setAuthHash(state, action: PayloadAction<string>) {
+      state.authHash = action.payload;
     },
     setCountry(state, action: PayloadAction<string>) {
       state.country = action.payload;
@@ -55,7 +55,7 @@ const registrationSlice = createSlice({
 
 export const {
   setEmail,
-  setCode,
+  setAuthHash,
   setCountry,
   setFirstName,
   setLastName,

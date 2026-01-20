@@ -15,6 +15,7 @@ const GoogleLoginButton = ({ onSuccess, onError }: any) => {
       onClick={() => login()}
       variant="outline"
       className="w-full flex items-center justify-center gap-2 border border-[#E5E7EB] text-[#434343] font-[400] cursor-pointer"
+      type="button"
     >
       {/* <Google /> */}
       <img src={Google} alt="Google icon" className="w-4 h-4" />

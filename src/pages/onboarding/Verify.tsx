@@ -7,10 +7,12 @@ import Header from "@/components/onboarding/shared/Header";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import type { AppDispatch, RootState } from "@/store";
-import { setCode } from "@/store/registration/slice";
-import { verifyOtpThunk } from "@/store/auth/asyncThunks/verifyOtp";
+import { setAuthHash } from "@/store/registration/slice";
+import { setCredentials, setLoading } from "@/store/auth/slice";
+// import { verifyOtpThunk } from "@/store/auth/asyncThunks/verifyOtp";
 import { resendOtpThunk } from "@/store/auth/asyncThunks/resendOtp";
-
+import { verifyOtp, finalizePasscodeCreate } from "@/api/authApi";
+import { useLocation } from "react-router-dom";
 
 const OTP_LENGTH = 6;
 
@@ -19,68 +21,92 @@ const Verify: React.FC = () => {
     Array(OTP_LENGTH).fill("")
   );
   const inputsRef = React.useRef<Array<HTMLInputElement | null>>([]);
-  const [isVerifying, setIsVerifying] = React.useState(false);
+  const [isVerifying, _setIsVerifying] = React.useState(false);
   const [seconds, setSeconds] = React.useState(50);
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  const location = useLocation();
+const { purpose: statePurpose, tempPasscode } = location.state || {};
 
   const { loading } = useSelector((state: RootState) => state.auth);
   const isBusy = isVerifying || loading;
 
   // Get email from Redux with localStorage fallbacks
-  const email =
-    useSelector((state: RootState) => state.registration.email) ||
-    localStorage.getItem("email") ||
-    localStorage.getItem("verifyEmail") ||
-    "";
-
+  const email = location.state?.email || JSON.parse(localStorage.getItem("user") || "{}")?.useremail
+console.log(email)
   React.useEffect(() => {
     const t = setInterval(() => setSeconds((s) => (s > 0 ? s - 1 : 0)), 1000);
     return () => clearInterval(t);
   }, []);
 
-  const submit = React.useCallback(
-    async (overrideCode?: string) => {
-      if (isBusy) return;
-      const finalCode = overrideCode ?? values.join("");
-      if (finalCode.length !== OTP_LENGTH) {
-        showDanger("Incorrect passcode. Please try again.");
-        return;
+const submit = async (overrideCode?: string) => {
+  if (isBusy) return;
+  const finalCode = overrideCode ?? values.join("");
+  
+  // 1. Dispatch the imported action
+  dispatch(setLoading(true)); 
+  // 1. Get the raw string from storage
+  const rawPurpose = statePurpose || localStorage.getItem("purpose");
+
+  // 2. Cast it to the specific type the API expects
+  // Use "registration" as a fallback if the storage is empty
+  const purpose = (rawPurpose || "registration") as "registration" | "login" | "passcode_reset" | "passcode_create";
+
+  // const storedPurpose = localStorage.getItem("purpose") ;
+
+  try {
+    // 2. Call the API
+    const response = await verifyOtp({ 
+      email: email || "", // Fix: ensure string
+      code: Number(finalCode), 
+      purpose: purpose 
+    });
+
+    showSuccess("Verified!");
+
+    // STEP 2: Handle different flows
+    if (purpose === "passcode_create") {
+      const authHash = response.data?.authHash;
+
+      if (!authHash || !tempPasscode) {
+        throw new Error("Missing session data. Please restart passcode setup.");
       }
 
-      setIsVerifying(true);
-      console.time("verifyOtpRequest");
-      // Retrieve purpose — ensure it's always a valid string
-      const storedPurpose = localStorage.getItem("purpose");
-      const purpose: "login" | "registration" =
-        storedPurpose === "login" ? "login" : "registration";
-      // Send purpose in the request
-      try {
-        const result = await dispatch(
-          verifyOtpThunk({ email, code: finalCode, purpose })
-        );
+      // STEP 3: Finalize Passcode Creation immediately
+      const finalRes = await finalizePasscodeCreate(tempPasscode, authHash);
+      
+      showSuccess(finalRes.message || "Passcode created successfully!");
+      navigate("/dashboard/home");
 
-        if (verifyOtpThunk.fulfilled.match(result)) {
-          dispatch(setCode(finalCode));
-          showSuccess("Code verified!");
-
-          if (purpose === "login") {
-            navigate("/dashboard/home");
-          } else {
-            navigate("/country");
+    } else if (purpose === "registration") {
+      // Access authHash safely from the response structure described in your error
+      const hash = response.data.authHash || ""; 
+      
+      dispatch(setAuthHash(hash));
+      localStorage.setItem("authHash", hash);
+      
+      navigate("/country");
+    } else {
+      // 3. Login Flow: Use the structure TS told us exists
+      if (response.data.token) {
+        dispatch(setCredentials({
+          token: response.data.token,
+          user: { 
+            useremail: email || "", 
+            oauth_id: 0 
           }
-        } else {
-          showDanger("Invalid OTP code. Please try again.");
-        }
-      } catch (err) {
-        showDanger("Something went wrong. Please try again.");
-      } finally {
-        console.timeEnd("verifyOtpRequest");
-        setIsVerifying(false);
+        }));
+        navigate("/dashboard/home");
       }
-    },
-    [dispatch, email, isBusy, navigate, values]
-  );
+    }
+  } catch (e: any) {
+    showDanger(e.response?.data?.message || "Verification failed");
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
+
+
 
   const attemptSubmit = React.useCallback(
     (nextValues: string[]) => {

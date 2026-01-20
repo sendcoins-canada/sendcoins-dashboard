@@ -1,6 +1,6 @@
 // src/api/authApi.ts
 import api from "./axios";
-import type { VerifyEmailRequest, VerifyEmailResponse, VerifyOtpRequest, VerifyOtpResponse, RegisterRequest, RegisterResponse, LoginRequest, LoginWithPasswordResponse, SurveyResponse, SubmitSurveyRequest, CountryResponse, RequestPasswordResetRequest, RequestPasswordResetResponse, VerifyPasswordResetOtpRequest, VerifyPasswordResetOtpResponse, UpdatePasswordWithOtpRequest, UpdatePasswordWithOtpResponse } from "../types/onboarding";
+import type { VerifyEmailRequest, VerifyEmailResponse, VerifyOtpRequest, VerifyOtpResponse, RegisterRequest, RegisterResponse, LoginRequest, LoginWithPasswordResponse, SurveyResponse, CountryResponse, RequestPasswordResetRequest, RequestPasswordResetResponse, VerifyPasswordResetOtpRequest, VerifyPasswordResetOtpResponse, UpdatePasswordWithOtpRequest, UpdatePasswordWithOtpResponse } from "../types/onboarding";
 
 // verify mail
 export const verifyEmail = async (
@@ -26,7 +26,7 @@ export const verifyOtp = async (
 
   const formData = new FormData();
   formData.append("email", data.email);
-  formData.append("otp", data.code);
+  formData.append("otp", data.code.toString());
   formData.append("purpose", data.purpose);
 
   const response = await api.post<VerifyOtpResponse>("/auth/otp/verify", formData, {
@@ -62,7 +62,7 @@ export const registerWithPassword = async (
   formData.append("lastName", data.lastName);
   formData.append("password", data.password);
   formData.append("country", data.country);
-  formData.append("code", data.code);
+  formData.append("authHash", data.authHash);
 
   const response = await api.post<RegisterResponse>(
     "/user/auth/registerWithPassword",
@@ -93,21 +93,6 @@ export const loginUser = async (data: LoginRequest): Promise<LoginWithPasswordRe
   return response.data;
 };
 
-// export const verifyOtpQueryString = async (queryString: string) => {
-//   const formData = new FormData();
-//   formData.append("queryString", queryString);
-
-//   const response = await api.post(
-//     "/user/auth/verifyOTPQueryString",
-//     formData,
-//     {
-//       headers: { "Content-Type": "multipart/form-data" },
-//     }
-//   );
- 
-
-//   return response.data;
-// };
 
 export const verifyLoginOtp = async (data: { email: string; code: string }) => {
   const formData = new FormData();
@@ -131,12 +116,20 @@ export const getActiveSurvey = async (): Promise<SurveyResponse> => {
 };
 
 // submit servey
-export const submitSurvey = async (data: SubmitSurveyRequest) => {
+
+export const submitSurvey = async (data: {
+  email: string;
+  config_id: number;
+  question_id: number;
+  answer: string;
+  azerId: string | number;
+}) => {
   const formData = new FormData();
   formData.append("email", data.email);
-  formData.append("configid", String(data.config_id));
-  formData.append("questionid", String(data.question_id));
+  formData.append("configId", String(data.config_id));
+  formData.append("questionId", String(data.question_id));
   formData.append("answers", data.answer);
+  formData.append("azerId", String(data.azerId));
 
   const response = await api.post("/user/survey/submit", formData, {
     headers: { "Content-Type": "multipart/form-data" },
@@ -168,6 +161,7 @@ export const createPasscode = async (data: { code: string; token: string }) => {
 };
 
 // Forgot password - Step 1: request reset & send OTP
+
 export const requestPasswordReset = async (
   data: RequestPasswordResetRequest
 ): Promise<RequestPasswordResetResponse> => {
@@ -223,13 +217,13 @@ export const changePasscode = async (data: { oldCode: string; newCode: string })
 // Step 1: Request Reset (requires token, newPasscode, confirmPasscode)
 export const requestPasscodeReset = async (data: { 
   token: string; 
-  newPasscode: string; 
-  confirmPasscode: string 
+  newPasscode: number; 
+  confirmPasscode: number 
 }) => {
   const formData = new FormData();
   formData.append("token", data.token);
-  formData.append("newPasscode", data.newPasscode);
-  formData.append("confirmPasscode", data.confirmPasscode);
+  formData.append("newPasscode", String(data.newPasscode));
+  formData.append("confirmPasscode", String(data.confirmPasscode));
 
   const response = await api.post("/auth/passcode/reset/request", formData, {
     headers: { "Content-Type": "multipart/form-data" },
@@ -240,11 +234,77 @@ export const requestPasscodeReset = async (data: {
 // Step 2: Confirm Reset (requires authHash and newPasscode)
 export const confirmPasscodeReset = async (data: { 
   authHash: string; 
-  newPasscode: string 
+  newPasscode: number 
 }) => {
   const response = await api.post("/auth/passcode/reset", {
     authHash: data.authHash,
     newPasscode: data.newPasscode,
+  });
+  return response.data;
+};
+
+// Step 1: Request Creation (Requires passcode + confirmPasscode + token)
+export const requestPasscodeCreate = async (data: { 
+  token: string;
+  passcode: string;
+}) => {
+  const formData = new FormData();
+  formData.append("token", data.token);
+  formData.append("passcode", data.passcode);
+
+  const response = await api.post("/auth/passcode/create/request", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
+// Step 2: Finalize Creation (Requires authHash + passcode)
+export const finalizePasscodeCreate = async (passcode: string, authHash: string) => {
+  const formData = new FormData();
+  formData.append("passcode", passcode);
+  formData.append("authHash", authHash);
+
+  const response = await api.post("/auth/passcode/create", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
+
+// --- NEW: Verify Passcode ---
+export const verifyPasscode = async (data: { token: string; passcode: string }) => {
+  const formData = new FormData();
+  formData.append("passcode", data.passcode);
+  formData.append("token", data.token);
+  
+  
+  const response = await api.post("/user/auth/verify/passcode", formData, {
+    headers: { 
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
+
+// --- NEW: Send Crypto ---
+export const sendCrypto = async (data: {
+  token: string;
+  asset: string;
+  network: string;
+  walletAddress: string;
+  amount: string;
+}) => {
+  const formData = new FormData();
+  formData.append("asset", data.asset);
+  formData.append("network", data.network);
+  formData.append("walletAddress", data.walletAddress);
+  formData.append("amount", data.amount);
+  formData.append("token", data.token);
+
+  const response = await api.post("/send", formData, {
+    headers: { 
+      "Content-Type": "multipart/form-data",
+    },
   });
   return response.data;
 };

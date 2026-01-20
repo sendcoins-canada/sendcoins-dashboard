@@ -36,6 +36,9 @@ export const getUser = async (): Promise<User> => {
     }
   );
 
+  // SAVE USER TO LOCAL STORAGE HERE
+  localStorage.setItem("user_data", JSON.stringify(response.data));
+
   return response.data;
 };
 

@@ -1,12 +1,13 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { registerWithPassword as registerWithPasswordApi } from "@/api/authApi";
 import type { RegisterRequest, RegisterResponse } from "@/types/onboarding";
-import type { AuthToken, User } from "../slice";
+import type { AuthToken, User, Result } from "../slice";
 import type { RootState } from "@/store";
 
 interface RegisterThunkReturn {
   token: AuthToken;
   user: User;
+  result: Result;
 }
 
 /**
@@ -22,10 +23,10 @@ export const registerWithPasswordThunk = createAsyncThunk<
   async ({ password }, { getState, rejectWithValue }) => {
     try {
       const state = getState();
-      const { email, firstName, lastName, country, code } = state.registration;
+      const { email, firstName, lastName, country, authHash } = state.registration;
 
       // Validate required fields
-      if (!email || !firstName || !lastName || !country || !code) {
+      if (!email || !firstName || !lastName || !country || !authHash) {
         return rejectWithValue(
           "Missing required registration information. Please complete all steps."
         );
@@ -37,7 +38,7 @@ export const registerWithPasswordThunk = createAsyncThunk<
         lastName,
         password,
         country,
-        code,
+        authHash,
       };
 
       const response: RegisterResponse = await registerWithPasswordApi(
@@ -60,6 +61,9 @@ export const registerWithPasswordThunk = createAsyncThunk<
           oauth_id: 0, // Will be set when fetching full user profile
           useremail: email,
         },
+        result: {
+          azer_id: data.result?.azer_id || 0 
+        }
       };
     } catch (error: any) {
       const message =

@@ -42,14 +42,14 @@ const Signup = () => {
 
   const handleGoogleSuccess = async (tokenResponse: any) => {
     try {
-      const { access_token } = tokenResponse;
+      const { accessToken } = tokenResponse;
 
-      if (!access_token) {
+      if (!accessToken) {
         showDanger("No access token returned from Google");
         return;
       }
 
-      const result = await dispatch(googleLoginThunk({ access_token }));
+      const result = await dispatch(googleLoginThunk({ accessToken }));
 
       if (googleLoginThunk.fulfilled.match(result)) {
         showSuccess("Welcome to Sendcoins!");

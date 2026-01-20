@@ -1,12 +1,13 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { submitSurvey as submitSurveyApi } from "@/api/authApi";
-import type { SubmitSurveyRequest } from "@/types/onboarding";
 import type { RootState } from "@/store";
 
 interface SubmitSurveyPayload {
+  email: string;
   config_id: number;
   question_id: number;
   answer: string;
+  azer_id: string | number; 
 }
 
 interface SubmitSurveyReturn {
@@ -32,11 +33,12 @@ export const submitSurveyThunk = createAsyncThunk<
         return rejectWithValue("No user email found. Please log in again.");
       }
 
-      const requestData: SubmitSurveyRequest = {
-        email,
+      const requestData = {
+        email: payload.email,
         config_id: payload.config_id,
         question_id: payload.question_id,
         answer: payload.answer,
+        azerId: payload.azer_id
       };
 
       const response = await submitSurveyApi(requestData);

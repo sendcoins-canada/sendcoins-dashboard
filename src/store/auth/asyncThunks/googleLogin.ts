@@ -3,7 +3,7 @@ import axios from "axios";
 import type { AuthToken, User } from "../slice";
 
 interface GoogleLoginPayload {
-  access_token: string;
+  accessToken: string;
 }
 
 interface GoogleLoginResponse {
@@ -39,14 +39,14 @@ export const googleLoginThunk = createAsyncThunk<
   { rejectValue: string }
 >(
   "auth/googleLogin",
-  async ({ access_token }, { rejectWithValue }) => {
+  async ({ accessToken }, { rejectWithValue }) => {
     try {
-      if (!access_token) {
+      if (!accessToken) {
         return rejectWithValue("No access token provided");
       }
 
       const formData = new FormData();
-      formData.append("accessToken", access_token);
+      formData.append("accessToken", accessToken);
 
       const response = await axios.post<GoogleLoginResponse>(
         "https://api.sendcoins.ca/auth/google",

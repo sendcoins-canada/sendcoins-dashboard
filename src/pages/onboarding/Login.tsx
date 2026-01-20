@@ -8,10 +8,12 @@ import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/store";
 import { showSuccess, showDanger } from "@/components/ui/toast";
 import { loginWithPasswordThunk } from "@/store/auth/asyncThunks/loginWithPassword";
-import { googleLoginThunk } from "@/store/auth/asyncThunks/googleLogin";
+// import { googleLoginThunk } from "@/store/auth/asyncThunks/googleLogin";
 import Header from "@/components/onboarding/shared/Header";
 import { PasswordCheck } from "iconsax-react";
 import GoogleLoginButton from "@/components/ui/GoogleLogin";
+import { setCredentials } from "@/store/auth/slice";
+import api from "@/api/axios";
 
 const schema = Yup.object({
   email: Yup.string()
@@ -27,12 +29,16 @@ const Login: React.FC = () => {
   const { loading } = useSelector((state: RootState) => state.auth);
 
   const handleLogin = async (values: { email: string; password: string }) => {
+     if (!values.email || !values.password) {
+    showDanger("Email and password are required");
+    return;
+  }
     const result = await dispatch(loginWithPasswordThunk(values));
 
     if (loginWithPasswordThunk.fulfilled.match(result)) {
       localStorage.setItem("purpose", "login");
       showSuccess("Check your mail for the verification code");
-      navigate("/verify");
+      navigate("/verify", { state: { email: result.payload.email, purpose: "login" } });
     } else if (loginWithPasswordThunk.rejected.match(result)) {
       showDanger(result.payload || "Invalid credentials, please try again.");
     }
@@ -42,25 +48,40 @@ const Login: React.FC = () => {
 const handleGoogleSuccess = async (tokenResponse: any) => {
   try {
     const { access_token } = tokenResponse;
-
     if (!access_token) {
       showDanger("No access token returned from Google");
       return;
     }
 
-    const result = await dispatch(googleLoginThunk({ access_token }));
+    // Create FormData
+    const formData = new FormData();
+    formData.append("accessToken", access_token);
 
-    if (googleLoginThunk.fulfilled.match(result)) {
+    // Send FormData to backend
+    const { data } = await api.post("/auth/google", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    console.log(data)
+
+    if (data.data.token) {
+      dispatch(setCredentials({
+        token: data.data.token,
+        user: data.data.result,
+        result: data.data.result
+      }));
       showSuccess("Welcome back!");
       navigate("/dashboard/home");
-    } else if (googleLoginThunk.rejected.match(result)) {
-      showDanger(result.payload || "Google Sign-In failed. Please try again.");
+    } else {
+      showDanger("Google Sign-In failed. No token returned.");
     }
   } catch (err) {
     console.error("Google login error:", err);
     showDanger("Google Sign-In failed. Please try again.");
   }
 };
+
 
 
   return (
@@ -127,18 +148,9 @@ const handleGoogleSuccess = async (tokenResponse: any) => {
                   <span className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-px bg-neutral-200" />
                 </div>
 
-                {/* <Button type="button" variant="outline" className="w-full" onClick={() => {
-                // Redirect user to your backend which starts the Google OAuth flow
-                window.location.href = `https://api.sendcoins.ca/auth/google`;
-              }}>
-                Continue with Google
-              </Button> */}
-                {/* <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={() => {
-                  showDanger("Google Sign-In Failed");
-                }}
-              /> */}
+              </Form>
+            )}
+          </Formik>
                 <GoogleLoginButton
                   onSuccess={handleGoogleSuccess}
                   onError={() => showDanger("Google Sign-In Failed")}
@@ -153,9 +165,6 @@ const handleGoogleSuccess = async (tokenResponse: any) => {
                     Create an account
                   </span>
                 </p>
-              </Form>
-            )}
-          </Formik>
         </div>
       </div>
       <div />

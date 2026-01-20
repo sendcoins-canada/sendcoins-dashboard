@@ -139,3 +139,5 @@ export const getAllBalances = async (data: { token: string }) => {
   return response.data;
 };
 
+
+

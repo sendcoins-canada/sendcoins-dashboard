@@ -81,14 +81,7 @@ const {selectedBalance } = useSelector((state: RootState) => state.wallet);
                 {displayedBalance.symbol} 
                 <ArrowDown2 size="14" color="#262626" className="inline" />
                 </h3>
-              {/* <p className="text-[28px] text-[#777777]">
-                <span className="text-primary text-5xl"> {showBalance ? "0.50" : <span className="text-[#D2D2D2]"> ***** </span>}</span>
-                USD
-              </p>
-              <p className="text-gray-400 text-sm mt-1">
-                {showBalance ? "0.0 USDC" : "*******"}
-                <ArrowSwapVertical size="14" color="black" variant="Outline" className="inline ml-2" />
-              </p> */}
+             
               <p className="text-[28px] text-[#777777]">
                 <span className="text-primary text-5xl">
                   {showBalance

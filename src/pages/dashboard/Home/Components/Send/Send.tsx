@@ -14,6 +14,8 @@ import FiatRecipientSelect from "./FiatRecipientSelection";
 import FiatCountrySelection from "./FiatCountrySelect";
 import EnterBankDetails from "./FiatBankDetails";
 import { sendFiat } from "@/api/sendfiat";
+import { sendCrypto } from "@/api/authApi";
+import { showSuccess, showDanger } from "@/components/ui/toast";
 
 /**
  * Place this component on route /send or render it in a page.
@@ -24,7 +26,18 @@ const SendFlow: React.FC = () => {
    const location = useLocation();
 
  const isFiatRoute = location.pathname.includes('send-fiat');
-  // flow state
+ const userSlice = useSelector((state: RootState) => state.user) as any;
+// 3. Safely drill down to the actual user data
+  // Structure: state.user -> user -> data -> isPinAvailable -> found
+  const userData = userSlice?.user?.data;
+  console.log(userSlice)
+  // 4. Check if PIN exists
+  const hasPin = userData?.isPinAvailable?.found ?? false;
+
+  // Debugging: This should now log 'true'
+  console.log("Has PIN setup:", hasPin);
+
+ // flow state
   const [isSendModalOpen, setIsSendModalOpen] = useState(false); // if triggered from Home
   const [step, setStep] = useState<"options" | "select-asset" | "recipient" | "amount" | "confirm"| "fiat-country" 
   | "fiat"
@@ -144,30 +157,57 @@ setRecipient({
 
 
 const handlePasscodeSuccess = async (capturedPasscode: string) => {
-  if (!token) return;
+    if (!token) return;
 
-  try {
-    const result = await sendFiat({
-      token,
-      passcode: capturedPasscode,
-      destinationCountry: selectedCountry || "",
-      currency: selectedAsset || "",
-      amount: amount,
-      fullName: recipient.name,
-      bankName: recipient.network,
-      accountNumber: recipient.address,
-      transitNumber: recipient.transitNumber, 
-      notes: notes, 
-    });
+    // Note: 'capturedPasscode' is already verified by the backend in EnterPasscode component
+    // We now just need to execute the transaction.
 
-    if (result.status === "success") {
-      setStep("success");
+    try {
+      if (isFiatRoute) {
+        // --- 1. FIAT FLOW ---
+        const result = await sendFiat({
+          token,
+          passcode: capturedPasscode,
+          destinationCountry: selectedCountry || "",
+          currency: selectedAsset || "",
+          amount: amount,
+          fullName: recipient.name,
+          bankName: recipient.network,
+          accountNumber: recipient.address,
+          transitNumber: recipient.transitNumber, 
+          notes: notes, 
+        });
+
+        if (result.status === "success") {
+           setStep("success");
+        }
+      } else {
+        // --- 2. CRYPTO FLOW ---
+        // Payload: token, asset, network, walletAddress, amount
+        const result = await sendCrypto({
+          token,
+          asset: selectedAsset || "", 
+          network: recipient.network, 
+          walletAddress: recipient.address,
+          amount: amount
+        });
+
+        // The endpoint returns { data: { isSuccess: true, ... } } based on your JSON
+        if (result.isSuccess || result.data?.isSuccess) {
+           showSuccess(result.message || "Crypto sent successfully");
+           setStep("success");
+        } else {
+           throw new Error(result.message || "Transfer failed");
+        }
+      }
+
+    } catch (error: any) {
+      console.error("Transfer error:", error);
+      showDanger(error.response?.data?.message || error.message || "Transaction failed");
+      // Throw error to EnterPasscode to stop it from proceeding/closing if needed
+      throw error; 
     }
-  } catch (error) {
-    console.error("Fiat transfer error:", error);
-    // handle error (e.g., show message)
-  }
-};
+  };
 
 
 
@@ -263,8 +303,15 @@ onNext={(data: { network: string; address: string; keychain: string }) =>
           />
         )}
 
-      {step === "passcode" && (
+      {/* {step === "passcode" && (
         <EnterPasscode onSuccess={handlePasscodeSuccess}  />
+      )} */}
+      {step === "passcode" && (
+        <EnterPasscode 
+          // If hasPin is true, we go to 'verify' mode. Else 'create' mode.
+          mode={hasPin ? "verify" : "create"}
+          onSuccess={handlePasscodeSuccess} 
+        />
       )}
     </>
   );

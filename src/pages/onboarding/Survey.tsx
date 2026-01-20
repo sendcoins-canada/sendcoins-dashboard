@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import Header from "@/components/onboarding/shared/Header";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch, RootState } from "@/store";
-import { getActiveSurvey } from "@/api/authApi";
-import { submitSurveyThunk } from "@/store/user/asyncThunks/submitSurvey";
+import type { RootState } from "@/store";
+import { getActiveSurvey, submitSurvey } from "@/api/authApi";
+// import { submitSurveyThunk } from "@/store/user/asyncThunks/submitSurvey";
+import { showDanger } from "@/components/ui/toast";
+import {  setLoading, setSurveyIndex } from "@/store/auth/slice";
 
 interface Question {
   question_id: number;
@@ -26,17 +28,20 @@ interface Survey {
 }
 
 const Survey: React.FC = () => {
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  // const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<{ [key: string]: string }>({});
   // const [surveys, setSurveys] = useState<Survey[]>([]);
   const [allQuestions, setAllQuestions] = useState<Array<Question & { config_id: number; survey_title: string }>>([]);
   const navigate = useNavigate();
-
-  const dispatch = useDispatch<AppDispatch>();
-  const { loading } = useSelector((state: RootState) => state.user);
+  const currentQuestionIndex = useSelector((state: RootState) => state.auth.surveyIndex);
+  const dispatch = useDispatch();
+  const { user, loading } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     const fetchSurveys = async () => {
+      // FIX 1: Prevent refetching if we already have the questions in state
+      console.log(allQuestions)
+      if (allQuestions.length > 0) return;
       try {
         const res = await getActiveSurvey();
         const surveysData = Array.isArray(res.data) ? res.data : [res.data];
@@ -76,39 +81,60 @@ const Survey: React.FC = () => {
     setAnswers({ ...answers, [questionKey]: option });
   };
 
-  const handleNext = async () => {
+  // const currentQuestion = allQuestions[currentQuestionIndex];
+ const handleNext = async () => {
+    const questionKey = `${currentQuestion.config_id}-${currentQuestion.question_id}`;
     const currentAnswer = answers[questionKey];
 
     if (!currentAnswer && currentQuestion.is_required) {
-      alert("Please select an answer");
+      showDanger("Please select an answer");
       return;
     }
 
-    // Submit current answer via Redux thunk
-    const result = await dispatch(submitSurveyThunk({
-      config_id: currentQuestion.config_id,
-      question_id: currentQuestion.question_id,
-      answer: currentAnswer,
-    }));
+    // 1. Get AzerID and Email safely
+    const storedResult = JSON.parse(localStorage.getItem("result") || "{}");
+    const azerId = storedResult?.azer_id;
+    const email = user?.useremail || localStorage.getItem("email") || "";
 
-    if (submitSurveyThunk.fulfilled.match(result)) {
-      console.log("Answer submitted successfully");
+    if (!azerId) {
+      showDanger("User session missing. Please restart.");
+      return;
+    }
 
-      // Move to next question or finish
-      if (currentQuestionIndex < totalQuestions - 1) {
-        setCurrentQuestionIndex(currentQuestionIndex + 1);
+    dispatch(setLoading(true));
+
+    try {
+      console.log("Submitting for Question Index:", currentQuestionIndex);
+      // 2. Direct API Call
+      await submitSurvey({
+        email: email,
+        config_id: currentQuestion.config_id,
+        question_id: currentQuestion.question_id,
+        answer: currentAnswer,
+        azerId: azerId,
+      });
+      console.log("API Success! Moving to next question...");
+
+      // 3. Update UI Local State
+      if (currentQuestionIndex < allQuestions.length - 1) {
+        console.log("Advancing index from", currentQuestionIndex, "to", currentQuestionIndex + 1);
+        // setCurrentQuestionIndex(currentQuestionIndex + 1);
+        // setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+        dispatch(setSurveyIndex(currentQuestionIndex + 1));
       } else {
-        // All questions answered, navigate to welcome
         navigate("/welcome");
       }
-    } else {
-      console.error("Failed to submit answer:", result.payload);
+    } catch (err: any) {
+      showDanger(err.response?.data?.message || "Failed to submit answer");
+    } finally {
+      dispatch(setLoading(false));
     }
   };
 
   const handleBack = () => {
     if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(currentQuestionIndex - 1);
+      // setCurrentQuestionIndex(currentQuestionIndex - 1);
+      dispatch(setSurveyIndex(currentQuestionIndex - 1));
     }
   };
 
@@ -135,7 +161,7 @@ const Survey: React.FC = () => {
         </div>
 
         {/* Question */}
-        <div className="text-center max-w-lg w-full">
+        <div className="text-center max-w-lg w-full" key={currentQuestionIndex}>
           <h2 className="text-xl font-semibold mb-4">
             {currentQuestion.survey_title}
           </h2>

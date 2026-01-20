@@ -9,13 +9,18 @@ import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/store";
-import { setPassword } from "@/store/registration/slice";
-import { registerWithPasswordThunk } from "@/store/auth/asyncThunks/registerWithPassword";
+// import { setPassword } from "@/store/registration/slice";
+// import { registerWithPasswordThunk } from "@/store/auth/asyncThunks/registerWithPassword";
 import { showSuccess, showDanger } from "@/components/ui/toast";
+import { registerWithPassword } from "@/api/authApi";
+import { setCredentials, setLoading } from "@/store/auth/slice";
 
 const Password: React.FC = () => {
   const [step, setStep] = useState<"create" | "confirm">("create");
   const [tempPassword, setTempPassword] = useState("");
+  const { email, firstName, lastName, country, authHash } = useSelector(
+    (state: RootState) => state.registration
+  );
 
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -54,20 +59,66 @@ const Password: React.FC = () => {
       .oneOf([Yup.ref("password")], "Passwords must match")
   });
 
+  // const handleRegistration = async () => {
+  //   // Save password in Redux
+  //   dispatch(setPassword(tempPassword));
+
+  //   // Call registerWithPasswordThunk (automatically gets data from Redux)
+  //   const result = await dispatch(registerWithPasswordThunk({ password: tempPassword }));
+
+  //   if (registerWithPasswordThunk.fulfilled.match(result)) {
+  //     showSuccess("Registration successful!");
+  //     navigate("/survey");
+  //   } else if (registerWithPasswordThunk.rejected.match(result)) {
+  //     showDanger(result.payload || "Something went wrong, try again.");
+  //   }
+  // };
+
   const handleRegistration = async () => {
-    // Save password in Redux
-    dispatch(setPassword(tempPassword));
+  // 1. Set global loading state (imported from your auth slice)
+  dispatch(setLoading(true));
 
-    // Call registerWithPasswordThunk (automatically gets data from Redux)
-    const result = await dispatch(registerWithPasswordThunk({ password: tempPassword }));
+  try {
+    // 2. Gather data from your registration slice
+    const registrationData = {
+      email,        // From useSelector
+      firstName,    // From useSelector
+      lastName,     // From useSelector
+      country,      // From useSelector
+      authHash,     // From useSelector (important!)
+      password: tempPassword,
+    };
 
-    if (registerWithPasswordThunk.fulfilled.match(result)) {
-      showSuccess("Registration successful!");
-      navigate("/survey");
-    } else if (registerWithPasswordThunk.rejected.match(result)) {
-      showDanger(result.payload || "Something went wrong, try again.");
-    }
-  };
+    // 3. Call the API directly (not through a thunk)
+    const response = await registerWithPassword(registrationData);
+
+    // 4. Update Redux and LocalStorage using your Sync Action
+    // This action handles the JSON.stringify for token, user, AND result
+    dispatch(
+      setCredentials({
+        token: response.data.token,
+        user: { 
+          useremail: email || "", 
+          oauth_id: response.data.user?.oauth_id 
+        },
+        result: { 
+          azer_id: response.data.result?.azer_id || 0 
+        },
+      })
+    );
+
+    showSuccess("Registration successful!");
+    navigate("/survey");
+    
+  } catch (error: any) {
+    // Handle errors from the API directly
+    const errorMsg = error.response?.data?.message || "Something went wrong, try again.";
+    showDanger(errorMsg);
+  } finally {
+    // Turn off loading regardless of success or failure
+    dispatch(setLoading(false));
+  }
+};
 
   return (
     <>

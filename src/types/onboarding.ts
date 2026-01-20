@@ -15,8 +15,8 @@ export interface VerifyEmailResponse {
 
 export interface VerifyOtpRequest {
   email: string;
-  code: string;
-  purpose: "login" | "registration" ;
+  code: number;
+  purpose: "login" | "registration" | "passcode_reset" | "passcode_create";
 }
 
 // export interface VerifyOtpResponse {
@@ -56,7 +56,7 @@ export interface RegisterRequest {
   lastName: string;
   password: string;
   country: string;
-  code: string;
+  authHash: string;
 }
 
 export interface RegisterResponse { 
@@ -67,6 +67,12 @@ export interface RegisterResponse {
             azer_token: string,
             expires_at: number
         },
+        result: {
+      azer_id: number;
+    };
+    user: {
+      oauth_id: number;
+    };
         isSuccess: boolean,
         icon: string,
         tokenID: string,
@@ -122,6 +128,7 @@ export interface SubmitSurveyRequest {
   config_id: number;
   question_id: number;
   answer: string;
+  azer_id: string;
 }
 
 export interface CountryResponse {

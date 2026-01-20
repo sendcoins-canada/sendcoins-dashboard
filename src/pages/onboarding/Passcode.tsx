@@ -7,7 +7,9 @@ import Header from "@/components/onboarding/shared/Header";
 import { showSuccess, showDanger } from "@/components/ui/toast";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/store";
-import { createPasscodeThunk } from "@/store/auth/asyncThunks/createPasscode";
+// import { createPasscodeThunk } from "@/store/auth/asyncThunks/createPasscode";
+import { requestPasscodeCreate } from "@/api/authApi";
+import { setLoading } from "@/store/auth/slice";
 
 const SetupPasscode: React.FC = () => {
   const navigate = useNavigate();
@@ -30,29 +32,59 @@ const SetupPasscode: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (passcode.length !== 4) return;
+  if (passcode.length !== 4) return;
 
-    if (step === "create") {
-      setFirstPasscode(passcode);
-      setPasscode([]);
-      setStep("confirm");
-    } else if (step === "confirm") {
-      if (passcode.join("") === firstPasscode.join("")) {
-        const result = await dispatch(createPasscodeThunk({ code: passcode.join("") }));
+  if (step === "create") {
+    setFirstPasscode(passcode);
+    setPasscode([]);
+    setStep("confirm");
+  } else if (step === "confirm") {
+    const finalCode = passcode.join("");
 
-        if (createPasscodeThunk.fulfilled.match(result)) {
-          showSuccess(result.payload.message || "Passcode created successfully!");
-          navigate("/dashboard/home");
-        } else if (createPasscodeThunk.rejected.match(result)) {
-          showDanger(result.payload || "Failed to create passcode.");
-        }
-      } else {
-        showDanger("Code doesn't match");
+    if (finalCode === firstPasscode.join("")) {
+      dispatch(setLoading(true));
+
+      try {
+       // Get the token from your auth state
+  const token = localStorage.getItem("azertoken") || "";
+
+  // --- STEP 1: Request the Create (Get the Hash) ---
+  // Pass the object that the function is asking for:
+  const requestRes = await requestPasscodeCreate({ 
+    token: token, 
+    passcode: finalCode 
+  });
+       // Based on your response: { data: { title: "OTP sent", ... } }
+      if (requestRes.data?.isSuccess) {
+        showSuccess(requestRes.data.message || "Verification code sent!");
+        
+        // 3. Move to OTP screen
+        // IMPORTANT: We pass 'finalCode' and 'purpose' in the state 
+        // so the Verify screen knows what to do after the OTP is correct.
+        navigate("/verify", { 
+          state: { 
+            purpose: "passcode_create", 
+            tempPasscode: finalCode 
+          } 
+        });
+      }
+        
+      } catch (error: any) {
+        const msg = error.response?.data?.message || error.message || "Action failed";
+        showDanger(msg);
+        // Reset to beginning on error
         setPasscode([]);
         setStep("create");
+      } finally {
+        dispatch(setLoading(false));
       }
+    } else {
+      showDanger("Code doesn't match");
+      setPasscode([]);
+      setStep("create");
     }
-  };
+  }
+};
 
   const isComplete = passcode.length === 4;
 

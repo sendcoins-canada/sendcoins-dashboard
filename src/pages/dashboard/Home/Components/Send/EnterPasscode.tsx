@@ -1,39 +1,41 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch, RootState } from "@/store";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
 import { ArrowLeft2, PasswordCheck } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/onboarding/shared/Header";
 import { showSuccess, showDanger } from "@/components/ui/toast";
-import { createPasscodeThunk } from "@/store/auth/asyncThunks/createPasscode";
+import { requestPasscodeCreate, finalizePasscodeCreate, verifyOtp, verifyPasscode } from "@/api/authApi";
 
 interface EnterPasscodeProps {
-  onSuccess?: (passcode: string) => void;
+  onSuccess?: (code: string) => void;
+  mode?: "create" | "verify";
 }
 
-const EnterPasscode: React.FC<EnterPasscodeProps> = ({ onSuccess }) => {
+const EnterPasscode: React.FC<EnterPasscodeProps> = ({ onSuccess, mode = 'create' }) => {
   const navigate = useNavigate();
-  const dispatch = useDispatch<AppDispatch>();
-  const { loading } = useSelector((state: RootState) => state.auth);
+  const token = useSelector((state: RootState) => state.auth.token?.azer_token);
+  // Using 'any' here as well to avoid conflicts if User types are strict
+  const userSlice = useSelector((state: RootState) => state.user) as any;
+  const userData = userSlice?.user?.data;
 
-  const [step, setStep] = useState<"create" | "confirm">("create");
+  // Initialize step based on mode
+  const [step, setStep] = useState<"create" | "confirm" | "otp" | "verify">(
+    mode === "verify" ? "verify" : "create"
+  );
+  // const [step, setStep] = useState<"create" | "confirm" | "otp">("create");
   const [passcode, setPasscode] = useState<string[]>([]);
   const [firstPasscode, setFirstPasscode] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const handleCreatePasscode = async (code: string) => {
-    const result = await dispatch(createPasscodeThunk({ code }));
-    if (createPasscodeThunk.fulfilled.match(result)) {
-      showSuccess(result.payload.message || "Passcode created successfully!");
-      onSuccess?.(code);
-    } else {
-      showDanger(result.payload || "Failed to create passcode.");
-    }
-  };
+  // Determine if we need 4 digits (PIN) or 6 digits (OTP)
+  const requiredLength = step === "otp" ? 6 : 4;
+  const isComplete = passcode.length === requiredLength;
 
   const handleNumberClick = (num: string) => {
-    if (passcode.length < 4) setPasscode((prev) => [...prev, num]);
+    if (passcode.length < requiredLength) setPasscode((prev) => [...prev, num]);
   };
 
   const handleDelete = () => {
@@ -41,29 +43,106 @@ const EnterPasscode: React.FC<EnterPasscodeProps> = ({ onSuccess }) => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, ""); // digits only
-    if (value.length > 4) value = value.slice(0, 4);
+    let value = e.target.value.replace(/\D/g, "");
+    if (value.length > requiredLength) value = value.slice(0, requiredLength);
     setPasscode(value.split(""));
   };
 
-  const handleSubmit = () => {
-    if (passcode.length !== 4) return;
+  const handleSubmit = async () => {
+    if (!isComplete) return;
+    // --- VERIFY MODE (For Transactions) ---
+    if (step === "verify") {
+      setLoading(true);
+      try {
+        if (!token) throw new Error("Authentication missing");
+
+        // 1. Verify Passcode with Backend
+        const verifyRes = await verifyPasscode({
+          token: token,
+          passcode: passcode.join("")
+        });
+
+        // 2. Check response success
+        if (verifyRes?.data?.isSuccess) {
+           // 3. If valid, proceed to execute the actual transaction (SendFlow logic)
+           if (onSuccess) {
+              await onSuccess(passcode.join(""));
+           }
+        } else {
+           throw new Error("Invalid passcode");
+        }
+      } catch (error: any) {
+        console.error("Passcode verification failed:", error);
+        showDanger(error.response?.data?.message || "Incorrect passcode. Please try again.");
+        setPasscode([]); // Clear input on error
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
 
     if (step === "create") {
       setFirstPasscode(passcode);
       setPasscode([]);
       setStep("confirm");
-    } else if (step === "confirm") {
-      if (passcode.join("") === firstPasscode.join("")) {
-        handleCreatePasscode(passcode.join(""));
-        showSuccess("Passcode confirmed!");
-      } else {
-        showDanger("Code doesn't match");
+    } 
+    else if (step === "confirm") {
+      if (passcode.join("") !== firstPasscode.join("")) {
+        showDanger("Passcodes do not match");
         setPasscode([]);
         setStep("create");
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const tokenData = JSON.parse(localStorage.getItem("token") || "{}");
+        await requestPasscodeCreate({
+          token: tokenData.azer_token,
+          passcode: firstPasscode.join(""),
+          // confirmPasscode: passcode.join(""),
+        });
+        showSuccess("OTP sent to your email");
+        setPasscode([]);
+        setStep("otp");
+      } catch (err: any) {
+        showDanger(err.response?.data?.message || "Failed to initiate request");
+      } finally {
+        setLoading(false);
+      }
+    } 
+    else if (step === "otp") {
+      setLoading(true);
+      try {
+        // 1. Verify OTP
+        
+        const otpRes = await verifyOtp({
+          email: userData.user_email,
+          code: Number(passcode.join("")),
+          purpose: "passcode_create",
+        });
+        console.log("OTP Response:", otpRes);
+
+        // 2. Finalize with authHash
+        await finalizePasscodeCreate(
+          firstPasscode.join(""),
+          otpRes?.data?.authHash || "",
+        );
+
+        showSuccess("Passcode created successfully!");
+        onSuccess?.(firstPasscode.join(""));
+        navigate("/dashboard/home");
+      } catch (err: any) {
+        showDanger(err.response?.data?.message || "Verification failed");
+      } finally {
+        setLoading(false);
       }
     }
   };
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, [step]);
 
   const keypad = [
     ["1", "2", "3"],
@@ -72,110 +151,94 @@ const EnterPasscode: React.FC<EnterPasscodeProps> = ({ onSuccess }) => {
     ["", "0", "←"],
   ];
 
-  const isComplete = passcode.length === 4;
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, [step]);
-
   return (
     <>
-<div className="hidden md:block">
-              <Header />
-            </div>           {/* Back button */}
-        <div
-          className="flex items-center cursor-pointer border rounded-full w-fit ml-6 p-2 mt-10 md:mt-0 "
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft2 size="16" color="black" />
-        </div>
-      <div className="min-h-screen flex flex-col items-center bg-white py-6 md:pt-16">
-       
+      <div className="hidden md:block">
+        <Header />
+      </div>
+      <div
+        className="flex items-center cursor-pointer border rounded-full w-fit ml-6 p-2 mt-10 md:mt-0"
+        onClick={() => navigate(-1)}
+      >
+        <ArrowLeft2 size="16" color="black" />
+      </div>
 
-        {/* Icon */}
+      <div className="min-h-screen flex flex-col items-center bg-white py-6 md:pt-16">
         <div className="bg-[#D6F6DD] w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
           <PasswordCheck color="#480355" size="32" variant="Bold" />
         </div>
 
-        {/* Title */}
         <p className="text-2xl font-extrabold mb-2 text-center">
-          {step === "create" ? "Enter passcode" : "Confirm passcode"}
+          {step === "create" ? "Create passcode" : step === "confirm" ? "Confirm passcode" : "Verify OTP"}
         </p>
         <p className="text-gray-500 mb-8 text-center px-4">
           {step === "create"
-            ? "Enter your passcode to confirm payment"
-            : "Re-enter your passcode to confirm."}
+            ? "Set a 4-digit PIN for your transactions"
+            : step === "confirm"
+            ? "Re-enter your passcode to confirm."
+            : "Enter the 6-digit code sent to your email."}
         </p>
 
-        {/* Passcode Dots */}
+        {/* Passcode Display */}
         <div className="flex gap-4 mb-10">
-          {[0, 1, 2, 3].map((i) => (
+          {Array.from({ length: requiredLength }).map((_, i) => (
             <div
               key={i}
-              className={`w-4 h-4 rounded-full ${
+              className={`w-4 h-4 rounded-full flex items-center justify-center ${
                 passcode[i] ? "bg-black" : "bg-gray-200"
               }`}
-            ></div>
+            >
+               {step === "otp" && passcode[i] && <span className="text-[8px] text-white">{passcode[i]}</span>}
+            </div>
           ))}
         </div>
 
-        {/* ✅ MOBILE LAYOUT: Numeric keypad */}
-        <div className="md:hidden flex flex-col items-center">
-          <div className="grid grid-cols-3 gap-18 text-2xl font-semibold mb-10">
+        {/* MOBILE KEYPAD */}
+        <div className="md:hidden flex flex-col items-center w-full">
+          <div className="grid grid-cols-3 gap-y-8 gap-x-12 text-2xl font-semibold mb-10">
             {keypad.flat().map((key, i) => (
               <div
                 key={i}
-                className={`flex justify-center items-center h-12 w-12 rounded-full mx-auto 
-          transition-all duration-150 ${
-                  key
-                    ? "cursor-pointer active:bg-[#F5F5F5] transition-transform"
-                    : ""
-                }`}
+                className="flex justify-center items-center h-12 w-12 rounded-full cursor-pointer active:bg-gray-100"
                 onClick={() => {
                   if (key === "←") handleDelete();
                   else if (key) handleNumberClick(key);
                 }}
               >
-                {key || ""}
+                {key}
               </div>
             ))}
           </div>
 
-          {/* Make Payment button (mobile) */}
           <Button
             onClick={handleSubmit}
             disabled={!isComplete || loading}
-            className={`w-[70%] py-3 rounded-full text-white transition ${
-              isComplete
-                ? "bg-primaryblue hover:bg-primaryblue/90"
-                : "bg-blue-100 text-gray-400"
+            className={`w-[80%] py-3 rounded-full text-white ${
+              isComplete ? "bg-primaryblue" : "bg-blue-100 text-gray-400"
             }`}
           >
-            {loading ? "Saving..." : "Make Payment"}
+            {loading ? "Processing..." : step === "otp" ? "Verify" : "Continue"}
           </Button>
         </div>
 
-        {/* DESKTOP LAYOUT: Hidden input method */}
+        {/* DESKTOP INPUT */}
         <div className="hidden md:flex flex-col items-center">
           <input
             ref={inputRef}
             type="tel"
-            maxLength={4}
+            maxLength={requiredLength}
             value={passcode.join("")}
             onChange={handleChange}
             className="absolute opacity-0 pointer-events-none"
           />
-
           <Button
             onClick={handleSubmit}
             disabled={!isComplete || loading}
-            className={`px-6 py-2 rounded-full mt-4 ${
-              isComplete
-                ? "bg-primaryblue text-white cursor-pointer"
-                : "bg-blue-100 text-gray-400"
+            className={`px-10 py-2 rounded-full mt-4 ${
+              isComplete ? "bg-primaryblue text-white" : "bg-blue-100 text-gray-400"
             }`}
           >
-            {loading ? "Saving..." : "Make Payment"}
+            {loading ? "Processing..." : step === "otp" ? "Verify OTP" : "Continue"}
           </Button>
         </div>
       </div>
