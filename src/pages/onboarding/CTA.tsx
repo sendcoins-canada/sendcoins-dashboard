@@ -4,9 +4,20 @@ import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import Header from "@/components/onboarding/shared/Header";
 import { ArrowLeft2, ShieldTick } from "iconsax-react";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
 
 const CTA = () => {
   const navigate = useNavigate();
+
+  // 1. Get User Data from Redux
+  // Casting to 'any' to safely handle the nested structure found in previous steps
+  const userSlice = useSelector((state: RootState) => state.user) as any;
+  const userData = userSlice?.user?.data;
+  
+  // 2. Check if PIN exists
+  const hasPin = userData?.isPinAvailable?.found === true;
+  const isVerified = userData?.verified === true;
 
   return (
     <>
@@ -29,31 +40,38 @@ const CTA = () => {
 
         {/* Options */}
         <div className="w-full max-w-md flex flex-col gap-4">
-          <button
-            onClick={() => navigate("/setup-passcode")}
-            className="w-full flex items-center justify-between bg-gray-100 p-4 rounded-xl cursor-pointer"
-          >
-            <div className="text-left">
-              <h3 className="font-semibold">Create a passcode</h3>
-              <p className="text-sm text-gray-500">
-                Set a secure 4 digit code to keep your account safe and your transfers protected.
-              </p>
-            </div>
-            <ChevronRight className="text-gray-400" />
-          </button>
 
-          <button
-            onClick={() => navigate("/address")}
-            className="w-full flex items-center justify-between bg-gray-100 p-4 rounded-xl cursor-pointer"
-          >
-            <div className="text-left">
-              <h3 className="font-semibold">Complete KYC verification</h3>
-              <p className="text-sm text-gray-500">
-                We’ll run a quick check to verify your details and keep your account secure.
-              </p>
-            </div>
-            <ChevronRight className="text-gray-400" />
-          </button>
+          {/* 3. Condition: Only show if User DOES NOT have a PIN */}
+            {!hasPin && (
+              <button
+                onClick={() => navigate("/setup-passcode")}
+                className="w-full flex items-center justify-between bg-gray-100 p-4 rounded-xl cursor-pointer hover:bg-gray-200 transition-colors"
+              >
+                <div className="text-left">
+                  <h3 className="font-semibold">Create a passcode</h3>
+                  <p className="text-sm text-gray-500">
+                    Set a secure 4 digit code to keep your account safe and your transfers protected.
+                  </p>
+                </div>
+                <ChevronRight className="text-gray-400" />
+              </button>
+            )}
+
+        {/* Condition 2: Only show if User is NOT Verified */}
+            {!isVerified && (
+              <button
+                onClick={() => navigate("/address")}
+                className="w-full flex items-center justify-between bg-gray-100 p-4 rounded-xl cursor-pointer hover:bg-gray-200 transition-colors"
+              >
+                <div className="text-left">
+                  <h3 className="font-semibold">Complete KYC verification</h3>
+                  <p className="text-sm text-gray-500">
+                    We’ll run a quick check to verify your details and keep your account secure.
+                  </p>
+                </div>
+                <ChevronRight className="text-gray-400" />
+              </button>
+            )}
         </div>
 
         {/* Later button */}

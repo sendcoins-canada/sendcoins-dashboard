@@ -34,6 +34,16 @@ const {selectedBalance } = useSelector((state: RootState) => state.wallet);
     amount: "0.00 XXX",
     logo: ""
   };
+
+  // Casting to 'any' to handle the nested structure safely as done before
+  const userSlice = useSelector((state: RootState) => state.user) as any;
+  const userData = userSlice?.user?.data;
+  
+  // Check conditions: Show reminder if PIN is NOT found OR User is NOT verified
+  const hasPin = userData?.isPinAvailable?.found === true;
+  const isVerified = userData?.verified === true;
+  const showReminder = !hasPin || !isVerified;
+  console.log(hasPin, isVerified)
   
   // 3. Fetch transactions on component mount
    useEffect(() => {
@@ -121,7 +131,7 @@ const {selectedBalance } = useSelector((state: RootState) => state.wallet);
         </div>
 
         {/* Reminder Card */}
-        <div className="bg-bggray rounded-xl px-4 hidden md:flex items-start justify-between mb-6">
+        {/* <div className="bg-bggray rounded-xl px-4 hidden md:flex items-start justify-between mb-6">
           <div>
             <h2 className="font-[500] text-primary pt-4">Almost there! 🚀</h2>
             <p className=" text-neutral mt-2">
@@ -140,7 +150,40 @@ const {selectedBalance } = useSelector((state: RootState) => state.wallet);
             </p>
           </div>
 
-        </div>
+        </div> */}
+
+        {/* --- REMINDER CARD (Conditional) --- */}
+        {showReminder && (
+          <>
+            {/* Desktop Version */}
+            <div 
+              onClick={() => navigate('/cta')} // Navigate to CTA on click
+              className="bg-bggray rounded-xl px-4 hidden md:flex items-start justify-between mb-6 cursor-pointer hover:bg-gray-200 transition-colors"
+            >
+              <div>
+                <h2 className="font-[500] text-primary pt-4">Almost there! 🚀</h2>
+                <p className="text-neutral mt-2">
+                  Finish setting up your details to start sending!
+                </p>
+              </div>
+              <img src={Coins} alt="coins" />
+            </div>
+
+            {/* Mobile Version */}
+            <div 
+              onClick={() => navigate('/cta')} // Navigate to CTA on click
+              className="bg-bggray rounded-xl px-4 flex gap-2 md:hidden items-center justify-between mb-6 py-4 cursor-pointer hover:bg-gray-200 transition-colors"
+            >
+              <img src={CoinsMobile} alt="coins" />
+              <div>
+                <h2 className="font-[500] text-primary text-sm">Almost there! 🚀</h2>
+                <p className="text-neutral mt-1 text-sm">
+                  Finish setting up your details to start sending!
+                </p>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Transactions Section
         <div>

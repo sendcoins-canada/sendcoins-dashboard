@@ -162,7 +162,9 @@ type FlowStep = "new" | "confirm" | "otp";
 const ResetPasscode: React.FC = () => {
   const navigate = useNavigate();
   const { user, token } = useSelector((state: RootState) => state.auth); 
-  console.log(user)
+  const userSlice = useSelector((state: RootState) => state.user) as any;
+    const userData = userSlice?.user?.data;
+  console.log(userData)
   const [step, setStep] = useState<FlowStep>("new");
   const [passcode, setPasscode] = useState<string[]>([]); // Current input buffer
   const [newCode, setNewCode] = useState<number>(0);
@@ -218,7 +220,7 @@ const ResetPasscode: React.FC = () => {
       else if (step === "otp") {
         // Verify OTP (Step 2)
         const otpResult = await verifyOtp({
-          email: user?.useremail || "",
+          email: userData?.user_email || "",
           code: currentCodeAsNumber,
           purpose: "passcode_reset"
         });
