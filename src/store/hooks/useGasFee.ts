@@ -10,7 +10,6 @@ export const useGasFee = (params?: GetGasFee) => {
   const { gasFeeData, loading, error } = useSelector(
     (state: RootState) => state.transaction
   );
-console.log("useGasFee params:", params);
 
   useEffect(() => {
     if (!params) return;

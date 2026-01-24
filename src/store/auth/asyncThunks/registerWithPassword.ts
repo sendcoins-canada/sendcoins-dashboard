@@ -23,10 +23,10 @@ export const registerWithPasswordThunk = createAsyncThunk<
   async ({ password }, { getState, rejectWithValue }) => {
     try {
       const state = getState();
-      const { email, firstName, lastName, country, authHash } = state.registration;
+      const { email, firstName, lastName, country, authHash, bvn } = state.registration;
 
       // Validate required fields
-      if (!email || !firstName || !lastName || !country || !authHash) {
+      if (!email || !firstName || !lastName || !country || !authHash || !bvn) {
         return rejectWithValue(
           "Missing required registration information. Please complete all steps."
         );
@@ -39,6 +39,7 @@ export const registerWithPasswordThunk = createAsyncThunk<
         password,
         country,
         authHash,
+        bvn
       };
 
       const response: RegisterResponse = await registerWithPasswordApi(

@@ -56,6 +56,7 @@ export interface RegisterRequest {
   lastName: string;
   password: string;
   country: string;
+  bvn: string;
   authHash: string;
 }
 

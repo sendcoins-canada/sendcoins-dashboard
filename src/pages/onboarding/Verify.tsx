@@ -33,7 +33,6 @@ const { purpose: statePurpose, tempPasscode } = location.state || {};
 
   // Get email from Redux with localStorage fallbacks
   const email = location.state?.email || JSON.parse(localStorage.getItem("user") || "{}")?.useremail
-console.log(email)
   React.useEffect(() => {
     const t = setInterval(() => setSeconds((s) => (s > 0 ? s - 1 : 0)), 1000);
     return () => clearInterval(t);
@@ -233,14 +232,14 @@ const submit = async (overrideCode?: string) => {
               onKeyDown={(e) => onKeyDown(i, e)}
               onPaste={(e) => onPaste(i, e)}
               disabled={isBusy}
-              className="md:h-[72px] md:w-[66px] h-14 w-12 text-center font-bold text-3xl rounded-md focus:outline-none bg-[#F5F5F5] focus:ring-1 focus:ring-[#57B5FF] focus-within:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+              className="md:h-[72px] md:w-[66px] h-14 w-12 text-center font-bold text-3xl rounded-md focus:outline-none bg-[#F5F5F5] focus:ring-1 focus:ring-[#0088FF] focus-within:bg-white disabled:cursor-not-allowed disabled:opacity-60"
             />
           ))}
         </div>
 
         {isBusy && (
           <div className="mt-4 flex items-center justify-center gap-2 text-sm text-neutral-500">
-            <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#57B5FF] border-t-transparent" />
+            <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#0088FF] border-t-transparent" />
             <span>Verifying code...</span>
           </div>
         )}
@@ -251,13 +250,13 @@ const submit = async (overrideCode?: string) => {
           </Button>
         </div> */}
 
-        <div className="mt-6 text-sm text-neutral-500">
+        <div className="mt-24 text-sm text-neutral-500">
           Didn't get the email?
         </div>
         <div className="mt-2">
   <Button
     variant="outline"
-    className="rounded-full px-4 py-2 text-xs cursor-pointer"
+    className="rounded-full px-4 py-2 text-sm font-medium cursor-pointer"
     disabled={seconds > 0 || isBusy}
     onClick={handleResendOtp}
   >

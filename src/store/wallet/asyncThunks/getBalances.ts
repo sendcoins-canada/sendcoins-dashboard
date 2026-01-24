@@ -7,7 +7,6 @@ export const getBTCBalanceThunk = createAsyncThunk(
     try {
       const res = await getBTCBalance(data);
       // <-- ADD LOG HERE TO SEE API RESPONSE
-      console.log('getBTCBalanceThunk Fulfilled Response:', res.data || res);
       return res;
     } catch (err: any) {
       return rejectWithValue(err.response?.data || "BTC balance failed");

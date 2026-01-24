@@ -19,25 +19,26 @@ export const showWarning = (message: string) =>
 export const showDanger = (message: string) =>
   toast.error(message, {
     icon: (
-      <div className="w-6 h-6 flex items-center justify-center rounded-full bg-[#FF383C]">
+      <div className="p-1 flex items-center gap-6 justify-center rounded-full bg-[#FF383C]">
         <CloseCircle size="18" color="white" />
       </div>
     ),
     className: `
-      flex items-center gap-2 rounded-full 
-      bg-[#FFE5E6] text-[#FF383C]
+      flex rounded-full 
+      bg-[#FFE5E6] text-sm text-[#FF383C]
        w-fit !justify-start !items-center
+       whitespace-nowrap
     `,
     duration: 4000,    
     position: "top-center",
     style: {
       width: "fit-content",
-      display: "flex", // ensure container uses flex
-      alignItems: "center", // vertically centers icon + text
+      display: "flex",
+      alignItems: "center", 
       justifyContent: "flex-start",
       borderRadius: "9999px",
-      paddingTop: 8,
-      paddingBottom: 8,
+      // paddingTop: 8,
+      // paddingBottom: 8,
       
     },
   });

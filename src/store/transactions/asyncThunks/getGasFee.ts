@@ -14,7 +14,6 @@ export const getGasFeeThunk = createAsyncThunk<
     try {
       const formData = new FormData();
        const token = localStorage.getItem("azertoken");
-       console.log(token)
        
 if (!token) {
   return rejectWithValue("Authentication token not found");

@@ -1,10 +1,11 @@
-import React from "react";
+import React, {useMemo} from "react";
 import { Button } from "@/components/ui/button";
-import { TransmitSqaure2, ArrowLeft2, Edit2 } from "iconsax-react";
+import { TransmitSqaure2, ArrowLeft2, Global } from "iconsax-react";
 import Header from "@/components/onboarding/shared/Header";
 import { Convert, Money, Money2 } from "iconsax-react";
-import Eth from "@/assets/Eth.svg"
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
 
 
 type Props = {
@@ -21,10 +22,28 @@ const ConfirmSend: React.FC<Props> = ({
   amount,
   onConfirm,
 }) => {
-  const exchangeRate = "$1 = 1 USDC";
   const platformFee = "Not applied";
   const estimatedArrival = "3 mins";
   const navigate = useNavigate()
+
+  // 1. Get User's Wallet Data from Redux
+  const { allBalances } = useSelector((state: RootState) => state.wallet);
+
+  // 2. Find the specific wallet address for the asset we are sending
+  const userWallet = useMemo(() => {
+    if (!allBalances?.data?.balances) return null;
+    return allBalances.data.balances[asset.toLowerCase()];
+  }, [allBalances, asset]);
+
+  const userAddress = userWallet?.walletAddress || "Loading...";
+// 3. Get Dynamic Logo (Fallback to null if not found)
+  const networkIcon = userWallet?.logo;
+  // Helper to shorten long addresses for display
+  const formatAddress = (addr: string) => {
+    if (!addr) return "";
+    if (addr.length < 15) return addr;
+    return `${addr.slice(0, 6)}...${addr.slice(-6)}`;
+  };
 
   return (
     <>
@@ -39,6 +58,9 @@ const ConfirmSend: React.FC<Props> = ({
                              <div className="absolute left-4 md:hidden flex items-center cursor-pointer border rounded-full justify-center p-2  w-fit" onClick={() => navigate(-1)}>
                                <ArrowLeft2 size="20" color="black" className="" />
                              </div>
+                              <div className="absolute left-4 md:flex hidden items-center cursor-pointer border rounded-full w-fit md:ml-28 ml-6 justify-center py-2 px-4" onClick={() => navigate(-1)}>
+                                     <ArrowLeft2 size="16" color="black" /><p className="text-sm ml-1">Back</p>
+                                   </div>
                  
                              <h2 className="md:text-2xl font-semibold text-center mx-auto w-fit">
                                Transaction summary
@@ -47,12 +69,12 @@ const ConfirmSend: React.FC<Props> = ({
           <TransmitSqaure2 size="64" color="#0647F7" variant="Bold"/>
         <p className="text-[#777777] text-sm">You are sending</p>
         <p className="text-4xl font-bold text-gray-900">{amount} {asset}</p>
-        <p className="text-sm text-[#0052FF] mt-1">~5 USD</p>
+        <p className="text-sm text-[#0052FF] mt-1">~{amount} {asset}</p>
       </div>
 
-<div className="bg-[#F5F5F5] max-w-md w-full p-2 rounded-2xl">
+<div className="bg-[#F5F5F5] max-w-xl w-full p-2 rounded-2xl">
       {/* Card */}
-      <div className="w-full max-w-md bg-white  rounded-2xl ">
+      <div className="w-full max-w-xl bg-white  rounded-2xl ">
         <div className="p-4 flex flex-col gap-2">
           <div className="flex justify-between">
             <p className="text-sm text-gray-500">From</p>
@@ -60,17 +82,23 @@ const ConfirmSend: React.FC<Props> = ({
               Your Wallet
             </p>
           </div>
-            <p className="text-xs text-gray-400 text-right">ETH | 0x89f8...a1C3</p>
+            <p className="text-xs text-gray-400 text-right">{formatAddress(userAddress)}</p>
         </div>
 
         <div className="px-4 py-2 flex justify-between items-center">
           <p className="text-sm text-gray-500">Network</p>
           <div className="flex items-center gap-2">
-            <img
-              src={Eth}
-              alt="Ethereum"
-              className="w-4 h-4"
-            />
+            {/* DYNAMIC ICON HERE */}
+                {networkIcon ? (
+                    <img 
+                        src={networkIcon} 
+                        alt={asset} 
+                        className="w-5 h-5 rounded-full object-contain" 
+                    />
+                ) : (
+                    // Fallback icon if logo isn't loaded yet
+                    <Global size="20" color="#555" variant="Bold"/>
+                )}
             <span className="text-sm font-medium text-gray-800 capitalize">
             {asset}
             </span>
@@ -88,7 +116,7 @@ const ConfirmSend: React.FC<Props> = ({
               {recipient.name || "—"}
             </p>
           </div>
-            <p className="text-xs text-gray-400 text-right">{recipient.address}</p>
+            <p className="text-xs text-gray-400 text-right">{formatAddress(recipient.address)}</p>
         </div>
 
         <div className="p-4 flex justify-between items-center">
@@ -100,12 +128,11 @@ const ConfirmSend: React.FC<Props> = ({
       </div>
 
       {/* Summary */}
-      <div className="w-full max-w-md bg-white rounded-2xl mt-4 divide-y divide-gray-200 text-neutral">
+      <div className="w-full max-w-xl bg-white rounded-2xl mt-4 divide-y divide-gray-200 text-neutral">
         <div className="flex items-center justify-between p-3 text-sm">
           <span className="flex items-center gap-2">
             <Convert size="16" color="#777777" className="inline"/> Exchange rate
           </span>
-          <span className="text-primary">{exchangeRate}</span>
         </div>
         <div className="flex items-center justify-between p-3 text-sm">
           <span className="flex items-center gap-2">
@@ -119,19 +146,11 @@ const ConfirmSend: React.FC<Props> = ({
           </span>
           <span className="text-primary">
             {amount} {asset}
-            <span className="text-xs text-neutral ml-1">(≈5 USD)</span>
+            <span className="text-xs text-neutral ml-1">(≈ {amount} {asset})</span>
           </span>
         </div>
       </div>
-      <div className="w-full max-w-md bg-white rounded-2xl mt-4 divide-y divide-gray-200 text-neutral">
-        <div className="flex flex-col justify-between p-3 text-sm">
-            <p className="inline"> Write memo <Edit2 size="16" color="#777777" className="inline"/></p>
-          
-          <span className="text-primary">Write Memo</span>
-        </div>
-        
-      </div>
-
+     
       </div>
 
       {/* Continue button */}

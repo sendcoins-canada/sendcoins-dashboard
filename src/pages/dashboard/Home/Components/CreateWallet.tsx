@@ -78,7 +78,6 @@ const CreateWallet: React.FC = () => {
     }));
 
     if (createWalletThunk.fulfilled.match(result)) {
-      console.log("Wallet created successfully:", result.payload);
       setIsSuccess(true);
     } else {
       console.error("Error creating wallet:", result.payload);
@@ -108,10 +107,7 @@ const CreateWallet: React.FC = () => {
         <HeaderWithCancel onCancel={() => navigate(-1)} />
       </div>
 
-      {/* Back Button */}
-      <div className="hidden md:flex items-center cursor-pointer border rounded-full w-fit md:ml-28 ml-6 justify-center py-2 px-4" onClick={() => navigate(-1)}>
-        <ArrowLeft2 size="16" color="black" className="" /><p className="text-sm font-semibold">Back</p>
-      </div>
+     
 
       {/* Form */}
       <div className="w-[90%] md:w-[25%] mx-auto mt-20">
@@ -119,6 +115,10 @@ const CreateWallet: React.FC = () => {
           <div className="md:hidden flex items-center cursor-pointer border rounded-full justify-center p-2  w-fit" onClick={() => navigate(-1)}>
             <ArrowLeft2 size="20" color="black" className="" />
           </div>
+           {/* Back Button */}
+      <div className="absolute left-4 hidden md:flex items-center cursor-pointer border rounded-full w-fit md:ml-28 ml-6 justify-center py-2 px-4" onClick={() => navigate(-1)}>
+        <ArrowLeft2 size="16" color="black" className="" /><p className="text-sm font-semibold">Back</p>
+      </div>
 
           <h2 className="md:text-2xl font-semibold text-center">
             Create New Wallet

@@ -10,6 +10,7 @@ interface RegistrationState {
   lastName: string;
   dob: string; // optional if you don’t need to send it
   password: string;
+  bvn: string;
 }
 
 const initialState: RegistrationState = {
@@ -20,6 +21,7 @@ const initialState: RegistrationState = {
   lastName: "",
   dob: "",
   password: "",
+  bvn: ""
 };
 
 const registrationSlice = createSlice({
@@ -41,6 +43,9 @@ const registrationSlice = createSlice({
     setLastName(state, action: PayloadAction<string>) {
       state.lastName = action.payload;
     },
+    setBvn(state, action: PayloadAction<string>) {
+      state.bvn = action.payload;
+    },
     setDob(state, action: PayloadAction<string>) {
       state.dob = action.payload;
     },
@@ -60,6 +65,7 @@ export const {
   setFirstName,
   setLastName,
   setDob,
+  setBvn,
   setPassword,
   resetRegistration,
 } = registrationSlice.actions;

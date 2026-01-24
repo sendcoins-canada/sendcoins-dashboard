@@ -18,7 +18,7 @@ import { setCredentials, setLoading } from "@/store/auth/slice";
 const Password: React.FC = () => {
   const [step, setStep] = useState<"create" | "confirm">("create");
   const [tempPassword, setTempPassword] = useState("");
-  const { email, firstName, lastName, country, authHash } = useSelector(
+  const { email, firstName, lastName, country, authHash, bvn } = useSelector(
     (state: RootState) => state.registration
   );
 
@@ -86,6 +86,7 @@ const Password: React.FC = () => {
       lastName,     // From useSelector
       country,      // From useSelector
       authHash,     // From useSelector (important!)
+      bvn,
       password: tempPassword,
     };
 

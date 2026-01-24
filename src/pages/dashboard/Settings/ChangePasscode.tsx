@@ -164,7 +164,6 @@ const ResetPasscode: React.FC = () => {
   const { user, token } = useSelector((state: RootState) => state.auth); 
   const userSlice = useSelector((state: RootState) => state.user) as any;
     const userData = userSlice?.user?.data;
-  console.log(userData)
   const [step, setStep] = useState<FlowStep>("new");
   const [passcode, setPasscode] = useState<string[]>([]); // Current input buffer
   const [newCode, setNewCode] = useState<number>(0);

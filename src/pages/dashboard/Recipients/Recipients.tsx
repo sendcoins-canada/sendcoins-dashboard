@@ -38,8 +38,6 @@ type FormattedRecipient = RawRecipient & {
   if (parts.length === 1) return parts[0][0].toUpperCase();
   return (parts[0][0] + parts[1][0]).toUpperCase();
 };
-    const mostRecent = recipients; // Simplified for example purposes
-console.log(mostRecent)
 const formattedRecipients: FormattedRecipient[] = recipients.map((rec, index) => ({
   ...rec,
   initials: getInitials(rec.name),

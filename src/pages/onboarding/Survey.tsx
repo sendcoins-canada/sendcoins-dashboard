@@ -40,13 +40,11 @@ const Survey: React.FC = () => {
   useEffect(() => {
     const fetchSurveys = async () => {
       // FIX 1: Prevent refetching if we already have the questions in state
-      console.log(allQuestions)
       if (allQuestions.length > 0) return;
       try {
         const res = await getActiveSurvey();
         const surveysData = Array.isArray(res.data) ? res.data : [res.data];
         // setSurveys(surveysData);
-        console.log(surveysData)
         // Flatten all questions from all surveys
         const questions = surveysData.flatMap((survey: any) => 
           survey.questions.map((q: Question) => ({
@@ -104,7 +102,6 @@ const Survey: React.FC = () => {
     dispatch(setLoading(true));
 
     try {
-      console.log("Submitting for Question Index:", currentQuestionIndex);
       // 2. Direct API Call
       await submitSurvey({
         email: email,
@@ -113,11 +110,9 @@ const Survey: React.FC = () => {
         answer: currentAnswer,
         azerId: azerId,
       });
-      console.log("API Success! Moving to next question...");
 
       // 3. Update UI Local State
       if (currentQuestionIndex < allQuestions.length - 1) {
-        console.log("Advancing index from", currentQuestionIndex, "to", currentQuestionIndex + 1);
         // setCurrentQuestionIndex(currentQuestionIndex + 1);
         // setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
         dispatch(setSurveyIndex(currentQuestionIndex + 1));

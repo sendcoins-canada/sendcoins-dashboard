@@ -13,6 +13,11 @@ export interface SendFiatParams {
   notes?: string;
 }
 
+export interface GetAccountParams {
+  token: string;
+  currency: string;
+}
+
 /**
  * Consumes the /fiat/send endpoint to initiate a bank transfer.
  * Uses FormData as the body to remain consistent with your other user APIs.
@@ -40,6 +45,25 @@ export const sendFiat = async (params: SendFiatParams) => {
 
   const response = await api.post(
     "/fiat/send",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return response.data;
+};
+
+export const getAccount = async (params: GetAccountParams) => {
+  const formData = new FormData();
+  
+  formData.append("token", params.token);
+  formData.append("currency", params.currency);
+
+  const response = await api.post(
+    "/user/crayfi/account",
     formData,
     {
       headers: {

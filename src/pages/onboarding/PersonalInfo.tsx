@@ -7,12 +7,13 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setFirstName, setLastName, setDob } from "@/store/registration/slice";
+import { setFirstName, setLastName, setDob, setBvn } from "@/store/registration/slice";
 
 const PersonalInfo: React.FC = () => {
   const schema = Yup.object({
     firstName: Yup.string().required("First name is required"),
     lastName: Yup.string().required("Last name is required"),
+    bvn: Yup.string().required("Bvn is required"),
     dob: Yup.date()
       .required("Date of birth is required")
       .max(new Date(), "Date of birth cannot be in the future"),
@@ -43,13 +44,14 @@ const PersonalInfo: React.FC = () => {
             </p>
 
             <Formik
-              initialValues={{ firstName: "", lastName: "", dob: "" }}
+              initialValues={{ firstName: "", lastName: "", dob: "", bvn: "" }}
               validationSchema={schema}
                onSubmit={(values) => {
                 // ✅ Save to Redux
                 dispatch(setFirstName(values.firstName));
                 dispatch(setLastName(values.lastName));
                 dispatch(setDob(values.dob));
+                dispatch(setBvn(values.bvn));
 
                 // ✅ Go to next step
                 navigate("/password");
@@ -67,6 +69,11 @@ const PersonalInfo: React.FC = () => {
                     name="lastName"
                     placeholder="eg: John"
                     label="Last name"
+                  />
+                  <TextInputField
+                    name="bvn"
+                    placeholder="eg: 1234567890"
+                    label="Bvn"
                   />
 
                   <TextInputField

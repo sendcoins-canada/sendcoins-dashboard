@@ -29,11 +29,12 @@ const Home: React.FC = () => {
     
 const {selectedBalance } = useSelector((state: RootState) => state.wallet);
   const displayedBalance = selectedBalance || {
-    symbol: "Loading......",
+    symbol: "",
     usd: "$0.00",
     amount: "0.00 XXX",
     logo: ""
   };
+  console.log(displayedBalance)
 
   // Casting to 'any' to handle the nested structure safely as done before
   const userSlice = useSelector((state: RootState) => state.user) as any;
@@ -43,7 +44,6 @@ const {selectedBalance } = useSelector((state: RootState) => state.wallet);
   const hasPin = userData?.isPinAvailable?.found === true;
   const isVerified = userData?.verified === true;
   const showReminder = !hasPin || !isVerified;
-  console.log(hasPin, isVerified)
   
   // 3. Fetch transactions on component mount
    useEffect(() => {
@@ -95,14 +95,13 @@ const {selectedBalance } = useSelector((state: RootState) => state.wallet);
               <p className="text-[28px] text-[#777777]">
                 <span className="text-primary text-5xl">
                   {showBalance
-                    ? String(displayedBalance.usd).replace('$', '') 
+                    ? String(displayedBalance.amount).replace('$', '') 
                     : <span className="text-[#D2D2D2]"> ***** </span>}
                 </span>
-                {displayedBalance.symbol}
               </p>
               <p className="text-gray-400 text-sm mt-1">
                 {showBalance
-                  ? String(displayedBalance.amount)//  Use Redux crypto amount
+                  ? String(displayedBalance.usd)
                   : "*******"}
                 <ArrowSwapVertical size="14" color="black" variant="Outline" className="inline ml-2" />
               </p>
@@ -117,40 +116,20 @@ const {selectedBalance } = useSelector((state: RootState) => state.wallet);
           </div>
 
           {/* Action Buttons */}
-          <div className="flex space-x-3 mt-4">
-            <button onClick={() => setIsFundingOpen(true)} className="flex items-center space-x-2 px-4 py-2 bg-primaryblue text-white rounded-full hover:bg-blue-700">
+          <div className="flex space-x-3 mt-4 text-sm">
+            <button onClick={() => setIsFundingOpen(true)} className="flex items-center space-x-2 px-4 py-2 bg-primaryblue text-white rounded-full hover:bg-blue-700 cursor-pointer">
               <span>Fund</span><Add size={16} color="white" />
             </button>
-            <button onClick={() => setIsSendModalOpen(true)} className="flex items-center space-x-2 px-4 py-2 bg-bggray text-primary rounded-full">
+            <button onClick={() => setIsSendModalOpen(true)} className="flex items-center space-x-2 px-4 py-2 bg-bggray hover:bg-[#777777]  text-primary rounded-full cursor-pointer">
               <span>Send</span> <Send2 size={16} color="black" />
             </button>
-            <button onClick={() => navigate('/dashboard/convert')} className="flex items-center space-x-2 px-4 py-2 bg-bggray text-primary rounded-full">
+            <button onClick={() => navigate('/dashboard/convert')} className="flex items-center space-x-2 px-4 py-2 bg-bggray hover:bg-[#777777] text-primary rounded-full cursor-pointer">
               <span>Convert</span><Convert size={16} color="black" />
             </button>
           </div>
         </div>
 
-        {/* Reminder Card */}
-        {/* <div className="bg-bggray rounded-xl px-4 hidden md:flex items-start justify-between mb-6">
-          <div>
-            <h2 className="font-[500] text-primary pt-4">Almost there! 🚀</h2>
-            <p className=" text-neutral mt-2">
-              Finish setting up your details to start sending!
-            </p>
-          </div>
-
-          <img src={Coins} />
-        </div>
-        <div className="bg-bggray rounded-xl px-4 flex gap-2 md:hidden items-center justify-between mb-6 py-4">
-          <img src={CoinsMobile} />
-          <div>
-            <h2 className="font-[500] text-primary text-sm">Almost there! 🚀</h2>
-            <p className=" text-neutral mt-1 text-sm">
-              Finish setting up your details to start sending!
-            </p>
-          </div>
-
-        </div> */}
+       
 
         {/* --- REMINDER CARD (Conditional) --- */}
         {showReminder && (
@@ -315,12 +294,12 @@ const {selectedBalance } = useSelector((state: RootState) => state.wallet);
           alt="No transactions"
           className="w-12 h-12 opacity-50 mb-3"
         />
-        <p className="text-gray-500 text-sm">No transactions yet</p>
-        <p className="text-gray-400 text-xs mt-1 text-center">
+        <p className="text-primary font-semibold">No transactions yet</p>
+        <p className="text-neutral text-sm mt-1 text-center max-w-xs">
           Looks like things are quiet here. Start your first transaction
           to get things moving.
         </p>
-        <button className="mt-4 px-5 py-2 bg-[#0647F7] text-white rounded-full hover:bg-blue-700">
+        <button onClick={() => setIsFundingOpen(true)} className="mt-4 px-5 py-2 bg-primaryblue text-white rounded-full hover:bg-blue-700 cursor-pointer">
           Fund wallet
         </button>
       </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Modal from "@/components/ui/Modal";
-import { Apple, ArrowRight2, Bank, BuyCrypto, Copy, TickCircle } from "iconsax-react";
+import { Apple, ArrowRight2, Bank, BuyCrypto, Copy, Refresh, TickCircle } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 import Select from "@/components/ui/select";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,6 +9,7 @@ import { getAllBalanceThunk } from "@/store/wallet/asyncThunks/getBalances";
 import { showSuccess } from "@/components/ui/toast";
 import { QRCodeSVG } from 'qrcode.react';
 import logo from "@/assets/Logosingle.png"
+import { useCrayfiAccount } from "@/store/hooks/useGetAccount";
 
 interface WalletOption {
   name: string;
@@ -28,6 +29,7 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
   const [step, setStep] = useState<1 | 2>(1);
   const [selected, setSelected] = useState<"bank" | "crypto" | "apple" | null>(null);
   const dispatch = useDispatch()
+  const token = useSelector((state: RootState) => state.auth.token?.azer_token);
   // State to hold the currently selected wallet address for funding
   const [selectedWalletAddress, setSelectedWalletAddress] = useState<string>("");
 
@@ -42,6 +44,8 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
     (state: RootState) => state.wallet
   );
 
+  // --- CUSTOM HOOK FOR BANK ACCOUNT ---
+  const { data: bankDetails, loading: bankLoading, error: bankError, fetchAccount } = useCrayfiAccount();
   useEffect(() => {
     if (open && !allBalances) {
       const token = localStorage.getItem("azertoken");
@@ -51,9 +55,17 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
     }
   }, [open, allBalances, dispatch]);
 
-  // 2. Process wallet data for dropdown and details
-  const walletMap = allBalances?.data?.balances || {};
+  // 2. Fetch Bank Details when Bank Step is Active
+  useEffect(() => {
+    if (open && step === 2 && selected === "bank" && token) {
+      // Defaulting to 'CAD' based on your previous "Scotiabank/Transit Number" example.
+      // Change to 'USD', 'NGN', or dynamic state as needed.
+      fetchAccount(token, "NGN"); 
+    }
+  }, [step, selected, open, token, fetchAccount]);
 
+  // 3. Process wallet data for dropdown and details
+  const walletMap = allBalances?.data?.balances || {};
   // Convert fetched balances into a clean list of options
   const walletOptions: WalletOption[] = Object.keys(walletMap)
     .map(key => {
@@ -198,38 +210,58 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
             Back
           </button>
           <div className="p-2 bg-white rounded-2xl text-center">
+
+          {/* Loading State */}
+            {bankLoading && (
+              <div className="py-10 flex flex-col items-center">
+                 <Refresh className="animate-spin mb-2 text-[#0088FF]" size={32}/>
+                 <p className="text-gray-500 text-sm">Generating account details...</p>
+              </div>
+            )}
+
+            {/* Error State */}
+            {bankError && !bankLoading && (
+              <div className="py-10 text-center">
+                <p className="text-red-500 mb-2">{bankError}</p>
+                <Button onClick={() => token && fetchAccount(token, "CAD")} variant="outline" className="text-sm">
+                  Try Again
+                </Button>
+              </div>
+            )}
+            {!bankLoading && !bankError && bankDetails && (
             <div className="bg-[#F5F5F5] rounded-2xl py-2">
 
               <div className="flex-col gap-4 space-y-4">
 
                 <div className="flex justify-between px-4">
                   <p className="text-sm text-[#777777]">Bank name</p>
-                  <p>Scotiabank</p>
+                  <p>{bankDetails.bankName}</p>
                 </div>
                 <div className="flex justify-between px-4">
                   <p className="text-sm text-[#777777]">Account name</p>
-                  <p>Michael Scott</p>
+                  <p>{bankDetails.accountName}</p>
                 </div>
                 <div className="flex justify-between px-4">
                   <p className="text-sm text-[#777777]">Account Number</p>
-                  <p>1234567812</p>
+                  <p>{bankDetails.accountNumber}</p>
                 </div>
                 <div className="flex justify-between px-4">
-                  <p className="text-sm text-[#777777]">Transit Number</p>
-                  <p>23123</p>
+                  <p className="text-sm text-[#777777]">Transit Number/ Bank code</p>
+                  <p>{bankDetails.bankCode}</p>
                 </div>
-                <div className="flex justify-between px-4">
+                {/* <div className="flex justify-between px-4">
                   <p className="text-sm text-[#777777]">Institution Number</p>
                   <p>995</p>
                 </div>
                 <div className="flex justify-between px-4">
                   <p className="text-sm text-[#777777]">Reference Code</p>
                   <p>SC-99GT43G3</p>
-                </div>
+                </div> */}
               </div>
-              <p className="text-sm text-[#777777] mt-4 mb-2">Expires in <span className="text-[#21963B]">29:50</span></p>
+             
 
             </div>
+            )}
             <Button className="bg-[#F5F5F5] my-2">I have sent the money</Button>
           </div>
         </>

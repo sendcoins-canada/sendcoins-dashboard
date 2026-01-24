@@ -55,13 +55,13 @@ export const resendOtp = async (email: string): Promise<{ message: string }> => 
 export const registerWithPassword = async (
   data: RegisterRequest
 ): Promise<RegisterResponse> => {
-   console.log(" Sending registration payload:", data); 
   const formData = new FormData();
   formData.append("email", data.email);
   formData.append("firstName", data.firstName);
   formData.append("lastName", data.lastName);
   formData.append("password", data.password);
   formData.append("country", data.country);
+  formData.append("bvn", data.bvn);
   formData.append("authHash", data.authHash);
 
   const response = await api.post<RegisterResponse>(

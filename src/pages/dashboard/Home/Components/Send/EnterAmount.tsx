@@ -1,12 +1,13 @@
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/onboarding/shared/Header";
 import { useNavigate } from "react-router-dom";
-import { Convert, Money, Money2, ArrowLeft2 } from "iconsax-react";
+import { Money, Money2, ArrowLeft2 } from "iconsax-react";
 import WalletSelectionModal from "@/pages/dashboard/WalletSelectionModal";
 import { useGasFee } from "@/store/hooks/useGasFee";
-
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
 
 interface EnterAmountProps {
   asset: string;
@@ -23,43 +24,97 @@ interface EnterAmountProps {
 const EnterAmount: React.FC<EnterAmountProps> = ({ asset, onNext, recipient }) => {
   const navigate = useNavigate();
   const [sendAmount, setSendAmount] = useState("");
-  const [receiveAmount, setReceiveAmount] = useState("");
   const [sendAsset, _setSendAsset] = useState(asset);
-  const [receiveAsset, _setReceiveAsset] = useState("usdc");
   const [error, setError] = useState("");
   const [isWalletModalOpen, setWalletModalOpen] = useState(false);
 
 
-console.log(sendAsset, recipient)
 
-const { gasFee, total } = useGasFee({
-  amount: sendAmount,
-  asset: 'crypto',
-  symbol: sendAsset.toLowerCase()
-});
+// 1. Get Wallet Balance from Redux
+  const { allBalances } = useSelector((state: RootState) => state.wallet);
+  
+  // Find the specific wallet balance for the selected asset (e.g., 'BTC')
+  const currentWallet = useMemo(() => {
+    if (!allBalances?.data?.balances) return null;
+    const key = asset.toLowerCase();
+    return allBalances.data.balances[key];
+  }, [allBalances, asset]);
 
-console.log(gasFee) 
+  const walletAvailableBalance = currentWallet?.totalAvailableBalance || 0;
+  
+// fetch gas fee
+const { 
+    gasFee,      
+    loading: isGasLoading, 
+    error: gasError 
+  } = useGasFee({
+    amount: sendAmount,
+    asset: 'crypto',
+    symbol: asset.toLowerCase()
+  });
 
-  const balance = 1500;
-  const exchangeRate = "$1 = ₦2000";
-  const platformFee = 5;
-  // const total = Number(sendAmount || 0) + platformFee;
 
-  const handleContinue = () => {
+ // 3. Calculation Logic
+
+  // Determine amounts based on wallet balance
+  const calculation = useMemo(() => {
+    const amountNum = Number(sendAmount);
+    // Use the gasFee from the hook, default to 0 if not loaded yet
+    const currentGasFee = Number(gasFee) || 0;
+    if (!amountNum || amountNum <= 0) {
+      return { recipientGets: 0, totalDeducted: 0, status: 'idle' };
+    }
+
+    const totalNeeded = amountNum + currentGasFee;
+
+    // Case 1: Insufficient funds for amount itself
+    if (amountNum > walletAvailableBalance) {
+      return { recipientGets: amountNum, totalDeducted: totalNeeded, status: 'insufficient' };
+    }
+
+    // Case 2: Enough for Amount but NOT Amount + Gas (User is sending Max)
+    // We must deduct gas from the amount they entered so the total doesn't exceed balance.
+    if (totalNeeded > walletAvailableBalance) {
+       // Recipient gets: Entered Amount - Gas Fee
+       // We safeguard against negative numbers if gas > amount
+       const adjustedReceive = Math.max(0, amountNum - currentGasFee);
+       return { 
+         recipientGets: adjustedReceive, 
+         totalDeducted: amountNum, // The entered amount acts as the total cap
+         status: 'adjusted' // Inform UI we deducted fees
+       };
+    }
+
+    // Case 3: Enough for Amount + Gas (Standard)
+    return { 
+      recipientGets: amountNum, 
+      totalDeducted: totalNeeded, 
+      status: 'sufficient' 
+    };
+
+  }, [sendAmount, gasFee, walletAvailableBalance]);
+
+const handleContinue = () => {
     if (!sendAmount.trim() || isNaN(Number(sendAmount))) {
       setError("Please enter a valid amount.");
       return;
     }
 
-    if (Number(sendAmount) > balance) {
-      setError("Not enough in this wallet");
+    // if (calculation.status === 'insufficient') {
+    //   setError(`Insufficient ${asset.toUpperCase()} balance.`);
+    //   return;
+    // }
+
+    if (calculation.recipientGets <= 0) {
+      setError("Amount is too low to cover gas fees.");
       return;
     }
 
     setError("");
-     setWalletModalOpen(true);
-    // onNext(sendAmount);
+    // Pass the actual amount the recipient will receive (sendAmount OR adjusted amount)
+    onNext(calculation.recipientGets.toString()); 
   };
+
    const handleWalletSelect = () => {
     setWalletModalOpen(false);
     onNext(sendAmount); 
@@ -76,6 +131,9 @@ console.log(gasFee)
                       <div className="absolute left-4 md:hidden flex items-center cursor-pointer border rounded-full justify-center p-2 w-fit" onClick={() => navigate(-1)}>
                         <ArrowLeft2 size="20" color="black" className="" />
                       </div>
+                       <div className="absolute left-4 md:flex hidden items-center cursor-pointer border rounded-full w-fit md:ml-28 ml-6 justify-center py-2 px-4" onClick={() => navigate(-1)}>
+                              <ArrowLeft2 size="16" color="black" /><p className="text-sm ml-1">Back</p>
+                            </div>
           
                       <h2 className="md:text-2xl font-semibold text-center mx-auto w-fit">
                         Enter amount
@@ -109,14 +167,21 @@ console.log(gasFee)
               <input
                 type="number"
                 value={sendAmount}
-                onChange={(e) => setSendAmount(e.target.value)}
+                onChange={(e) => {
+                    setSendAmount(e.target.value);
+                    setError("");
+                }}                
                 placeholder="0.00"
                 className="w-full bg-transparent outline-none text-[40px] font-semibold text-neutral-900"
               />
 
+             {/* Warnings / Errors */}
               {error && (
-                <p className="text-xs text-danger mt-1 font-medium">
-                  {error}
+                <p className="text-sm text-danger mt-1 font-medium">{error}</p>
+              )}
+               {calculation.status === 'adjusted' && !error && (
+                <p className="text-sm text-orange-500 mt-1 font-medium">
+                  Note: Gas fees were deducted from the total amount.
                 </p>
               )}
             </div>
@@ -127,7 +192,7 @@ console.log(gasFee)
                 <label className="text-sm text-neutral-500">
                   Amount they’ll receive
                 </label>
-                <p className="bg-[#F5F5F5] px-6 py-1 rounded-full text-primary">{recipient.network}</p>
+                <p className="bg-[#F5F5F5] px-6 py-1 rounded-full text-primary">{recipient.network || asset.toUpperCase()}</p>
                 {/* <Select
                   value={receiveAsset}
                   onChange={setReceiveAsset}
@@ -143,29 +208,32 @@ console.log(gasFee)
 
               <input
                 type="number"
-                value={receiveAmount}
-                onChange={(e) => setReceiveAmount(e.target.value)}
+                value={calculation.recipientGets > 0 ? calculation.recipientGets.toFixed(6) : "0.00"}
+                // onChange={(e) => setReceiveAmount(e.target.value)}
                 placeholder="2000"
-                className="w-full bg-transparent outline-none text-[40px] font-semibold text-neutral-400"
+                className="w-full bg-transparent outline-none text-[40px] font-semibold "
               />
             </div>
 
             {/* Summary section */}
             <div className="pt-2 space-y-2 text-sm text-neutral">
+             
               <div className="flex justify-between">
-                <span><Convert size="16" color="#0088FF" className="inline"/> Exchange rate</span>
-                <span className="text-primary">{exchangeRate}</span>
-              </div>
-              <div className="flex justify-between">
-                <span><Money2 size="16" color="#0088FF" className="inline"/> Platform fee</span>
+                <span><Money2 size="16" color="#0088FF" className="inline"/> Gas fee</span>
                 <span className="text-primary">
-                  {platformFee} {receiveAsset.toUpperCase()}
+                  <span className="text-primary">
+                  {isGasLoading 
+                    ? "Calculating..." 
+                    : `${Number(gasFee || 0).toFixed(6)} ${asset.toUpperCase()}`
+                  }
+                </span>
                 </span>
               </div>
               <div className="flex justify-between font-semibold">
                 <span><Money size="16" color="#0088FF" className="inline"/> Total amount</span>
-                <span className="text-primary">
-                  {total || 0} {receiveAsset.toUpperCase()}
+               <span className="text-primary">
+                  {/* Shows what leaves your wallet (Input amount + Gas OR Input amount if adjusted) */}
+                  {calculation.totalDeducted > 0 ? calculation.totalDeducted.toFixed(6) : "0.00"} {asset.toUpperCase()}
                 </span>
               </div>
             </div>
@@ -173,6 +241,9 @@ console.log(gasFee)
 
           {/* Info & Continue button */}
           <div className="mt-6 text-center">
+            {gasError && (
+                 <p className="text-xs text-red-500 mb-2">Error calculating fees</p>
+            )}
             <p className="text-xs text-green-700 bg-green-50 border border-green-300 border-dashed inline-block px-3 py-1 rounded-full">
               Usually takes less than 2 minutes
             </p>

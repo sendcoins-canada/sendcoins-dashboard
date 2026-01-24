@@ -19,7 +19,6 @@ export const getTransactionDetailThunk = createAsyncThunk(
             // The response structure is { data: {...} }
             const detailData = res.data?.data || res.data;
             
-            console.log('getTransactionDetailThunk Fulfilled Response:', detailData);
             return detailData;
         } catch (err: any) {
             console.error('getTransactionDetailThunk Rejected Error:', err.response?.data || err.message);

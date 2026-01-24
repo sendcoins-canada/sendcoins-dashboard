@@ -1,15 +1,21 @@
-// import React from "react";
+import {useState} from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import Header from "@/components/onboarding/shared/Header";
 import { ArrowLeft2, ShieldTick } from "iconsax-react";
-import { useSelector } from "react-redux";
-import type { RootState } from "@/store";
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState, AppDispatch } from "@/store";
+import { updateKycStatus } from "@/api/kyc"; // Import the API function
+import { showSuccess, showDanger } from "@/components/ui/toast";
+// You might want to import an action to refresh user profile here if needed
+import { fetchUser } from "@/store/user/asyncRequests/fetchUser";
 
 const CTA = () => {
   const navigate = useNavigate();
-
+  const dispatch = useDispatch<AppDispatch>();
+  const [_loading, setLoading] = useState(false);
+const token = useSelector((state: RootState) => state.auth.token?.azer_token);
   // 1. Get User Data from Redux
   // Casting to 'any' to safely handle the nested structure found in previous steps
   const userSlice = useSelector((state: RootState) => state.user) as any;
@@ -18,6 +24,42 @@ const CTA = () => {
   // 2. Check if PIN exists
   const hasPin = userData?.isPinAvailable?.found === true;
   const isVerified = userData?.verified === true;
+
+  // Extract Keychain (Priority: PIN data -> User data -> Hardcoded Fallback)
+  const userKeychain = "7a36424ffd798afa36c52eebcdb702225be0c71f12754cabd8989592523ab458"
+  // const userKeychain = userData?.isPinAvailable?.data?.[0]?.keychain || userData?.keychain || "3yu120lbys";
+
+  // 3. Handle KYC Update
+  const handleCompleteKyc = async () => {
+    if (!token) {
+      showDanger("Authentication token missing. Please login again.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Hardcoding status to 'verified' as requested
+      await updateKycStatus({
+        token,
+        keychain: userKeychain, 
+        status: "verified" 
+      });
+
+      showSuccess("KYC verification completed successfully!");
+      
+      // Optional: Refresh user data here so the UI updates immediately
+      dispatch(fetchUser());
+
+      // Navigate to dashboard or refresh page
+      navigate("/dashboard/home");
+      
+    } catch (error: any) {
+      console.error(error);
+      showDanger(error.response?.data?.message || "Failed to update KYC status.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -60,7 +102,7 @@ const CTA = () => {
         {/* Condition 2: Only show if User is NOT Verified */}
             {!isVerified && (
               <button
-                onClick={() => navigate("/address")}
+                onClick={handleCompleteKyc}
                 className="w-full flex items-center justify-between bg-gray-100 p-4 rounded-xl cursor-pointer hover:bg-gray-200 transition-colors"
               >
                 <div className="text-left">

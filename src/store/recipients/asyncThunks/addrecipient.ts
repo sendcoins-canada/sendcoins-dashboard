@@ -19,7 +19,6 @@ export const addRecipientThunk = createAsyncThunk<
       formData.append("walletAddress", walletAddress);
 
       const response = await addRecipient(formData);
-      console.log(response, "frmthunk")
       return response;
     } catch (error) {
       

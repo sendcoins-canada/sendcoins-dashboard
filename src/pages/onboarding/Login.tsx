@@ -40,7 +40,8 @@ const Login: React.FC = () => {
       showSuccess("Check your mail for the verification code");
       navigate("/verify", { state: { email: result.payload.email, purpose: "login" } });
     } else if (loginWithPasswordThunk.rejected.match(result)) {
-      showDanger(result.payload || "Invalid credentials, please try again.");
+      showDanger(result.payload || "Invalid email or password, please try again.");
+      console.log(result)
     }
   };
 
@@ -63,7 +64,6 @@ const handleGoogleSuccess = async (tokenResponse: any) => {
         "Content-Type": "multipart/form-data",
       },
     });
-    console.log(data)
 
     if (data.data.token) {
       dispatch(setCredentials({
@@ -87,7 +87,7 @@ const handleGoogleSuccess = async (tokenResponse: any) => {
   return (
     <div className="flex flex-col justify-between min-h-screen">
       <Header />
-      <div className=" grid place-items-center">
+      <div className=" grid place-items-center ">
         <div className="w-full max-w-sm px-4">
           <div className="text-center space-y-1 mb-6">
             <h3 className="text-[34px] font-semibold font-inter">
@@ -125,10 +125,10 @@ const handleGoogleSuccess = async (tokenResponse: any) => {
                   startIcon={<PasswordCheck size={16} color="black" />}
                 />
 
-                <div className="flex items-center justify-between text-[11px]">
+                <div className="flex items-center justify-between text-sm">
                   {/* <span /> */}
                   <span
-                    className="text-black font-semibold cursor-pointer"
+                    className="text-black font-bold cursor-pointer"
                     onClick={() => navigate("/forgot-password/email")}
                   >
                     Forgot password?
@@ -143,7 +143,7 @@ const handleGoogleSuccess = async (tokenResponse: any) => {
                   {loading ? "Signing in..." : "Continue"}
                 </Button>
 
-                <div className="relative text-center text-xs text-primaryblue">
+                <div className="relative text-center text-[#777777] mb-4">
                   <span className="px-2 bg-white relative z-10">or</span>
                   <span className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-px bg-neutral-200" />
                 </div>
@@ -156,10 +156,10 @@ const handleGoogleSuccess = async (tokenResponse: any) => {
                   onError={() => showDanger("Google Sign-In Failed")}
                 />
 
-                <p className="text-center text-[11px] text-neutral-500 ">
+                <p className="text-center text-sm text-[#777777] mt-4">
                   Don’t have an account?{" "}
                   <span
-                    className="font-bold cursor-pointer"
+                    className="font-bold cursor-pointer text-primary"
                     onClick={() => navigate("/signup")}
                   >
                     Create an account

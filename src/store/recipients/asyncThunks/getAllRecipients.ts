@@ -8,9 +8,7 @@ export const getRecipientsThunk = createAsyncThunk(
     try {
         const { token } = data
       const res = await getRecipients(token);
-      
-      console.log('getRecipients Fulfilled Response:', res.data || res);
-      return res;
+            return res;
     } catch (err: any) {
       return rejectWithValue(err.response?.data || "Fetching recipients failed");
     }

@@ -6,7 +6,7 @@ import { getAllBalanceThunk, getBNBBalanceThunk, getBTCBalanceThunk, getETHBalan
 import type { RootState } from "@/store";
 import type { BalancesResponse } from "@/types/wallet";
 import { setSelectedBalance } from "@/store/wallet/slice";
-
+import { Bank } from "iconsax-react";
 
 
 type ParsedWallet = {
@@ -16,6 +16,7 @@ type ParsedWallet = {
   amount: string; 
   logo: string;
   symbol: string; 
+  isFiat?: boolean;
 };
 
 const balanceThunkMap = {
@@ -41,7 +42,7 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   );
   const balances = (allBalances?.data?.balances || {}) as BalancesResponse;
 
-  const parsedWallets = Object.keys(balances)
+  const parsedCryptoWallets = Object.keys(balances)
     .map((key) => {
       const wallet = balances[key];
       return wallet;
@@ -56,6 +57,22 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       symbol: wallet.symbol
     }))
 
+    // 2. Parse Fiat Accounts
+  const fiatAccounts = (allBalances?.data?.fiatAccounts || []) as any[];
+  const parsedFiatWallets: ParsedWallet[] = fiatAccounts.map((account) => ({
+    name: account.bankName, // Display Bank Name (e.g., Moniepoint...)
+    address: account.accountNumber, // Display Account Number
+    // Formatting balance (Assuming NGN for now based on your response, or use currency symbol)
+    usd: account.currency === 'NGN' ? `₦${account.availableBalance}` : `${account.availableBalance} ${account.currency}`, 
+    amount: `${account.availableBalance} ${account.currency}`,
+    logo: "", // API doesn't return logo for fiat, handled in render
+    symbol: account.currency,
+    isFiat: true
+  }));
+
+  // 3. Combine Lists
+  const allWallets = [...parsedFiatWallets, ...parsedCryptoWallets];
+
   useEffect(() => {
     if (token) {
       dispatch(getAllBalanceThunk({ token }) as any);
@@ -63,7 +80,6 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   }, [token, dispatch]);
 
  const handleWalletClick = (wallet: ParsedWallet) => {
-   console.log(wallet)
     const symbol = wallet.symbol.toUpperCase();
     
     // Convert symbol to lowercase for the network parameter as requested
@@ -121,7 +137,7 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         {loading && <p className="text-center">Loading wallets...</p>}
 
         {!loading &&
-          parsedWallets.map((wallet, i) => (
+          allWallets.map((wallet, i) => (
             <div
               key={i}
               onClick={() => handleWalletClick(wallet)}
@@ -129,11 +145,15 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             >
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 flex items-center justify-center">
-                  <img
-                    src={wallet.logo}
-                    alt={`${wallet.name} icon`}
-                    className="w-7 h-7"
-                  />
+                  {wallet.logo ? (
+                    <img
+                      src={wallet.logo}
+                      alt={`${wallet.name} icon`}
+                      className="w-7 h-7 object-contain"
+                    />
+                  ) : (
+                    <Bank size="20" color="#555" variant="Bold" />
+                  )}
                 </div>
                 <div>
                   <p className="font-medium text-gray-800">{wallet.name}</p>

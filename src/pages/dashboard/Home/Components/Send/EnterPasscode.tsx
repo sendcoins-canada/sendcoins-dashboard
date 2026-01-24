@@ -121,7 +121,6 @@ const EnterPasscode: React.FC<EnterPasscodeProps> = ({ onSuccess, mode = 'create
           code: Number(passcode.join("")),
           purpose: "passcode_create",
         });
-        console.log("OTP Response:", otpRes);
 
         // 2. Finalize with authHash
         await finalizePasscodeCreate(

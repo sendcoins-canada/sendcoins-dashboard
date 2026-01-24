@@ -9,7 +9,6 @@ export const getTransactionsThunk = createAsyncThunk(
         const { token } = data
       const res = await getTransactions(token);
       
-      console.log('getTransactions Fulfilled Response:', res.data || res);
       return res;
     } catch (err: any) {
       return rejectWithValue(err.response?.data || "Fetching Transactions failed");

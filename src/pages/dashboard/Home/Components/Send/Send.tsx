@@ -30,12 +30,8 @@ const SendFlow: React.FC = () => {
 // 3. Safely drill down to the actual user data
   // Structure: state.user -> user -> data -> isPinAvailable -> found
   const userData = userSlice?.user?.data;
-  console.log(userSlice)
   // 4. Check if PIN exists
   const hasPin = userData?.isPinAvailable?.found ?? false;
-
-  // Debugging: This should now log 'true'
-  console.log("Has PIN setup:", hasPin);
 
  // flow state
   const [isSendModalOpen, setIsSendModalOpen] = useState(false); // if triggered from Home
@@ -89,7 +85,6 @@ const SendFlow: React.FC = () => {
 
   const handleConfirm = () => {
     // Do API call to create/send transaction
-    console.log("Sending", { selectedAsset, recipient, amount });
       setStep("passcode");
   };
 
