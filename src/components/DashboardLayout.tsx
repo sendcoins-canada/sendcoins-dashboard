@@ -263,7 +263,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </header>
 
         {/* Content Area */}
-        <main className="flex-1 p-6 overflow-y-auto">{children}</main>
+        <main className="flex-1 p-6 overflow-y-auto md:mt-10">{children}</main>
       </div>
 
       {/* Close Account Modal */}

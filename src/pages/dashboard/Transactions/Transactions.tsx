@@ -75,11 +75,11 @@ const Transactions = () => {
 
   return (
     <DashboardLayout>
-      <div className="md:w-[50%]">
-        <h2 className="text-[40px] font-bold mb-4">Transaction</h2>
+      <div className="md:w-[40%]">
+        <h2 className="text-[28px] font-bold mb-4">Transaction</h2>
 
         {/* Search */}
-        <div className="relative w-full my-6 flex gap-2 items-center">
+        <div className="relative w-full  my-6 flex gap-2 items-center">
           <SearchNormal1 className="absolute left-3 top-2 text-gray-400" size={18} color="#262626" />
           <Input
             type="text"

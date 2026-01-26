@@ -7,6 +7,8 @@
   import type { RootState } from "@/store";
   import { getRecipientsThunk } from "@/store/recipients/asyncThunks/getAllRecipients";
 import type { RawRecipient } from "@/types/recipients";
+import Search from "@/assets/search.png"
+
 
 
   
@@ -82,11 +84,34 @@ const formattedRecipients: FormattedRecipient[] = recipients.map((rec, index) =>
 
     return (
       <DashboardLayout>
-        <div className="w-full md:w-[50%]">
+        <div className="w-full md:w-[40%]">
           <h2 className="text-[28px] font-bold mb-6">Recipients</h2>
 
+{/* EMPTY STATE */}
+        {!loading && recipients.length === 0 ? (
+          <div className="flex flex-col items-center justify-center p-10 bg-white rounded-xl mt-4">
+            <img
+              src={Search}
+              alt="No recipients"
+              className="w-12 h-12 opacity-50 mb-3"
+            />
+            <p className="text-[#262626] font-semibold">No recipients yet</p>
+            <p className="text-[#777777] text-sm mt-1 text-center max-w-xs">
+              Looks like things are quiet here. Start your first transaction to
+              save recipients automatically.
+            </p>
+            <button
+              onClick={() => navigate("/dashboard/home")}
+              className="mt-4 px-5 py-2 bg-[#0647F7] text-white rounded-full hover:bg-blue-700 cursor-pointer"
+            >
+              Send Money
+            </button>
+          </div>
+        ) : (
+        !loading && (
+          <>
           {/* Search Input */}
-          <div className="relative w-full mb-6 flex gap-2 items-center">
+          <div className="relative  mb-6 flex gap-2 items-center">
             <SearchNormal1 className="absolute left-3 top-2 text-gray-400" size={18} color="#262626" />
             <Input
               type="text"
@@ -156,6 +181,9 @@ const formattedRecipients: FormattedRecipient[] = recipients.map((rec, index) =>
                 </div>
               </div>
             ))}
+            </>
+        )
+          )}
         </div>
       </DashboardLayout>
     );

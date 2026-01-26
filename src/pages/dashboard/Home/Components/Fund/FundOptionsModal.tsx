@@ -46,6 +46,20 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
 
   // --- CUSTOM HOOK FOR BANK ACCOUNT ---
   const { data: bankDetails, loading: bankLoading, error: bankError, fetchAccount } = useCrayfiAccount();
+
+  // This ensures the modal starts fresh from Step 1 every time it is reopened
+  useEffect(() => {
+    if (!open) {
+      const timer = setTimeout(() => {
+        setStep(1);
+        setSelected(null);
+        // Optional: Reset other states if you want a complete hard reset
+        setCopied(false); 
+      }, 300); // 300ms delay to prevent UI flickering while the modal fade-out animation plays
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
+
   useEffect(() => {
     if (open && !allBalances) {
       const token = localStorage.getItem("azertoken");
@@ -127,11 +141,6 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
     setStep(2);
   };
 
-  const handleBack = () => {
-    setStep(1);
-    setSelected(null);
-  };
-
 
   return (
     <Modal
@@ -203,12 +212,13 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
 
       {step === 2 && selected === "bank" && (
         <>
-          <h2 className="text-[28px] font-semibold text-center">
-            Bank Details
+          <h2 className="text-[24px] font-semibold text-center flex items-center justify-center gap-2 mb-4 mx-auto">
+            <Bank size="24" color="#0088FF" variant="Bold" />
+             <p>Bank details </p>
           </h2>
-          <button onClick={handleBack} className="pl-2 text-gray-600 mb-3">
+          {/* <button onClick={handleBack} className="pl-2 text-gray-600 mb-3">
             Back
-          </button>
+          </button> */}
           <div className="p-2 bg-white rounded-2xl text-center">
 
           {/* Loading State */}

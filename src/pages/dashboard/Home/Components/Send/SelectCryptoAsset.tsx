@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { TickCircle, SearchNormal1, ArrowLeft2 } from "iconsax-react";
-import Header from "@/components/onboarding/shared/Header";
+import { HeaderWithCancel } from "@/components/onboarding/shared/Header";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import { getAllBalanceThunk } from "@/store/wallet/asyncThunks/getBalances";
@@ -71,14 +71,17 @@ const SelectCryptoAsset = ({ onContinue }: Props) => {
   return (
     <>
     <div className="hidden md:block">
-            <Header/>
+            <HeaderWithCancel/>
           </div>
     <div className=" flex flex-col items-center justify-center bg-white px-4 ">
-      <div className="w-full md:w-[25%] mx-auto text-center mt-20 md:mt-0">
+      <div className="w-full md:w-[25%] mx-auto text-center mt-20 md:mt-10">
         <div className="flex items-center md:justify-center gap-6 mb-8">
                   <div className="md:hidden flex items-center cursor-pointer border rounded-full justify-center p-2  w-fit" onClick={() => navigate(-1)}>
                     <ArrowLeft2 size="20" color="black" className="" />
                   </div>
+                   <div className="absolute left-4 hidden md:flex items-center cursor-pointer border rounded-full w-fit md:ml-28 ml-6 justify-center py-2 px-4" onClick={() => navigate(-1)}>
+                          <ArrowLeft2 size="16" color="black" className="" /><p className="text-sm font-semibold">Back</p>
+                        </div>
         
                   <h2 className="md:text-2xl font-semibold text-center">
                     Select crypto asset

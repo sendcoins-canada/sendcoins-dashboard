@@ -81,7 +81,7 @@ const {selectedBalance } = useSelector((state: RootState) => state.wallet);
     <DashboardLayout>
       {/* Balance Section */}
       <div className="md:w-[50%]">
-        <div className="mb-6 md:mt-10 ">
+        <div className="mb-6  ">
           <div className="flex items-start justify-between">
             <div>
               <h3 onClick={() => setWalletOpen(true)} 
