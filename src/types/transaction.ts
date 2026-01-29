@@ -62,7 +62,7 @@ export const mapListToDisplay = (tx: any) => {
     name: tx.destination?.name ?? "Wallet Transfer",
     status: status.text,
     time: new Date(tx.createdAt).toLocaleString(),
-    amount: `${tx.type === "OUTGOING" ? "-" : "+"}${tx.amount.crypto} ${tx.currency.crypto}`,
+    amount: `${tx.type === "OUTGOING" ? "-" : "+"}${tx.amount.crypto || tx.amount.fiat} ${tx.currency.crypto || tx.currency.fiat}`,
     color: "bg-[#DCFCE7]",
     textColor: status.textColor,
     tagColor: status.tagColor,

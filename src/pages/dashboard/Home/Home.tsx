@@ -117,13 +117,13 @@ const {selectedBalance } = useSelector((state: RootState) => state.wallet);
 
           {/* Action Buttons */}
           <div className="flex space-x-3 mt-4 text-sm">
-            <button onClick={() => setIsFundingOpen(true)} className="flex items-center space-x-2 px-4 py-2 bg-primaryblue text-white rounded-full hover:bg-blue-700 cursor-pointer">
+            <button onClick={() => setIsFundingOpen(true)} className="flex items-center space-x-2 px-[20px] py-[12px] bg-primaryblue text-white rounded-full hover:bg-blue-700 cursor-pointer">
               <span>Fund</span><Add size={16} color="white" />
             </button>
-            <button onClick={() => setIsSendModalOpen(true)} className="flex items-center space-x-2 px-4 py-2 bg-bggray hover:bg-[#777777]  text-primary rounded-full cursor-pointer">
+            <button onClick={() => setIsSendModalOpen(true)} className="flex items-center space-x-2 px-[20px] py-[12px] bg-bggray hover:bg-[#777777]  text-primary rounded-full cursor-pointer">
               <span>Send</span> <Send2 size={16} color="black" />
             </button>
-            <button onClick={() => navigate('/dashboard/convert')} className="flex items-center space-x-2 px-4 py-2 bg-bggray hover:bg-[#777777] text-primary rounded-full cursor-pointer">
+            <button onClick={() => navigate('/dashboard/convert')} className="flex items-center space-x-2 px-[20px] py-[12px] bg-bggray hover:bg-[#777777] text-primary rounded-full cursor-pointer">
               <span>Convert</span><Convert size={16} color="black" />
             </button>
           </div>
@@ -137,7 +137,7 @@ const {selectedBalance } = useSelector((state: RootState) => state.wallet);
             {/* Desktop Version */}
             <div 
               onClick={() => navigate('/cta')} // Navigate to CTA on click
-              className="bg-bggray rounded-xl px-4 hidden md:flex items-start justify-between mb-6 cursor-pointer hover:bg-gray-200 transition-colors"
+              className="bg-bggray rounded-[16px] px-4 hidden md:flex items-start justify-between mb-6 cursor-pointer hover:bg-gray-200 transition-colors"
             >
               <div>
                 <h2 className="font-[500] text-primary pt-4">Almost there! 🚀</h2>

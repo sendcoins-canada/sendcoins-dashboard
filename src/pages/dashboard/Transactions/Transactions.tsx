@@ -30,9 +30,9 @@ const Transactions = () => {
     loading: transactionsLoading,
   // Use error from Redux
     hasLoaded,
-
+    
   } = useSelector((state: RootState) => state.transaction);
-
+console.log(fetchedTransactions)
   // 2. Map fetched list data to the display format (DisplayTransaction[])
   // We use 'as any' here if fetchedTransactions is typed generically in Redux, 
   // but ideally it should be typed as RawApiTransactionList[]
@@ -56,6 +56,7 @@ const Transactions = () => {
   const filtered = processedTransactions.filter((t: DisplayTransaction) =>
     t.name.toLowerCase().includes(search.toLowerCase())
   );
+  console.log(filtered)
 
   // 5. Define the click handler to fetch details
   const handleTransactionSelect = (item: DisplayTransaction) => {

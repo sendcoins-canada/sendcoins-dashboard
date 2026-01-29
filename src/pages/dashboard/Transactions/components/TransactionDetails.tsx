@@ -107,7 +107,7 @@ const TransactionDetails: React.FC = () => {
   if (selectedDetail) {
     transaction = mapDetailToDisplay(selectedDetail as RawTransactionDetail) as TransactionDetail;
   }
-
+console.log(selectedDetail)
   // --- Rendering Logic ---
 
   if (detailLoading) {

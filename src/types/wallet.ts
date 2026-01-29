@@ -1,15 +1,17 @@
+export interface Currency {
+  currency_name: string;
+  currency_init: string;
+  country: string;
+  image: string;
+  currency_sign: string;
+  flag: string;
+  flag_emoji: string;
+  id?: string; // Optional if sometimes present
+}
+
 export interface CurrencyResponse {
-      data: [
-        {
-            currency_name: string,
-            currency_init: string,
-            country: string,
-            image: string,
-            currency_sign: string,
-            flag: string,
-            flag_emoji: string
-        },
-      ]
+  success: boolean;
+  data: Currency[];
 }
 // Coin structure
 export interface Coin {
@@ -18,6 +20,7 @@ export interface Coin {
   logo: string;
   name: string;
   name_display: string;
+  network?: string;
 }
 
 // Main response type

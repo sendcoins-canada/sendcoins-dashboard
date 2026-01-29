@@ -15,9 +15,9 @@ const ResetPasscode: React.FC = () => {
   const navigate = useNavigate();
   const { token } = useSelector((state: RootState) => state.auth); 
   const userSlice = useSelector((state: RootState) => state.user) as any;
-    const userData = userSlice?.user?.data;
+  const userData = userSlice?.user?.data;
   const [step, setStep] = useState<FlowStep>("new");
-  const [passcode, setPasscode] = useState<string[]>([]); // Current input buffer
+  const [passcode, setPasscode] = useState<string[]>([]); 
   const [newCode, setNewCode] = useState<number>(0);
   // const [authHash, setAuthHash] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -105,7 +105,7 @@ const ResetPasscode: React.FC = () => {
             <PasswordCheck color="#480355" size="32" variant="Bold" />
           </div>
 
-          <h2 className="text-2xl font-extrabold mb-2">
+          <h2 className="text-[28px] font-semibold mb-2">
             {step === "new" ? "Setup new passcode" : step === "confirm" ? "Confirm new passcode" : "Verify OTP"}
           </h2>
           <p className="text-gray-500 mb-8 md:w-[70%]">

@@ -173,7 +173,7 @@ const handlePasscodeSuccess = async (capturedPasscode: string) => {
           notes: notes, 
         });
 
-        if (result.status === "success") {
+        if (result.data.isSuccess) {
            setStep("success");
         }
       } else {
