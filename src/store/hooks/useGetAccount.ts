@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { getAccount } from "@/api/sendfiat"; // Ensure path matches your project
+import { getAccount } from "@/api/fiat"; // Ensure path matches your project
 
 export interface BankAccountDetails {
   bankName: string;
@@ -20,7 +20,7 @@ export const useCrayfiAccount = () => {
 
   const fetchAccount = useCallback(async (token: string, currency: string) => {
     if (!token) return;
-    
+
     setLoading(true);
     setError(null);
     try {

@@ -2,15 +2,15 @@ import api from "./axios";
 
 export interface SendFiatParams {
   token: string;
-  passcode: string;
-  destinationCountry: string;
+  // passcode: string;
+  // destinationCountry: string;
   currency: string;
   amount: string;
-  fullName: string;
-  bankName: string;
+  recipientName: string;
+  bankCode: string;
   accountNumber: string;
   transitNumber?: string;
-  notes?: string;
+  narration?: string;
 }
 
 export interface GetAccountParams {
@@ -27,24 +27,24 @@ export const sendFiat = async (params: SendFiatParams) => {
   
   // Appending all required fields to the FormData object
   formData.append("token", params.token);
-  formData.append("passcode", params.passcode);
-  formData.append("destinationCountry", params.destinationCountry);
+  // formData.append("passcode", params.passcode);
+  // formData.append("destinationCountry", params.destinationCountry);
   formData.append("currency", params.currency);
   formData.append("amount", params.amount);
-  formData.append("fullName", params.fullName);
-  formData.append("bankName", params.bankName);
+  formData.append("recipientName", params.recipientName);
+  formData.append("bankCode", params.bankCode);
   formData.append("accountNumber", params.accountNumber);
   
   // Appending optional fields if they exist
   if (params.transitNumber) {
     formData.append("transitNumber", params.transitNumber);
   }
-  if (params.notes) {
-    formData.append("notes", params.notes);
+  if (params.narration) {
+    formData.append("narration", params.narration);
   }
 
   const response = await api.post(
-    "/fiat/send",
+    "/user/crayfi/payout",
     formData,
     {
       headers: {

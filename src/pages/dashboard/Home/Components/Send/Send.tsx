@@ -13,7 +13,7 @@ import type { RootState } from "@/store";
 import FiatRecipientSelect from "./FiatRecipientSelection";
 import FiatCountrySelection from "./FiatCountrySelect";
 import EnterBankDetails from "./FiatBankDetails";
-import { sendFiat } from "@/api/sendfiat";
+import { sendFiat } from "@/api/fiat";
 import { sendCrypto } from "@/api/authApi";
 import { showSuccess, showDanger } from "@/components/ui/toast";
 
@@ -23,33 +23,33 @@ import { showSuccess, showDanger } from "@/components/ui/toast";
  */
 const SendFlow: React.FC = () => {
   const navigate = useNavigate();
-   const location = useLocation();
+  const location = useLocation();
 
- const isFiatRoute = location.pathname.includes('send-fiat');
- const userSlice = useSelector((state: RootState) => state.user) as any;
-// 3. Safely drill down to the actual user data
+  const isFiatRoute = location.pathname.includes('send-fiat');
+  const userSlice = useSelector((state: RootState) => state.user) as any;
+  // 3. Safely drill down to the actual user data
   // Structure: state.user -> user -> data -> isPinAvailable -> found
   const userData = userSlice?.user?.data;
   // 4. Check if PIN exists
   const hasPin = userData?.isPinAvailable?.found ?? false;
 
- // flow state
+  // flow state
   const [isSendModalOpen, setIsSendModalOpen] = useState(false); // if triggered from Home
-  const [step, setStep] = useState<"options" | "select-asset" | "recipient" | "amount" | "confirm"| "fiat-country" 
-  | "fiat"
+  const [step, setStep] = useState<"options" | "select-asset" | "recipient" | "amount" | "confirm" | "fiat-country"
+    | "fiat"
     | "fiat-bank-details"
     | "confirm-fiat" | "passcode" | "success">(isFiatRoute ? "fiat" : "select-asset");
 
 
   // data collected through the flow
   const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
-   const [notes, _setNotes] = useState<string>(""); 
-  const [recipient, setRecipient] = useState({name: "", network: "", address: "", keychain: "", transitNumber: "" });
+  const [notes, _setNotes] = useState<string>("");
+  const [recipient, setRecipient] = useState({ name: "", network: "", address: "", keychain: "", transitNumber: "" });
   const [amount, setAmount] = useState<string>("");
-  const [selectedCountry, setSelectedCountry] = useState<string | null>(null); 
-   const token = useSelector((state: RootState) => state.auth.token?.azer_token);
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const token = useSelector((state: RootState) => state.auth.token?.azer_token);
 
-   useEffect(() => {
+  useEffect(() => {
     if (isFiatRoute && (step === "select-asset" || step === "options")) {
       setStep("fiat");
     } else if (!isFiatRoute && step === "fiat") {
@@ -78,22 +78,22 @@ const SendFlow: React.FC = () => {
   };
 
   const handleRecipientNext = (data: { network: string; address: string; keychain: string }) => {
-    setRecipient({ name: "", network: data.network, address: data.address, keychain: data.keychain, transitNumber: ""  });
+    setRecipient({ name: "", network: data.network, address: data.address, keychain: data.keychain, transitNumber: "" });
     // setAmount(data.amount);
     setStep("amount");
   };
 
   const handleConfirm = () => {
     // Do API call to create/send transaction
-      setStep("passcode");
+    setStep("passcode");
   };
 
-  
+
   // --- FIAT FLOW HANDLERS ---
   const handleCountrySelect = (countryCode: string) => {
     setSelectedCountry(countryCode);
     setSelectedAsset(countryCode);
-    setStep("fiat-bank-details"); 
+    setStep("fiat-bank-details");
     // The country code acts as the currency/asset code (e.g., CAD, NGN)
   };
 
@@ -103,10 +103,10 @@ const SendFlow: React.FC = () => {
     network: string; // Bank Name
     address: string; // Account Number
   }) => {
-setRecipient({
+    setRecipient({
       ...data,
-      transitNumber: "" 
-    });    setSelectedAsset(selectedCountry || "CAD");
+      transitNumber: ""
+    }); setSelectedAsset(selectedCountry || "CAD");
     setStep("amount");
   };
 
@@ -116,7 +116,7 @@ setRecipient({
 
   const handleBankDetailsSubmit = (data: {
     name: string;
-    bankName: string;
+    bankCode: string;
     accountNumber: string;
     transitNumber: string; // Not used in state but passed to API later
     country: string;
@@ -126,9 +126,9 @@ setRecipient({
     setRecipient({
       keychain: newRecipientKeychain,
       name: data.name,
-      network: data.bankName,
-      address: data.accountNumber, 
-       transitNumber: data.transitNumber
+      network: data.bankCode,
+      address: data.accountNumber,
+      transitNumber: data.transitNumber
     });
     setSelectedAsset(data.country);
     setStep("amount");
@@ -151,48 +151,45 @@ setRecipient({
   // };
 
 
-const handlePasscodeSuccess = async (capturedPasscode: string) => {
+  const handlePasscodeSuccess = async () => {
     if (!token) return;
-
-    // Note: 'capturedPasscode' is already verified by the backend in EnterPasscode component
-    // We now just need to execute the transaction.
 
     try {
       if (isFiatRoute) {
         // --- 1. FIAT FLOW ---
         const result = await sendFiat({
           token,
-          passcode: capturedPasscode,
-          destinationCountry: selectedCountry || "",
+          // passcode: capturedPasscode,
+          // destinationCountry: selectedCountry || "",
           currency: selectedAsset || "",
           amount: amount,
-          fullName: recipient.name,
-          bankName: recipient.network,
+          recipientName: recipient.name,
+          bankCode: recipient.network,
           accountNumber: recipient.address,
-          transitNumber: recipient.transitNumber, 
-          notes: notes, 
+          transitNumber: recipient.transitNumber,
+          narration: notes,
         });
 
         if (result.data.isSuccess) {
-           setStep("success");
+          setStep("success");
         }
       } else {
         // --- 2. CRYPTO FLOW ---
         // Payload: token, asset, network, walletAddress, amount
         const result = await sendCrypto({
           token,
-          asset: selectedAsset || "", 
-          network: recipient.network, 
+          asset: selectedAsset || "",
+          network: recipient.network,
           walletAddress: recipient.address,
           amount: amount
         });
 
         // The endpoint returns { data: { isSuccess: true, ... } } based on your JSON
         if (result.isSuccess || result.data?.isSuccess) {
-           showSuccess(result.message || "Crypto sent successfully");
-           setStep("success");
+          showSuccess(result.message || "Crypto sent successfully");
+          setStep("success");
         } else {
-           throw new Error(result.message || "Transfer failed");
+          throw new Error(result.message || "Transfer failed");
         }
       }
 
@@ -200,14 +197,14 @@ const handlePasscodeSuccess = async (capturedPasscode: string) => {
       console.error("Transfer error:", error);
       showDanger(error.response?.data?.message || error.message || "Transaction failed");
       // Throw error to EnterPasscode to stop it from proceeding/closing if needed
-      throw error; 
+      throw error;
     }
   };
 
 
 
 
-    //  Final Success Page
+  //  Final Success Page
   if (step === "success") {
     return (
       <SuccessPage
@@ -226,7 +223,7 @@ const handlePasscodeSuccess = async (capturedPasscode: string) => {
 
   return (
     <>
-     
+
       {/* 1) Send Options Modal */}
       <SendOptionsModal
         open={isSendModalOpen}
@@ -243,22 +240,22 @@ const handlePasscodeSuccess = async (capturedPasscode: string) => {
         <RecipientDetails
           asset={selectedAsset}
           onBack={() => setStep("select-asset")}
-onNext={(data: { network: string; address: string; keychain: string }) => 
-      handleRecipientNext(data)
-    }        />
+          onNext={(data: { network: string; address: string; keychain: string }) =>
+            handleRecipientNext(data)
+          } />
       )}
 
       {step === "amount" && selectedAsset && (
-  <EnterAmount
-    asset={selectedAsset}
-    onBack={() => setStep("recipient")}
-    recipient={recipient}
-    onNext={(amount) => {
-      setAmount(amount);
-      setStep("confirm");
-    }}
-  />
-)}
+        <EnterAmount
+          asset={selectedAsset}
+          onBack={() => setStep("recipient")}
+          recipient={recipient}
+          onNext={(amount) => {
+            setAmount(amount);
+            setStep("confirm");
+          }}
+        />
+      )}
 
 
       {step === "confirm" && selectedAsset && (
@@ -271,41 +268,40 @@ onNext={(data: { network: string; address: string; keychain: string }) =>
         />
       )}
 
-       {/* --------------------------- FIAT FLOW STEPS --------------------------- */}
- {step === "fiat" && (
-          <FiatRecipientSelect
-            country={selectedCountry || ""}
-            onBack={() => setStep("options")}
-            onSelectRecipient={handleFiatRecipientSelect}
-            onAddNew={handleNewRecipientStart}
-          />
-        )}
+      {/* --------------------------- FIAT FLOW STEPS --------------------------- */}
+      {step === "fiat" && (
+        <FiatRecipientSelect
+          country={selectedCountry || ""}
+          onSelectRecipient={handleFiatRecipientSelect}
+          onAddNew={handleNewRecipientStart}
+        />
+      )}
 
-        {step === "fiat-country" && (
-          <FiatCountrySelection
-            onBack={() => setStep("fiat")}
-            onCountrySelect={handleCountrySelect}
-          />
-        )}
+      {step === "fiat-country" && (
+        <FiatCountrySelection
+          onBack={() => setStep("fiat")}
+          onCountrySelect={handleCountrySelect}
+        />
+      )}
 
-       
 
-        {step === "fiat-bank-details" && selectedCountry && (
-          <EnterBankDetails
-            country={selectedCountry}
-            onBack={() => setStep("fiat-country")}
-            onSubmit={handleBankDetailsSubmit}
-          />
-        )}
+
+      {step === "fiat-bank-details" && selectedCountry && (
+        <EnterBankDetails
+          country={selectedCountry}
+          onBack={() => setStep("fiat-country")}
+          onSubmit={handleBankDetailsSubmit}
+        />
+      )}
 
       {/* {step === "passcode" && (
         <EnterPasscode onSuccess={handlePasscodeSuccess}  />
       )} */}
       {step === "passcode" && (
-        <EnterPasscode 
+        <EnterPasscode
           // If hasPin is true, we go to 'verify' mode. Else 'create' mode.
           mode={hasPin ? "verify" : "create"}
-          onSuccess={handlePasscodeSuccess} 
+          onSuccess={handlePasscodeSuccess}
         />
       )}
     </>

@@ -11,7 +11,7 @@ import { useVerifyBankAccount } from '@/store/hooks/useVerifyBankDetails';
 interface EnterBankDetailsProps {
   country: string;
   onBack: () => void;
-  onSubmit: (data: { name: string; bankName: string; accountNumber: string; transitNumber: string; country: string }) => void;
+  onSubmit: (data: { name: string; bankCode: string; accountNumber: string; transitNumber: string; country: string }) => void;
 }
 
 const EnterBankDetails: React.FC<EnterBankDetailsProps> = ({ country, onBack, onSubmit }) => {
@@ -33,14 +33,14 @@ const EnterBankDetails: React.FC<EnterBankDetailsProps> = ({ country, onBack, on
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !bankName || !accountNumber || !accountName) return;
+    if (!name || !bankCode || !accountNumber || !accountName) return;
 
     setIsSubmitting(true);
     // Simulate delay
     setTimeout(() => {
       onSubmit({
         name,
-        bankName,
+        bankCode,
         accountNumber,
         transitNumber,
         country,

@@ -21,7 +21,6 @@ interface FormattedRecipient {
 
 interface FiatRecipientSelectProps {
   country: string;
-  onBack: () => void;
   onSelectRecipient: (data: { keychain: string; name: string; network: string; address: string }) => void;
   onAddNew: () => void;
 }
@@ -46,7 +45,7 @@ const shortenAddress = (address: string) => {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 };
 
-const FiatRecipientSelect: React.FC<FiatRecipientSelectProps> = ({ country, onBack, onSelectRecipient, onAddNew }) => {
+const FiatRecipientSelect: React.FC<FiatRecipientSelectProps> = ({ country, onSelectRecipient, onAddNew }) => {
   const [search, setSearch] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate()
@@ -92,7 +91,7 @@ const FiatRecipientSelect: React.FC<FiatRecipientSelectProps> = ({ country, onBa
       <div className="hidden md:block">
         <HeaderWithCancel />
       </div>
-      <div className="md:flex hidden items-center cursor-pointer border rounded-full w-fit md:ml-28 ml-6 justify-center py-2 px-4" onClick={onBack}>
+      <div className="md:flex hidden items-center cursor-pointer border rounded-full w-fit md:ml-28 ml-6 justify-center py-2 px-4" onClick={() => navigate(-1)}>
                   <ArrowLeft2 size="16" color="black" className="" /><p className="text-sm ">Back</p>
                 </div>
       <div className="w-full max-w-md mt-16 md:mt-0 flex flex-col mx-auto">
