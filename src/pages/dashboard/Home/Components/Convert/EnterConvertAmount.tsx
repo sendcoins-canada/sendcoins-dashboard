@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  getCoins, 
-  getCurrency, 
-} from "@/api/wallet";
-import type { Coin, Currency } from "@/types/wallet"; 
 import { convertCryptoToFiat, getConvertQuote } from "@/api/convert";
 import type { ConversionResponse } from "@/api/convert";
 import { Button } from "@/components/ui/button";
@@ -15,26 +10,26 @@ import SuccessPage from "@/pages/dashboard/SuccessPage";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import { showDanger } from "@/components/ui/toast";
+import type { WalletBalance } from "@/types/wallet";
+import NGN from '@/assets/nigerianflag.svg'
 // import WalletSelectionModal from "@/pages/dashboard/WalletSelectionModal";
 
 const ConvertFlow: React.FC = () => {
   const navigate = useNavigate();
   const token = useSelector((state: RootState) => state.auth.token?.azer_token);
-
+const { allBalances, loading } = useSelector((state: RootState) => state.wallet);
   // Step management
   const [step, setStep] = useState<"amount" | "details" | "success">("amount");
 
-  // --- API Data State ---
-  const [coins, setCoins] = useState<Coin[]>([]);
-  const [currencies, setCurrencies] =useState<Currency[]>([]);
-  const [isLoadingData, setIsLoadingData] = useState(true);
+
 
   // --- Transaction State ---
   const [sendAmount, setSendAmount] = useState("");
   const [receiveAmount, setReceiveAmount] = useState("");
   
-  const [selectedCoinSymbol, setSelectedCoinSymbol] = useState<string>(""); 
-  const [selectedCurrencyName, setSelectedCurrencyName] = useState<string>("");
+  // We store the Symbols (e.g., "BTC", "NGN")
+  const [selectedSourceSymbol, setSelectedSourceSymbol] = useState<string>(""); 
+  const [selectedDestSymbol, setSelectedDestSymbol] = useState<string>("");
 
   // --- Quote State ---
   const [isFetchingQuote, setIsFetchingQuote] = useState(false);
@@ -49,54 +44,45 @@ const ConvertFlow: React.FC = () => {
   const [isConverting, setIsConverting] = useState(false);
   const [error, setError] = useState("");
 
-  // Mock constants for fees/rates
-  const balance = 1500;
-
-  
 
   const recipient = {
     name: "John Doe",
     address: "0x89f8...a1C3",
   };
 
-  // --- 1. Fetch Coins and Currencies on Mount ---
-  // --- Fetch Data ---
+// --- 2. Derive Wallets from Redux ---
+  // Safely convert the balances object into an array
+  const wallets = React.useMemo(() => {
+    const balancesObj = allBalances?.data?.balances as Record<string, WalletBalance> | undefined;
+    if (!balancesObj) return [];
+
+return Object.values(balancesObj).filter((w: any) => w.isWalletAvailable === true);  
+}, [allBalances]);
+
+  const fiatWallets = React.useMemo(() => {
+    // Access the fiatAccounts array from your console log structure
+    const accounts = allBalances?.data?.fiatAccounts;
+    if (!accounts || !Array.isArray(accounts)) return [];
+    return accounts;
+  }, [allBalances]);
+
+  // Set defaults on mount if available
   useEffect(() => {
-    const fetchInitData = async () => {
-      try {
-        setIsLoadingData(true);
-        const [coinsData, currencyData] = await Promise.all([
-          getCoins(),
-          getCurrency()
-        ]);
+    if (wallets.length > 0 && !selectedSourceSymbol) {
+      // Default Source: First wallet found
+      setSelectedSourceSymbol(wallets[0].symbol);
+    }
+    // Default Dest: First Fiat Account
+    if (fiatWallets.length > 0 && !selectedDestSymbol) {
+       // Assuming fiat account has 'currency' or 'symbol' property
+      setSelectedDestSymbol(fiatWallets[0].currency || fiatWallets[0].symbol);
+    }
+  }, [wallets, selectedSourceSymbol, selectedDestSymbol]);
 
-        const coinsArray = coinsData.coins ? Object.values(coinsData.coins) : [];
-        const currencyArray = currencyData.data || [];
+  // --- Helpers to get full objects ---
+  const selectedSourceWallet = wallets.find(w => w.symbol === selectedSourceSymbol);
+const selectedDestWallet = fiatWallets.find(w => w.currency === selectedDestSymbol);// --- 2. Live Quote Calculation (Debounced) ---
 
-        setCoins(coinsArray);
-        setCurrencies(currencyArray);
-
-        // Set defaults
-        if (coinsArray.length > 0) setSelectedCoinSymbol(coinsArray[0].symbol);
-        if (currencyArray.length > 0) setSelectedCurrencyName(currencyArray[0].currency_name);
-
-      } catch (err) {
-        console.error("Failed to load assets", err);
-        setError("Failed to load supported assets");
-      } finally {
-        setIsLoadingData(false);
-      }
-    };
-
-    fetchInitData();
-  }, []);
-
-  
-  // Helper to get full objects based on ID
-  const selectedCoinObj = coins.find(c => c.symbol === selectedCoinSymbol);
-  const selectedCurrencyObj = currencies.find(c => c.currency_name === selectedCurrencyName);
-
-// --- 2. Live Quote Calculation (Debounced) ---
   useEffect(() => {
     // Reset if input is empty
     if (!sendAmount || isNaN(Number(sendAmount)) || Number(sendAmount) === 0) {
@@ -105,7 +91,7 @@ const ConvertFlow: React.FC = () => {
       return;
     }
 
-    if (!selectedCoinObj || !selectedCurrencyObj) return;
+    if (!selectedSourceWallet || !selectedDestWallet) return;
 
     // Debounce timer to prevent API spam while typing
     const timer = setTimeout(async () => {
@@ -113,18 +99,19 @@ const ConvertFlow: React.FC = () => {
       setError("");
       if (!token) {
   showDanger("Please login again");
+  setIsFetchingQuote(false);
   return;
 }
 
       try {
-       
+       const network = selectedSourceWallet.network || selectedSourceWallet.name 
         // Call the quote endpoint
         const quoteData = await getConvertQuote({
           token ,
-          sourceAsset: selectedCoinObj.symbol,
-          sourceNetwork: selectedCoinObj.network || selectedCoinObj.name, // Use fallback if network missing
+          sourceAsset: selectedSourceWallet.symbol,
+          sourceNetwork: network, // Use fallback if network missing
           sourceAmount: sendAmount,
-          destinationCurrency: selectedCurrencyObj.currency_name
+          destinationCurrency: selectedDestWallet.currency
         });
 
         // Assuming response.data contains these fields based on your previous 'success' response structure
@@ -151,7 +138,7 @@ const ConvertFlow: React.FC = () => {
     }, 500); // 500ms delay
 
     return () => clearTimeout(timer);
-  }, [sendAmount, selectedCoinSymbol, selectedCurrencyName, selectedCoinObj, selectedCurrencyObj]);
+  }, [sendAmount, selectedSourceSymbol, selectedDestSymbol, selectedSourceWallet, selectedDestWallet, token]);
   // 3. Store the successful conversion response
   const [_successData, setSuccessData] = useState<ConversionResponse['data'] | null>(null);
 
@@ -160,7 +147,10 @@ const ConvertFlow: React.FC = () => {
       setError("Please enter a valid amount.");
       return;
     }
-    if (Number(sendAmount) > balance) {
+    // --- 4. Validation against Redux Balance ---
+    const availableBalance = Number(selectedSourceWallet?.totalAvailableBalance || 0);
+
+    if (Number(sendAmount) > availableBalance) {
       setError("Not enough in this wallet");
       return;
     }
@@ -177,7 +167,7 @@ const ConvertFlow: React.FC = () => {
 
   // --- 2. Execute Conversion ---
   const handleConfirm = async () => {
-    if (!selectedCoinObj || !selectedCurrencyObj) {
+    if (!selectedSourceWallet || !selectedDestWallet) {
       setError("Invalid asset selection");
       return;
     }
@@ -192,14 +182,14 @@ const ConvertFlow: React.FC = () => {
 
     try {
       // const authToken = localStorage.getItem("token") || "";
-      const network = selectedCoinObj.network || selectedCoinObj.name; // fallback if missing
+      const network = selectedSourceWallet.network || selectedSourceWallet.name; // fallback if missing
 
       const response = await convertCryptoToFiat({
         token,
-        sourceAsset: selectedCoinObj.symbol,   // e.g., 'eth'
+        sourceAsset: selectedSourceWallet.symbol,   // e.g., 'eth'
         sourceNetwork: network,            // e.g., 'ethereum' (from API)
         sourceAmount: sendAmount,
-        destinationCurrency: selectedCurrencyObj.currency_name // e.g., 'ngn'
+        destinationCurrency: selectedDestWallet.symbol // e.g., 'ngn'
       });
 
 if (response.success && response.data) {
@@ -220,7 +210,7 @@ if (response.success && response.data) {
     return (
       <SuccessPage
         title="Conversion successful!"
-        subtitle={`You’ve exchanged ${sendAmount} ${selectedCoinObj?.symbol.toUpperCase()} to ${selectedCurrencyObj?.currency_name.toUpperCase()}.`}
+        subtitle={`You’ve exchanged ${sendAmount} ${selectedSourceSymbol?.toUpperCase()} to ${selectedDestSymbol?.toUpperCase()}.`}
         primaryButtonText="Done"
         showSecondaryButton={false}
         onPrimaryClick={() => navigate("/dashboard/home")}
@@ -249,7 +239,7 @@ if (response.success && response.data) {
             
             <Convert size="64" color="#0647F7" variant="Bold" className="text-center mx-auto mb-4" />
             <p className="text-[28px] font-semibold mb-4">
-              {sendAmount} {selectedCoinObj?.symbol} → {receiveAmount || "..."} {selectedCurrencyObj?.currency_sign}
+              {sendAmount} {selectedSourceSymbol} → {receiveAmount || "..."} {selectedDestSymbol}
             </p>
             
             {error && <div className="mb-4 p-3 bg-red-50 text-red-500 rounded-lg text-sm">{error}</div>}
@@ -262,15 +252,15 @@ if (response.success && response.data) {
                     <p className="text-sm font-medium text-gray-900">Your Wallet</p>
                   </div>
                   <p className="text-xs text-gray-400 text-right">
-                    {selectedCoinObj?.name} | {selectedCoinObj?.network}
+                    {selectedSourceWallet?.name} | {selectedSourceWallet?.network}
                   </p>
                 </div>
                 <div className="px-4 py-2 flex justify-between items-center">
                   <p className="text-sm text-gray-500">Network</p>
                   <div className="flex items-center gap-2">
-                    {selectedCoinObj && <img src={selectedCoinObj.logo} alt="Network" className="w-4 h-4" />}
+                    {selectedSourceWallet && <img src={selectedSourceWallet.logo} alt="Network" className="w-4 h-4" />}
                     <span className="text-sm font-medium text-gray-800">
-                      {selectedCoinObj?.network}
+                      {selectedSourceWallet?.network}
                     </span>
                   </div>
                 </div>
@@ -293,7 +283,7 @@ if (response.success && response.data) {
                 </div>
                 <div className="flex justify-between">
                   <span><Money2 size="16" color="#777777" className="inline" /> Platform fee</span>
-                  <span className="text-primary">{quoteDetails.platformFee} {selectedCurrencyObj?.currency_name}</span>
+                  <span className="text-primary">{quoteDetails.platformFee} {selectedDestSymbol}</span>
                 </div>
               </div>
             </div>
@@ -332,18 +322,20 @@ if (response.success && response.data) {
             <div className="bg-white rounded-2xl border border-neutral-200 px-4 py-3">
               <div className="flex justify-between items-center mb-2">
                 <label className="text-sm text-neutral-500">From</label>
-                {isLoadingData ? (
+                {loading ? (
                   <span className="text-xs text-gray-400">Loading...</span>
                 ) : (
                   <Select
-                    value={selectedCoinSymbol}
-                    onChange={setSelectedCoinSymbol}
-                    options={coins.map((coin) => ({
-                      value: coin.symbol,
-                      label: coin.symbol, // or coin.symbol
-                      icon: <img src={coin.logo} alt={coin.name} className="w-4 h-4 object-contain" />,
+                    value={selectedSourceSymbol}
+                    onChange={setSelectedSourceSymbol}
+                    options={wallets.map((wallet: any) => ({
+                      value: wallet.symbol,
+                      label: wallet.symbol.toUpperCase(),
+                      // Use logo from wallet object
+                      icon: <img src={wallet.logo} alt={wallet.symbol} className="w-4 h-4 object-contain rounded-full" />,
                     }))}
                     className="w-[150px]"
+                    disabled={loading}
                   />
                 )}
               </div>
@@ -361,18 +353,20 @@ if (response.success && response.data) {
             <div className="bg-white rounded-2xl border border-transparent px-4 py-3">
               <div className="flex justify-between items-center mb-2">
                 <label className="text-sm text-neutral-500">To</label>
-                {isLoadingData ? (
+                {loading ? (
                   <span className="text-xs text-gray-400">Loading...</span>
                 ) : (
                   <Select
-                    value={selectedCurrencyName}
-                    onChange={setSelectedCurrencyName}
-                    options={currencies.map((curr) => ({
-                      value: curr.currency_name,
-                      label: (curr.currency_name).toUpperCase(), // or curr.symbol
-                      icon: <img src={curr.flag} alt={curr.currency_name} className="w-4 h-4 object-cover rounded-full" />,
+                    value={selectedDestSymbol}
+                    onChange={setSelectedDestSymbol}
+                    options={fiatWallets.map((wallet: any) => ({
+                      value: wallet.currency,
+                      label: wallet.currency.toUpperCase(),
+                      // Use logo from wallet object
+                      icon: <img src={wallet.logo || NGN } alt={wallet.symbol} className="w-4 h-4 object-contain rounded-full" />,
                     }))}
                     className="w-[150px]"
+                    disabled={loading}
                   />
                 )}
               </div>
@@ -400,11 +394,11 @@ if (response.success && response.data) {
               </div>
               <div className="flex justify-between">
                 <span><Money2 size="16" color="#0088FF" className="inline" /> Platform fee</span>
-                <span className="text-primary">{quoteDetails.platformFee} {selectedCurrencyObj?.currency_name || "Fiat"}</span>
+                <span className="text-primary">{quoteDetails.platformFee} {selectedDestSymbol || "Fiat"}</span>
               </div>
               <div className="flex justify-between">
                 <span><Money size="16" color="#0088FF" className="inline" /> Total amount</span>
-                <span className="text-primary">{quoteDetails.finalAmount} {selectedCurrencyObj?.currency_name || "Fiat"}</span>
+                <span className="text-primary">{quoteDetails.finalAmount} {selectedDestSymbol || "Fiat"}</span>
               </div>
             </div>
           </div>

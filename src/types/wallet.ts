@@ -44,6 +44,7 @@ export interface WalletBalance {
   totalAvailableBalance: number | string;
   symbol: string;
   logo: string;
+  network?: string
 }
 
 export interface BalancesResponse {

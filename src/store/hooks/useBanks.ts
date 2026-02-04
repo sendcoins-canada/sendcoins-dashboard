@@ -3,12 +3,9 @@ import { useEffect, useState } from "react";
 import api from "@/api/axios";
 
 export interface Bank {
-  id: number;
-  name: string;
-  slug: string;
-  code: string;
-  country: string;
-  currency: string;
+  bank_code: number;
+  bank_name: string;
+
 }
 
 interface UseBanksResult {
@@ -26,10 +23,10 @@ export const useBanks = (currency?: string): UseBanksResult => {
     const fetchBanks = async () => {
       try {
         setLoading(true);
-        const res = await api.get("/api/bank/list");
+        const res = await api.get("/user/crayfi/banks");
 
-        const allBanks: Bank[] = res.data.banks || [];
-        
+        const allBanks: Bank[] = res.data.data || [];
+        console.log(allBanks)
         setBanks(allBanks);
       } catch (err: any) {
         setError(err.response?.data?.message || "Failed to load banks");

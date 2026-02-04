@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Add, Send2, Convert, EyeSlash, Eye, ArrowSwapVertical, TransmitSqaure2, ArrowDown2 } from "iconsax-react";
 import Coins from "@/assets/coin.svg"
@@ -27,14 +27,31 @@ const Home: React.FC = () => {
   // 1. Get transaction data and loading state from the Redux store
     const { transactions: fetchedTransactions, loading: transactionsLoading, error: transactionsError   } = useSelector((state: RootState) => state.transaction);
     
-const {selectedBalance } = useSelector((state: RootState) => state.wallet);
-  const displayedBalance = selectedBalance || {
+const {selectedBalance, allBalances } = useSelector((state: RootState) => state.wallet);
+const defaultFiatBalance = useMemo(() => {
+    const fiatAccount = allBalances?.data?.fiatAccounts?.[0]; // Get the first fiat account
+    
+    if (fiatAccount) {
+      return {
+        symbol: fiatAccount.currency,
+        
+        usd: `${fiatAccount.currency} ${fiatAccount.availableBalance}`, 
+        amount: `${fiatAccount.availableBalance} ${fiatAccount.currency}`,
+        logo: "https://flagcdn.com/w40/ng.png" 
+      };
+    }
+    return null;
+  }, [allBalances]);
+  // console.log()
+  const displayedBalance = selectedBalance?.symbol ? selectedBalance : defaultFiatBalance || 
+  {
     symbol: "",
     usd: "$0.00",
     amount: "0.00 XXX",
     logo: ""
-  };
-  console.log(displayedBalance)
+  }
+
+  // console.log(displayedBalance)
 
   // Casting to 'any' to handle the nested structure safely as done before
   const userSlice = useSelector((state: RootState) => state.user) as any;
@@ -87,7 +104,7 @@ const {selectedBalance } = useSelector((state: RootState) => state.wallet);
               <h3 onClick={() => setWalletOpen(true)} 
               className="text-primary text-xs cursor-pointer mb-4 flex gap-2 bg-[#F5F5F5] w-fit p-2 rounded-full">
                 
-                <img src={displayedBalance.logo} alt="logo"  className="h-4 w-4"/>
+                <img src={displayedBalance.logo} alt="logo"  className="h-4 w-4 rounded-full"/>
                 {displayedBalance.symbol} 
                 <ArrowDown2 size="14" color="#262626" className="inline" />
                 </h3>

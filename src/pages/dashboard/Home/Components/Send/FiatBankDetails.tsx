@@ -98,19 +98,19 @@ const EnterBankDetails: React.FC<EnterBankDetailsProps> = ({ country, onBack, on
               value={bankName}
               onChange={(selectedName) => {
                 const selectedBank = banks.find(
-                  (bank) => bank.name === selectedName
+                  (bank) => bank.bank_name === selectedName
                 );
 
                 if (!selectedBank) return;
 
-                setBankName(selectedBank.name);
-                setBankCode(selectedBank.code); //  AUTO SET
+                setBankName(selectedBank.bank_name);
+                setBankCode(selectedBank.bank_code.toString()); //  AUTO SET
                  // Reset verification when bank changes
               setAccountNumber("");
               }}
               options={banks.map((bank) => ({
-                label: bank.name,
-                value: bank.name,
+                label: bank.bank_name,
+                value: bank.bank_name,
               }))}
             />
 

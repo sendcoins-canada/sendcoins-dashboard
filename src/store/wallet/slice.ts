@@ -173,7 +173,7 @@ const walletSlice = createSlice({
                 usd: coinData.TotalAvailableBalancePrice,
                 amount: `${coinData.totalAvailableBalance} ${coinData.symbol}`,
                 symbol: coinData.symbol,
-                                logo: coinData.logo
+                logo: coinData.logo
 
             };
         }
@@ -258,26 +258,69 @@ const walletSlice = createSlice({
     //         }
     //       }
     // })
-   .addCase(getAllBalanceThunk.fulfilled, (state, action) => {
+//    .addCase(getAllBalanceThunk.fulfilled, (state, action) => {
+//   state.loading = false;
+//   state.allBalances = action.payload;
+
+//   const balances = action.payload?.data?.balances;
+//   const fetchedKeys = action.payload?.data?.fetchedSuccessfully; 
+
+//   if (balances && fetchedKeys && fetchedKeys.length > 0) {
+//     // Only auto-select if we don't have a selection yet
+//     if (!state.selectedBalance || state.selectedBalance.symbol === "") {
+      
+//       // Get the first successful key (e.g., 'btc')
+//       const firstKey = fetchedKeys[0];
+//       const firstWallet = balances[firstKey];
+
+//       if (firstWallet ) {
+//         // Map the API fields to your SelectedBalance type
+//         state.selectedBalance = {
+//           symbol: firstWallet.symbol,
+//           // Use the price field from your API log 
+//           usd: firstWallet.TotalAvailableBalancePrice || "$0.00",
+//           amount: `${firstWallet.totalAvailableBalance} ${firstWallet.symbol}`,
+//           logo: firstWallet.logo,
+//           isWalletAvailable: firstWallet.isWalletAvailable
+//         };
+//       }
+//     }
+//   }
+// })
+.addCase(getAllBalanceThunk.fulfilled, (state, action) => {
   state.loading = false;
   state.allBalances = action.payload;
 
   const balances = action.payload?.data?.balances;
-  const fetchedKeys = action.payload?.data?.fetchedSuccessfully; 
+  const fetchedKeys = action.payload?.data?.fetchedSuccessfully;
+  // 1. Get Fiat Accounts
+  const fiatAccounts = action.payload?.data?.fiatAccounts;
 
-  if (balances && fetchedKeys && fetchedKeys.length > 0) {
-    // Only auto-select if we don't have a selection yet
-    if (!state.selectedBalance || state.selectedBalance.symbol === "") {
+  // Only auto-select if we don't have a selection yet
+  if (!state.selectedBalance || state.selectedBalance.symbol === "") {
+    
+    // 2. PRIORITY: Check if User has Fiat Account
+    if (fiatAccounts && fiatAccounts.length > 0) {
+      const firstFiat = fiatAccounts[0];
       
-      // Get the first successful key (e.g., 'btc')
+      state.selectedBalance = {
+        symbol: firstFiat.currency, // e.g., "NGN"
+        // Fiat doesn't usually have a 'usd' price field, so we just show the currency code or formatted balance
+        usd: `${firstFiat.currency} ${firstFiat.availableBalance}`, 
+        amount: `${firstFiat.availableBalance}`, 
+        // You can set a static flag for NGN/Fiat here since the API might not return a logo
+        logo: "https://flagcdn.com/w40/ng.png", 
+        isWalletAvailable: true
+      };
+    } 
+    // 3. FALLBACK: Use Crypto if no Fiat found
+    else if (balances && fetchedKeys && fetchedKeys.length > 0) {
       const firstKey = fetchedKeys[0];
       const firstWallet = balances[firstKey];
 
-      if (firstWallet ) {
-        // Map the API fields to your SelectedBalance type
+      if (firstWallet) {
         state.selectedBalance = {
           symbol: firstWallet.symbol,
-          // Use the price field from your API log 
           usd: firstWallet.TotalAvailableBalancePrice || "$0.00",
           amount: `${firstWallet.totalAvailableBalance} ${firstWallet.symbol}`,
           logo: firstWallet.logo,
