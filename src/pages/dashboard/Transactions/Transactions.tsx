@@ -342,7 +342,7 @@ const Transactions = () => {
               return (
                 <div
                   key={tx.id}
-                  className="flex justify-between items-center py-3 px-2 border-b border-gray-50 last:border-none cursor-pointer hover:bg-gray-50 transition-colors"
+                  className="flex justify-between items-center py-3 px-2 cursor-pointer "
                   onClick={() => handleTransactionSelect(tx.tx_id)} // Use raw tx_id
                 >
                   <div className="flex items-center space-x-3 gap-2">

@@ -125,15 +125,28 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
     }
   };
 
-  const handleCopy = () => {
-    if (selectedWalletAddress) {
-      document.execCommand('copy');
-      navigator.clipboard.writeText(selectedWalletAddress);
-      showSuccess("Wallet address copied successfully!");
+  // const handleCopy = () => {
+  //   if (selectedWalletAddress) {
+  //     document.execCommand('copy');
+  //     navigator.clipboard.writeText(selectedWalletAddress);
+  //     showSuccess("Wallet address copied successfully!");
+  //     setCopied(true);
+  //     setTimeout(() => setCopied(false), 2000);
+  //   }
+  // };
+  // Update your existing handleCopy to this:
+const handleCopy = (text: string, label?: string) => {
+  if (text) {
+    navigator.clipboard.writeText(text);
+    showSuccess(`${label || "Address"} copied successfully!`);
+    
+    // Logic for the specific 'Crypto' copy button state
+    if (!label) { 
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
-  };
+  }
+};
 
   const handleSelect = (option: "bank" | "crypto" | "apple") => {
     setSelected(option);
@@ -239,39 +252,28 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
               </div>
             )}
             {!bankLoading && !bankError && bankDetails && (
-            <div className="bg-[#F5F5F5] rounded-2xl py-2">
-
-              <div className="flex-col gap-4 space-y-4">
-
-                <div className="flex justify-between px-4">
-                  <p className="text-sm text-[#777777]">Bank name</p>
-                  <p>{bankDetails.bankName}</p>
-                </div>
-                <div className="flex justify-between px-4">
-                  <p className="text-sm text-[#777777]">Account name</p>
-                  <p>{bankDetails.accountName}</p>
-                </div>
-                <div className="flex justify-between px-4">
-                  <p className="text-sm text-[#777777]">Account Number</p>
-                  <p>{bankDetails.accountNumber}</p>
-                </div>
-                <div className="flex justify-between px-4">
-                  <p className="text-sm text-[#777777]">Transit Number/ Bank code</p>
-                  <p>{bankDetails.bankCode}</p>
-                </div>
-                {/* <div className="flex justify-between px-4">
-                  <p className="text-sm text-[#777777]">Institution Number</p>
-                  <p>995</p>
-                </div>
-                <div className="flex justify-between px-4">
-                  <p className="text-sm text-[#777777]">Reference Code</p>
-                  <p>SC-99GT43G3</p>
-                </div> */}
-              </div>
-             
-
-            </div>
-            )}
+  <div className="bg-[#F5F5F5] rounded-2xl py-4 px-2">
+    <div className="flex-col gap-4 space-y-4">
+      {[
+        { label: "Bank name", value: bankDetails.bankName },
+        { label: "Account name", value: bankDetails.accountName },
+        { label: "Account Number", value: bankDetails.accountNumber },
+        { label: "Transit Number/ Bank code", value: bankDetails.bankCode },
+      ].map((item, index) => (
+        <div key={index} className="flex justify-between items-center px-4">
+          <p className="text-sm text-[#777777]">{item.label}</p>
+          <div 
+            className="flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity"
+            onClick={() => handleCopy(item.value, item.label)}
+          >
+            <p className="text-sm font-medium">{item.value}</p>
+            <Copy size={16} color="#777777" />
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
             <Button className="bg-[#F5F5F5] my-2">I have sent the money</Button>
           </div>
         </>
@@ -331,7 +333,8 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
 
               <Button className="bg-[#F5F5F5] my-2">Share</Button>
               <Button
-                onClick={handleCopy}
+                // onClick={handleCopy}
+                onClick={() => handleCopy(selectedWalletAddress)}
                 className={`bg-[#0647F7] my-2 text-white`}
               >
                 {copied ? 'Copied!' : 'Copy'}

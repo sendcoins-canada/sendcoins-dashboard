@@ -1,7 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { getTransactionsThunk } from "./asyncThunks/getTransactions"; 
 import { getTransactionDetailThunk } from "./asyncThunks/getTransactionDetail";
-import type { RawTransactionDetail, RawApiTransactionList } from "@/types/transaction";
+import type {  RawApiTransactionList } from "@/types/transaction";
 import type { GasFeeData } from "@/types/transaction";
 import { getGasFeeThunk } from "./asyncThunks/getGasFee";
 
@@ -25,7 +25,7 @@ interface TransactionState {
   error: string | null;
   hasLoaded: boolean;
   gasFeeData: GasFeeData | null;
-  selectedDetail: RawTransactionDetail | null; // Stores the raw detail data
+  selectedDetail: RawApiTransactionList | null; // Stores the raw detail data
   detailLoading: boolean;
   detailError: string | null;
 }
@@ -98,7 +98,7 @@ const transactionSlice = createSlice({
         state.detailLoading = false;
         // CRITICAL FIX: Store the successfully fetched detail data
         // The payload contains the raw detail object, which matches RawTransactionDetail
-        state.selectedDetail = action.payload as RawTransactionDetail; 
+        state.selectedDetail = action.payload as RawApiTransactionList; 
     })
     .addCase(getTransactionDetailThunk.rejected, (state, action) => {
         state.detailLoading = false;
