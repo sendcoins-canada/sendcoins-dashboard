@@ -3,15 +3,52 @@ import type { TransactionDetail as UITransaction } from "../pages/dashboard/Tran
 
 // --- A. Raw API Input Type (Transaction History List) ---
 export interface RawApiTransactionList {
-    history_id: number;
-    crypto_sign: string;
-    currency_sign: string;
-    reference: string;
-    keychain: string; // Used for fetching details
-    asset_amount: string;
-    status: 'completed' | 'pending' | 'processing' | string;
-    type: 'OUTGOING' | 'INCOMING' | string;
-    timestamp: string;
+  id: string;
+  tx_id: string;
+  crayfi_transaction_id: string;
+  reference: string;
+  
+  // Amount & Asset Details
+  amount: string;
+  net_amount: string;
+  currency_amount: string;
+  currency_sign: string; // e.g. "NGN"
+  asset: string;
+  asset_type: string; // "fiat" | "crypto"
+  isFiat: boolean;
+  
+  // Balances
+  balance_before: string;
+  balance_after: string;
+  
+  // Transaction Details
+  description: string;
+  note: string;
+  status: 'completed' | 'pending' | 'processing' | 'failed' | string;
+  transaction_type: 'payout' | 'deposit' | string; // e.g. "payout"
+  option_type: string; // "send"
+  payment_method: string;
+  source: string;
+  network: string;
+  
+  // Participants
+  sender_name: string;
+  recipient_name: string | null;
+  recipient_account_number: string | null;
+  recipient_bank_code: string | null;
+  
+  // Timestamps
+  created_at: string;
+  created_at_timestamp: number;
+  updated_at: string;
+  completed_at: string | null;
+  
+  // Metadata & Nullables
+  metadata?: any;
+  channel: string | null;
+  charge: string | null;
+  crypto_amount: string | null;
+  crypto_sign: string | null;
 }
 export interface Merchant {
 
@@ -56,13 +93,13 @@ export const mapListToDisplay = (tx: any) => {
     textColor: "text-red-500",
     tagColor: "bg-red-100",
   };
-
+  
   return {
     id: tx.id,
     name: tx.destination?.name ?? "Wallet Transfer",
     status: status.text,
     time: new Date(tx.createdAt).toLocaleString(),
-    amount: `${tx.type === "OUTGOING" ? "-" : "+"}${tx.amount.crypto || tx.amount.fiat} ${tx.currency.crypto || tx.currency.fiat}`,
+    amount: `${tx.type === "OUTGOING" ? "-" : "+"}${tx?.amount?.crypto || tx?.amount?.fiat} ${tx.currency?.crypto || tx.currency?.fiat}`,
     color: "bg-[#DCFCE7]",
     textColor: status.textColor,
     tagColor: status.tagColor,
@@ -70,7 +107,7 @@ export const mapListToDisplay = (tx: any) => {
     // keychain: tx.merchant?.keychain,
 
     // For details page
-    currency: tx.currency.crypto,
+    currency: tx.currency?.crypto,
     transaction_type: tx.type,
   };
 };

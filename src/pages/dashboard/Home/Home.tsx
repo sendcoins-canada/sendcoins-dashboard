@@ -13,7 +13,6 @@ import FundOptionsModal from "./Components/Fund/FundOptionsModal";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "@/store";
 import { getTransactionsThunk } from "@/store/transactions/asyncThunks/getTransactions";
-import { mapListToDisplay } from "@/types/transaction";
 import { getAllBalanceThunk } from "@/store/wallet/asyncThunks/getBalances";
 
 
@@ -76,7 +75,9 @@ const defaultFiatBalance = useMemo(() => {
 }, [dispatch]); 
 
 
-    const processedTransactions = fetchedTransactions.map(mapListToDisplay);
+    // const processedTransactions = fetchedTransactions.map(mapListToDisplay);
+    console.log(fetchedTransactions)
+    // console.log(processedTransactions)
 
   const handleSelectOption = (option: "crypto" | "fiat") => {
     setIsSendModalOpen(false);
@@ -252,7 +253,7 @@ const defaultFiatBalance = useMemo(() => {
   <div className="flex justify-between items-center mb-3">
     <h2 className="font-semibold text-primary">Recent transaction</h2>
     {/* Use processedTransactions length for the See all button */}
-    {!transactionsLoading && !transactionsError && processedTransactions.length > 0 && (
+    {!transactionsLoading && !transactionsError && fetchedTransactions.length > 0 && (
       <Button variant={'outline'} onClick={() => navigate('/dashboard/transactions')}>See all</Button>
     )}
   </div>
@@ -266,45 +267,101 @@ const defaultFiatBalance = useMemo(() => {
   )}
 
   {/* Display Fetched Transactions (using processedTransactions) */}
-  {!transactionsLoading && !transactionsError && processedTransactions.length > 0 ? (
-    <div className="">
-      {/* FIX HERE: Map over processedTransactions, not the old local 'transactions' state */}
-      {processedTransactions.map((tx) => ( 
+  {!transactionsLoading && !transactionsError && fetchedTransactions.length > 0 ? (
+  <div className="">
+    {fetchedTransactions.map((tx) => {
+      // --- LOGIC TO DERIVE UI PROPS FROM RAW DATA ---
+      
+      // 1. Determine Display Name
+      // If it's a payout (outgoing), show recipient. If deposit (incoming), show sender.
+      const displayName = tx.recipient_name || tx.sender_name || "Unknown Transaction";
+
+      // 2. Determine Status Colors
+      let statusColor = "text-yellow-500"; // Default pending
+      let bgColor = "bg-yellow-100";
+      let tagColor = "bg-gray-100";
+
+      if (tx.status === 'completed') {
+        statusColor = "text-green-500";
+        bgColor = "bg-green-100"; // For the circle icon background
+        tagColor = "bg-[#E8F8F0]"; // For the small tag icon
+      } else if (tx.status === 'failed') {
+        statusColor = "text-red-500";
+        bgColor = "bg-red-100";
+        tagColor = "bg-red-50";
+      }
+
+      // 3. Format Date
+      const dateObj = new Date(tx.created_at);
+      const timeDisplay = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      // Or simply: const timeDisplay = tx.created_at.split('T')[0];
+
+      // 4. Format Amount (Add - for payouts)
+      const isOutgoing = tx.transaction_type === 'payout' || tx.option_type === 'send';
+      const amountPrefix = isOutgoing ? "-" : "+";
+      // const displayAmount = `${amountPrefix}${tx.currency_sign}${tx.amount}`;
+      let displayAmount = "";
+
+      if (tx.asset_type === 'crypto') {
+        // Crypto Format: "2 BTC"
+        displayAmount = `${amountPrefix}${tx.amount} ${tx.asset}`;
+      } else {
+        // Fiat Format: "₦50.00" (Fallback to empty string if sign is null)
+        const sign = tx.currency_sign || ""; 
+        displayAmount = `${amountPrefix}${sign}${tx.amount}`;
+      }
+
+      return (
         <div
           key={tx.id}
-          className="flex justify-between items-center py-3 px-2"
+          className="flex justify-between items-center py-3 px-2 border-b border-gray-50 last:border-none"
         >
           <div className="flex items-center space-x-3 gap-2">
+            {/* Icon Circle */}
             <div
-              className={`w-12 h-12 rounded-full flex items-center justify-center relative ${tx.color}`}
+              className={`w-12 h-12 rounded-full flex items-center justify-center relative ${bgColor}`}
             >
+              {/* Initials */}
               <span className="text-xs font-semibold text-gray-700">
-                {tx.name
+                {displayName
                   .split(" ")
-                  .map((n: string) => n[0])
-                  .join("")}
+                  .slice(0, 2) // Limit to 2 initials
+                  .map((n) => n[0])
+                  .join("")
+                  .toUpperCase()}
               </span>
-              <div className={`${tx.tagColor} p-1 rounded-full absolute left-8 top-6`}>
-                <TransmitSqaure2 size="14" color="#697689" variant="Outline" className="" />
+              
+              {/* Small Tag Icon */}
+              <div className={`${tagColor} p-1 rounded-full absolute -right-1 -bottom-1 border border-white`}>
+                <TransmitSqaure2 size="14" color="#697689" variant="Outline" />
               </div>
             </div>
+
+            {/* Text Details */}
             <div>
-              <p className="font-medium text-gray-800 text-sm md:text-base">{tx.name}</p>
-              <p
-                className={`text-xs md:text-sm ${tx.textColor}  mt-1`}
-              >
+              <p className="font-medium text-gray-800 text-sm md:text-base capitalize">
+                {displayName.toLowerCase()}
+              </p>
+              <p className={`text-xs md:text-sm ${statusColor} mt-1 capitalize`}>
                 {tx.status}
-                <span className="text-gray-400 ml-1">. {tx.time}</span>
+                <span className="text-gray-400 ml-1">
+                  • {timeDisplay}
+                </span>
               </p>
             </div>
           </div>
-          <p className="text-primary text-sm md:text-base">{tx.amount}</p>
+
+          {/* Amount */}
+          <p className={`text-sm md:text-base font-semibold ${isOutgoing ? 'text-red-500' : 'text-green-600'}`}>
+            {displayAmount}
+          </p>
         </div>
-      ))}
-    </div>
-  ) : (
+      );
+    })}
+  </div>
+) : (
     // Display No Transactions state only when not loading, no error, and list is empty
-    !transactionsLoading && !transactionsError && processedTransactions.length === 0 && (
+    !transactionsLoading && !transactionsError && fetchedTransactions.length === 0 && (
       <div className="flex flex-col items-center justify-center p-10 bg-white rounded-xl">
         <img
           src={Search}
