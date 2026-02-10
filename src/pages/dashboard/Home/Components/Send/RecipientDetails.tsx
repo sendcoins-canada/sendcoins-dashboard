@@ -53,7 +53,6 @@ const RecipientDetails: React.FC<Props> = ({ asset, onNext }) => {
         const response = await getSupportedNetwork((asset).toLowerCase());
         // Assuming response.data is an array of strings or objects like { network: "ERC20" }
         const networks = response.data.data || []; 
-        console.log(networks)
         setSupportedNetworks(networks);
         
         // Optional: Auto-select first network
@@ -97,8 +96,6 @@ const RecipientDetails: React.FC<Props> = ({ asset, onNext }) => {
       const valid = WAValidator.validate(address, validatorSymbol);
       setIsValid(valid);
       
-      // Console log for debugging
-      console.log(`Validating ${address} against ${validatorSymbol}: ${valid}`);
     } catch (e) {
       console.warn("Validator error:", e);
       // Fallback for unsupported coins

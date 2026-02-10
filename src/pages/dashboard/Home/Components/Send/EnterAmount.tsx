@@ -12,7 +12,8 @@ import type { RootState } from "@/store";
 interface EnterAmountProps {
   asset: string;
   onBack: () => void;
-  onNext: (amount: string) => void;
+  onNext: (amount: string, fee: string) => void;
+  isFiat?: boolean;
   recipient: {
     name: string;
     address?: string;
@@ -21,7 +22,7 @@ interface EnterAmountProps {
 }
 
 
-const EnterAmount: React.FC<EnterAmountProps> = ({ asset, onNext, recipient }) => {
+const EnterAmount: React.FC<EnterAmountProps> = ({ asset, onNext, isFiat, recipient }) => {
   const navigate = useNavigate();
   const [sendAmount, setSendAmount] = useState("");
   const [sendAsset, _setSendAsset] = useState(asset);
@@ -49,7 +50,7 @@ const {
     error: gasError 
   } = useGasFee({
     amount: sendAmount,
-    asset: 'crypto',
+    asset: isFiat ? 'fiat' : 'crypto',
     symbol: asset.toLowerCase()
   });
 
@@ -112,12 +113,12 @@ const handleContinue = () => {
 
     setError("");
     // Pass the actual amount the recipient will receive (sendAmount OR adjusted amount)
-    onNext(calculation.recipientGets.toString()); 
+    onNext(calculation.recipientGets.toString(), gasFee.toString()); 
   };
 
    const handleWalletSelect = () => {
     setWalletModalOpen(false);
-    onNext(sendAmount); 
+    onNext(sendAmount, gasFee.toString()); 
   };
 
   return (
@@ -208,7 +209,7 @@ const handleContinue = () => {
 
               <input
                 type="number"
-                value={calculation.recipientGets > 0 ? calculation.recipientGets.toFixed(6) : "0.00"}
+                value={calculation.recipientGets > 0 ? calculation.recipientGets.toFixed(isFiat ? 2 : 6) : "0.00"}
                 // onChange={(e) => setReceiveAmount(e.target.value)}
                 placeholder="2000"
                 className="w-full bg-transparent outline-none text-[40px] font-semibold "
@@ -219,12 +220,12 @@ const handleContinue = () => {
             <div className="pt-2 space-y-2 text-sm text-neutral">
              
               <div className="flex justify-between">
-                <span><Money2 size="16" color="#0088FF" className="inline"/> Gas fee</span>
+                <span><Money2 size="16" color="#0088FF" className="inline"/> {isFiat ? "Platform fee" : "Gas fee"}</span>
                 <span className="text-primary">
                   <span className="text-primary">
                   {isGasLoading 
                     ? "Calculating..." 
-                    : `${Number(gasFee || 0).toFixed(6)} ${asset.toUpperCase()}`
+                    : `${Number(gasFee || 0).toFixed(isFiat ? 2 : 6)} ${asset.toUpperCase()}`
                   }
                 </span>
                 </span>
@@ -233,7 +234,7 @@ const handleContinue = () => {
                 <span><Money size="16" color="#0088FF" className="inline"/> Total amount</span>
                <span className="text-primary">
                   {/* Shows what leaves your wallet (Input amount + Gas OR Input amount if adjusted) */}
-                  {calculation.totalDeducted > 0 ? calculation.totalDeducted.toFixed(6) : "0.00"} {asset.toUpperCase()}
+                  {calculation.totalDeducted > 0 ? calculation.totalDeducted.toFixed(isFiat ? 2 : 6) : "0.00"} {asset.toUpperCase()}
                 </span>
               </div>
             </div>

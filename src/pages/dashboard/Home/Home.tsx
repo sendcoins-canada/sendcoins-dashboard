@@ -41,7 +41,6 @@ const defaultFiatBalance = useMemo(() => {
     }
     return null;
   }, [allBalances]);
-  // console.log()
   const displayedBalance = selectedBalance?.symbol ? selectedBalance : defaultFiatBalance || 
   {
     symbol: "",
@@ -50,7 +49,6 @@ const defaultFiatBalance = useMemo(() => {
     logo: ""
   }
 
-  // console.log(displayedBalance)
 
   // Casting to 'any' to handle the nested structure safely as done before
   const userSlice = useSelector((state: RootState) => state.user) as any;
@@ -74,10 +72,6 @@ const defaultFiatBalance = useMemo(() => {
   }
 }, [dispatch]); 
 
-
-    // const processedTransactions = fetchedTransactions.map(mapListToDisplay);
-    console.log(fetchedTransactions)
-    // console.log(processedTransactions)
 
   const handleSelectOption = (option: "crypto" | "fiat") => {
     setIsSendModalOpen(false);

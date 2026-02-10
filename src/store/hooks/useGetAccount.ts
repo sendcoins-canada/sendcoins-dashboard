@@ -1,5 +1,7 @@
 import { useState, useCallback } from "react";
 import { getAccount } from "@/api/fiat"; // Ensure path matches your project
+import { setBankDetails } from "../user/slice";
+import { useDispatch } from "react-redux";
 
 export interface BankAccountDetails {
   bankName: string;
@@ -14,6 +16,7 @@ export interface BankAccountDetails {
 }
 
 export const useCrayfiAccount = () => {
+  const dispatch = useDispatch();
   const [data, setData] = useState<BankAccountDetails | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +32,7 @@ export const useCrayfiAccount = () => {
       // Example assumes: { status: "success", data: { bankName: "..." } }
       if (response && (response.data || response.bankName)) {
         setData(response.data || response);
+        dispatch(setBankDetails(response.data || response));
       } else {
         throw new Error("No account details found");
       }

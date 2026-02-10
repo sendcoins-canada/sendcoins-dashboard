@@ -22,7 +22,7 @@ const EnterBankDetails: React.FC<EnterBankDetailsProps> = ({ country, onBack, on
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { banks } = useBanks(country);
   const [bankCode, setBankCode] = useState("");
-  
+  const [transferCode, setTransferCode] = useState("")
   const {
     verifyAccount,
     accountName,
@@ -30,10 +30,34 @@ const EnterBankDetails: React.FC<EnterBankDetailsProps> = ({ country, onBack, on
     error: verifyError,
   } = useVerifyBankAccount();
 
+  const handleBankSelection = (selectedName: string) => {
+    const selectedBank = banks.find((bank) => bank.bank_name === selectedName);
+    if (!selectedBank) return;
 
+    setBankName(selectedBank.bank_name);
+    setBankCode(selectedBank.bank_code.toString());
+    
+    // Crucial: Set the transfer_code from the mapped hook result
+    // Fallback to internal bank_code if transfer_code is missing
+    const actualTransferCode = selectedBank.transfer_code || selectedBank.bank_code.toString();
+    setTransferCode(actualTransferCode);
+
+    // Reset account details when bank changes
+    setAccountNumber("");
+  };
+
+  const handleAccountNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, "");
+    setAccountNumber(value);
+
+    // Use the transferCode (from /api/bank/list) for verification
+    if (value.length >= 10 && transferCode) {
+      verifyAccount(value, transferCode);
+    }
+  };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !bankCode || !accountNumber || !accountName) return;
+    if (!name || !transferCode || !accountNumber || !accountName) return;
 
     setIsSubmitting(true);
     // Simulate delay
@@ -48,6 +72,7 @@ const EnterBankDetails: React.FC<EnterBankDetailsProps> = ({ country, onBack, on
       setIsSubmitting(false);
     }, 500);
   };
+
 
   // Helper for the display name of the country
   const getCountryDisplay = (code: string) => {
@@ -96,18 +121,7 @@ const EnterBankDetails: React.FC<EnterBankDetailsProps> = ({ country, onBack, on
             <Select
               placeholder="Select bank"
               value={bankName}
-              onChange={(selectedName) => {
-                const selectedBank = banks.find(
-                  (bank) => bank.bank_name === selectedName
-                );
-
-                if (!selectedBank) return;
-
-                setBankName(selectedBank.bank_name);
-                setBankCode(selectedBank.bank_code.toString()); //  AUTO SET
-                 // Reset verification when bank changes
-              setAccountNumber("");
-              }}
+              onChange={handleBankSelection}
               options={banks.map((bank) => ({
                 label: bank.bank_name,
                 value: bank.bank_name,
@@ -122,13 +136,7 @@ const EnterBankDetails: React.FC<EnterBankDetailsProps> = ({ country, onBack, on
             <Input
               type="number"
               value={accountNumber}
-              onChange={(e) => {
-                const value = e.target.value.replace(/\D/g, "");
-                setAccountNumber(value);
-                verifyAccount(value, bankCode);
-                  // Reset state on edit
-
-              }}
+              onChange={handleAccountNumberChange}
 
               placeholder="Recipient's bank account number"
               className=""

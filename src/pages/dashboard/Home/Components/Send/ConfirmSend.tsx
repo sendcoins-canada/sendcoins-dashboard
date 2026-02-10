@@ -12,6 +12,8 @@ type Props = {
   asset: string;
   recipient: { name: string; address: string };
   amount: string;
+  platformFee?: string;
+  isFiat?: boolean;
   onBack: () => void;
   onConfirm: () => void;
 };
@@ -20,15 +22,15 @@ const ConfirmSend: React.FC<Props> = ({
   asset,
   recipient,
   amount,
+  platformFee = "0.00",
   onConfirm,
 }) => {
-  const platformFee = "Not applied";
   const estimatedArrival = "3 mins";
   const navigate = useNavigate()
 
   // 1. Get User's Wallet Data from Redux
   const { allBalances } = useSelector((state: RootState) => state.wallet);
-
+const { bankDetails} = useSelector((state: RootState) => state.user) as any;
   // 2. Find the specific wallet address for the asset we are sending
   const userWallet = useMemo(() => {
     if (!allBalances?.data?.balances) return null;
@@ -82,7 +84,7 @@ const ConfirmSend: React.FC<Props> = ({
               Your Wallet
             </p>
           </div>
-            <p className="text-xs text-gray-400 text-right">{formatAddress(userAddress)}</p>
+            <p className="text-xs text-gray-400 text-right">{bankDetails.accountNumber || formatAddress(userAddress)}</p>
         </div>
 
         <div className="px-4 py-2 flex justify-between items-center">

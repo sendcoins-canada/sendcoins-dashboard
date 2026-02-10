@@ -1,4 +1,3 @@
-// src/components/send/SendFlow.tsx
 import React, { useState, useEffect } from "react";
 import SendOptionsModal from "./SendModal";
 import SelectCryptoAsset from "./SelectCryptoAsset";
@@ -16,6 +15,7 @@ import EnterBankDetails from "./FiatBankDetails";
 import { sendFiat } from "@/api/fiat";
 import { sendCrypto } from "@/api/authApi";
 import { showSuccess, showDanger } from "@/components/ui/toast";
+import { useCrayfiAccount } from "@/store/hooks/useGetAccount";
 
 /**
  * Place this component on route /send or render it in a page.
@@ -26,12 +26,7 @@ const SendFlow: React.FC = () => {
   const location = useLocation();
 
   const isFiatRoute = location.pathname.includes('send-fiat');
-  const userSlice = useSelector((state: RootState) => state.user) as any;
-  // 3. Safely drill down to the actual user data
-  // Structure: state.user -> user -> data -> isPinAvailable -> found
-  const userData = userSlice?.user?.data;
-  // 4. Check if PIN exists
-  const hasPin = userData?.isPinAvailable?.found ?? false;
+  
 
   // flow state
   const [isSendModalOpen, setIsSendModalOpen] = useState(false); // if triggered from Home
@@ -48,7 +43,16 @@ const SendFlow: React.FC = () => {
   const [amount, setAmount] = useState<string>("");
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const token = useSelector((state: RootState) => state.auth.token?.azer_token);
+  // fee
+  const [fee, setFee] = useState<string>("0");  
+// fetch bankdetails
+const { fetchAccount } = useCrayfiAccount();
 
+useEffect(() => {
+  if (isFiatRoute && token) {
+    fetchAccount(token, "NGN"); // or your preferred currency
+  }
+}, [isFiatRoute, token]);
   useEffect(() => {
     if (isFiatRoute && (step === "select-asset" || step === "options")) {
       setStep("fiat");
@@ -169,8 +173,7 @@ const SendFlow: React.FC = () => {
           transitNumber: recipient.transitNumber,
           narration: notes,
         });
-
-        if (result.data.isSuccess) {
+        if (result.isSuccess) {
           setStep("success");
         }
       } else {
@@ -206,13 +209,19 @@ const SendFlow: React.FC = () => {
 
   //  Final Success Page
   if (step === "success") {
+    const destinationLabel = isFiatRoute 
+      ? recipient.network // This holds the Bank Name in your fiat flow
+      : recipient.network; // This holds the Network in your crypto flow
     return (
       <SuccessPage
         title="Money Sent!"
-        subtitle="Dwight will receive 50 USD shortly via ethereum. Your transfer is on its way"
+        subtitle={`${amount} ${selectedAsset} will be received by ${recipient.name || 'the recipient'} shortly via ${destinationLabel}. Your transfer is on its way.`}
         primaryButtonText="Send Again"
         secondaryButtonText="Go Home"
-        onPrimaryClick={() => navigate("/dashboard/home")}
+        onPrimaryClick={() => {
+            setStep(isFiatRoute ? "fiat" : "select-asset");
+            setAmount("");
+        }}        
         onSecondaryClick={() => navigate("/dashboard/home")}
         backgroundColor="#35FD82"
         iconColor="#0647F7"
@@ -248,10 +257,13 @@ const SendFlow: React.FC = () => {
       {step === "amount" && selectedAsset && (
         <EnterAmount
           asset={selectedAsset}
-          onBack={() => setStep("recipient")}
+          // onBack={() => setStep("recipient")}
+          onBack={() => setStep(isFiatRoute ? "fiat" : "recipient")}
           recipient={recipient}
-          onNext={(amount) => {
+          isFiat={isFiatRoute}
+          onNext={(amount, calculatedFee) => {
             setAmount(amount);
+            setFee(calculatedFee || "0");
             setStep("confirm");
           }}
         />
@@ -263,6 +275,8 @@ const SendFlow: React.FC = () => {
           asset={selectedAsset}
           recipient={recipient}
           amount={amount}
+          platformFee={fee}       // Pass the fee
+          isFiat={isFiatRoute}
           onBack={() => setStep("recipient")}
           onConfirm={handleConfirm}
         />
@@ -300,7 +314,7 @@ const SendFlow: React.FC = () => {
       {step === "passcode" && (
         <EnterPasscode
           // If hasPin is true, we go to 'verify' mode. Else 'create' mode.
-          mode={hasPin ? "verify" : "create"}
+          // mode={hasPin ? "verify" : "create"}
           onSuccess={handlePasscodeSuccess}
         />
       )}

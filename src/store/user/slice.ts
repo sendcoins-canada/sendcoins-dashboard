@@ -7,11 +7,13 @@ type UserState = {
   user: User | null;
   loading: boolean;
   error?: string;
+  bankDetails?: null
 };
 
 const initialState: UserState = {
   user: null,
   loading: false,
+  bankDetails: null
 };
 
 const userSlice = createSlice({
@@ -24,6 +26,9 @@ const userSlice = createSlice({
     updateUser(state, action: PayloadAction<Partial<User>>) {
       if (!state.user) return;
       state.user = { ...state.user, ...action.payload };
+    },
+    setBankDetails: (state, action) => {
+      state.bankDetails = action.payload;
     },
     clearUser(state) {
       state.user = null;
@@ -62,5 +67,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { setUser, updateUser, clearUser } = userSlice.actions;
+export const { setUser, updateUser, setBankDetails, clearUser } = userSlice.actions;
 export default userSlice.reducer;
