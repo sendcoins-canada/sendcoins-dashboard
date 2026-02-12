@@ -66,9 +66,8 @@ const defaultFiatBalance = useMemo(() => {
     // 1. Fetch transactions immediately
     dispatch(getTransactionsThunk({ token }) as any);
 
-    if (!selectedBalance) {
       dispatch(getAllBalanceThunk({ token }) as any);
-    }
+
   }
 }, [dispatch]); 
 

@@ -5,7 +5,7 @@ import type { ConversionResponse } from "@/api/convert";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/onboarding/shared/Header";
 import { Select } from "@/components/ui/select";
-import { Convert, Money, Money2, FlashCircle, ArrowLeft2, ArrowSwapVertical } from "iconsax-react";
+import { Convert, Money, Money2, FlashCircle, ArrowLeft2 } from "iconsax-react";
 import SuccessPage from "@/pages/dashboard/SuccessPage";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
