@@ -1,13 +1,15 @@
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/onboarding/shared/Header";
 import { useNavigate } from "react-router-dom";
 import { Money, Money2, ArrowLeft2 } from "iconsax-react";
 import WalletSelectionModal from "@/pages/dashboard/WalletSelectionModal";
 import { useGasFee } from "@/store/hooks/useGasFee";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/store";
+import { getAllBalanceThunk } from "@/store/wallet/asyncThunks/getBalances";
+
 
 interface EnterAmountProps {
   asset: string;
@@ -29,20 +31,32 @@ const EnterAmount: React.FC<EnterAmountProps> = ({ asset, onNext, isFiat, recipi
   const [error, setError] = useState("");
   const [isWalletModalOpen, setWalletModalOpen] = useState(false);
 
-
-
+const dispatch = useDispatch();
+const token = useSelector((state: RootState) => state.auth.token?.azer_token);
 // 1. Get Wallet Balance from Redux
   const { allBalances } = useSelector((state: RootState) => state.wallet);
-  
-  // Find the specific wallet balance for the selected asset (e.g., 'BTC')
-  const currentWallet = useMemo(() => {
-    if (!allBalances?.data?.balances) return null;
-    const key = asset.toLowerCase();
-    return allBalances.data.balances[key];
-  }, [allBalances, asset]);
+useEffect(() => {
+  if (token && (!allBalances || !allBalances.data)) {
+    dispatch(getAllBalanceThunk({token}) as any);
+  }
+}, [dispatch, token, allBalances]);
 
-  const walletAvailableBalance = currentWallet?.totalAvailableBalance || 0;
   
+ const walletAvailableBalance = useMemo(() => {
+  if (!allBalances?.data) return 0;
+
+  if (isFiat) {
+    // For Fiat Route: Access the top-level totalFiatBalance string
+    // Based on your API: data.totalFiatBalance is "250.00"
+    return parseFloat(allBalances.data.totalFiatBalance) || 0;
+  } else {
+    // For Crypto Route: Access the balances object for the specific asset
+    // Based on your API: data.balances.btc.totalAvailableBalance
+    const key = asset.toLowerCase();
+    const currentWallet = allBalances.data.balances?.[key];
+    return currentWallet?.totalAvailableBalance || 0;
+  }
+}, [allBalances, asset, isFiat]);
 // fetch gas fee
 const { 
     gasFee,      
@@ -65,26 +79,25 @@ const {
     if (!amountNum || amountNum <= 0) {
       return { recipientGets: 0, totalDeducted: 0, status: 'idle' };
     }
-
+    const recipientGets = Math.max(amountNum - currentGasFee);
     const totalNeeded = amountNum + currentGasFee;
-
-    // Case 1: Insufficient funds for amount itself
-    if (amountNum > walletAvailableBalance) {
-      return { recipientGets: amountNum, totalDeducted: totalNeeded, status: 'insufficient' };
-    }
-
     // Case 2: Enough for Amount but NOT Amount + Gas (User is sending Max)
     // We must deduct gas from the amount they entered so the total doesn't exceed balance.
     if (totalNeeded > walletAvailableBalance) {
        // Recipient gets: Entered Amount - Gas Fee
        // We safeguard against negative numbers if gas > amount
-       const adjustedReceive = Math.max(0, amountNum - currentGasFee);
        return { 
-         recipientGets: adjustedReceive, 
+         recipientGets, 
          totalDeducted: amountNum, // The entered amount acts as the total cap
          status: 'adjusted' // Inform UI we deducted fees
        };
     }
+    // Case 1: Insufficient funds for amount itself
+    if (amountNum > walletAvailableBalance) {
+      return { recipientGets, totalDeducted: totalNeeded, status: 'insufficient' };
+    }
+
+
 
     // Case 3: Enough for Amount + Gas (Standard)
     return { 
@@ -101,10 +114,10 @@ const handleContinue = () => {
       return;
     }
 
-    // if (calculation.status === 'insufficient') {
-    //   setError(`Insufficient ${asset.toUpperCase()} balance.`);
-    //   return;
-    // }
+    if (calculation.status === 'insufficient') {
+      setError(`Insufficient ${asset.toUpperCase()} balance.`);
+      return;
+    }
 
     if (calculation.recipientGets <= 0) {
       setError("Amount is too low to cover gas fees.");
@@ -175,16 +188,21 @@ const handleContinue = () => {
                 placeholder="0.00"
                 className="w-full bg-transparent outline-none text-[40px] font-semibold text-neutral-900"
               />
-
-             {/* Warnings / Errors */}
-              {error && (
-                <p className="text-sm text-danger mt-1 font-medium">{error}</p>
-              )}
+<span className={`text-xs font-bold ${calculation.status === 'insufficient' ? 'text-red-500' : 'text-neutral-500'}`}>
+   Available balance: {walletAvailableBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })} {asset.toUpperCase()}
+  </span>
+             
                {calculation.status === 'adjusted' && !error && (
                 <p className="text-sm text-orange-500 mt-1 font-medium">
                   Note: Gas fees were deducted from the total amount.
                 </p>
               )}
+              {/* Error Message */}
+{calculation.status === 'insufficient' && (
+  <p className="text-xs text-red-500 mt-2 font-bold animate-shake">
+    ⚠️ Insufficient funds. You only have {walletAvailableBalance} {asset.toUpperCase()} available.
+  </p>
+)}
             </div>
 
             {/* Amount they'll receive */}
@@ -253,6 +271,12 @@ const handleContinue = () => {
               <Button
                 onClick={handleContinue}
                 className="rounded-full bg-[#0052FF] hover:bg-[#0040CC] text-white px-10 py-2"
+                disabled={
+      isGasLoading || 
+      !sendAmount || 
+      calculation.status === 'insufficient' || 
+      calculation.recipientGets <= 0
+    }
               >
                 Continue 
               </Button>

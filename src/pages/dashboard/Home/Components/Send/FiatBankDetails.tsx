@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Lock } from 'lucide-react';
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,12 @@ const EnterBankDetails: React.FC<EnterBankDetailsProps> = ({ country, onBack, on
     loading: verifying,
     error: verifyError,
   } = useVerifyBankAccount();
+  // --- AUTO-POPULATE NAME FROM VERIFICATION ---
+  useEffect(() => {
+    if (accountName) {
+      setName(accountName);
+    }
+  }, [accountName]);
 
   const handleBankSelection = (selectedName: string) => {
     const selectedBank = banks.find((bank) => bank.bank_name === selectedName);
@@ -44,6 +50,7 @@ const EnterBankDetails: React.FC<EnterBankDetailsProps> = ({ country, onBack, on
 
     // Reset account details when bank changes
     setAccountNumber("");
+    setName("")
   };
 
   const handleAccountNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,17 +110,7 @@ const EnterBankDetails: React.FC<EnterBankDetailsProps> = ({ country, onBack, on
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Full Name Input */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-[#777777] ml-1">Full Name</label>
-            <Input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Recipient's full legal name"
-              className=""
-            />
-          </div>
+          
 
           {/* Bank Name Custom Select */}
           <div className="space-y-2">
@@ -147,6 +144,17 @@ const EnterBankDetails: React.FC<EnterBankDetailsProps> = ({ country, onBack, on
               Verifying account...
             </p>
           )}
+          {/* Full Name Input */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-[#777777] ml-1">Full Name</label>
+            <Input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Recipient's full legal name"
+              disabled={verifying}
+            />
+          </div>
 
           {accountName && (
             <p className="text-sm text-green-600 mt-1 font-medium">

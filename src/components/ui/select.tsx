@@ -1,7 +1,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { ArrowDown2 } from "iconsax-react";
+import { ArrowDown2, SearchNormal1 } from "iconsax-react";
 
 export type SelectOption = {
   value: string;
@@ -15,7 +15,8 @@ export type SelectProps = {
   options: SelectOption[];
   placeholder?: string;
   className?: string;
-  disabled?: boolean
+  disabled?: boolean;
+  showSearch?: boolean;
 };
 
 export const Select: React.FC<SelectProps> = ({
@@ -24,16 +25,30 @@ export const Select: React.FC<SelectProps> = ({
   options,
   placeholder,
   className,
-  disabled
+  disabled,
+  showSearch = true
 }) => {
   const [open, setOpen] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState(""); 
   const selected = options.find((o) => o.value === value);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
+
+  // Filter options based on search term
+  const filteredOptions = React.useMemo(() => {
+    return options.filter((opt) => {
+      const labelText = typeof opt.label === 'string' ? opt.label : opt.value;
+      return labelText.toLowerCase().includes(searchTerm.toLowerCase());
+    });
+  }, [options, searchTerm]);
 
   React.useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (!containerRef.current) return;
-      if (!containerRef.current.contains(e.target as Node)) setOpen(false);
+      if (!containerRef.current.contains(e.target as Node)) 
+        {
+          setOpen(false);;
+          setSearchTerm("")
+        }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -78,8 +93,30 @@ export const Select: React.FC<SelectProps> = ({
       {/* --- Dropdown Menu --- */}
       {open && !disabled && (
         <div className="absolute z-20 mt-1 w-full rounded-xl border border-neutral-200 bg-[#F5F5F5] py-2">
+          {/* --- Search Input --- */}
+          {showSearch && (
+            <div className="px-3 pb-2 pt-1 border-b border-neutral-200 mb-1">
+              <div className="relative flex items-center">
+                <SearchNormal1 
+                  size={16} 
+                  className="absolute left-3 "
+                  color="#262626" 
+                />
+                <input
+                  type="text"
+                  autoFocus
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full bg-white border border-neutral-200 rounded-lg py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  onClick={(e) => e.stopPropagation()} // Prevent closing dropdown
+                />
+              </div>
+            </div>
+          )}
           <div className="max-h-56 overflow-auto py-1">
-            {options.map((opt) => (
+            {filteredOptions.length > 0 ? (
+            filteredOptions.map((opt) => (
               <button
                 key={opt.value}
                 type="button"
@@ -97,7 +134,13 @@ export const Select: React.FC<SelectProps> = ({
                 )}
                 <span className="text-[15px] text-[#262626] py-1 mb-1">{opt.label}</span>
               </button>
-            ))}
+            ))
+            ) : (
+              <div className="text-center py-4 text-sm text-neutral-500">
+                No results found
+              </div>
+            )
+          }
           </div>
         </div>
       )}
@@ -107,176 +150,3 @@ export const Select: React.FC<SelectProps> = ({
 
 export default Select;
 
-// src/components/ui/select.tsx
-// import * as React from "react";
-// import { cn } from "@/lib/utils";
-// import { ArrowDown2, Add } from "iconsax-react"; // Added 'Add' icon
-
-// export type SelectOption = {
-//   value: string;
-//   label: string | React.ReactNode;
-//   icon?: React.ReactNode;
-// };
-
-// export type SelectProps = {
-//   value?: string;
-//   onChange?: (value: string) => void;
-//   options: SelectOption[];
-//   placeholder?: string;
-//   className?: string;
-//   disabled?: boolean;
-//   creatable?: boolean; // New Prop
-// };
-
-// export const Select: React.FC<SelectProps> = ({
-//   value,
-//   onChange,
-//   options,
-//   placeholder,
-//   className,
-//   disabled,
-//   creatable = false,
-// }) => {
-//   const [open, setOpen] = React.useState(false);
-//   const [query, setQuery] = React.useState(""); // State for search text
-//   const containerRef = React.useRef<HTMLDivElement | null>(null);
-//   const inputRef = React.useRef<HTMLInputElement | null>(null);
-
-//   const selected = options.find((o) => o.value === value);
-
-//   // Reset query when closing or when value changes externally
-//   React.useEffect(() => {
-//     if (!open) setQuery("");
-//   }, [open]);
-
-//   React.useEffect(() => {
-//     const handler = (e: MouseEvent) => {
-//       if (!containerRef.current) return;
-//       if (!containerRef.current.contains(e.target as Node)) {
-//         setOpen(false);
-//       }
-//     };
-//     document.addEventListener("mousedown", handler);
-//     return () => document.removeEventListener("mousedown", handler);
-//   }, []);
-
-//   // Filter options based on query
-//   const filteredOptions = options.filter((opt) => {
-//     const labelString = typeof opt.label === "string" ? opt.label : opt.value;
-//     return labelString.toLowerCase().includes(query.toLowerCase());
-//   });
-
-//   // Check if we need to show the "Create" option
-//   const showCreate =
-//     creatable &&
-//     query.length > 0 &&
-//     !filteredOptions.some((opt) => opt.value.toLowerCase() === query.toLowerCase());
-
-//   return (
-//     <div ref={containerRef} className={cn("relative", className)}>
-//       {/* --- Trigger Area --- */}
-//       <div
-//         onClick={() => {
-//           if (!disabled) {
-//             setOpen(true);
-//             setTimeout(() => inputRef.current?.focus(), 0);
-//           }
-//         }}
-//         className={cn(
-//           "w-full rounded-full bg-[#F5F5F5] px-[14px] py-[10px] text-left text-[15px] flex items-center justify-between gap-2 transition-colors duration-150 cursor-pointer",
-//           disabled && "opacity-50 cursor-not-allowed",
-//           open && "ring-2 ring-[#0052FF]/20 bg-white"
-//         )}
-//       >
-//         <div className="flex items-center gap-2 overflow-hidden flex-1">
-//           {/* Show Icon only if selected and not searching/typing */}
-//           {!open && selected?.icon && (
-//             <span className="shrink-0 flex items-center">{selected.icon}</span>
-//           )}
-
-//           {/* If open, show Input, otherwise show Label */}
-//           {open ? (
-//             <input
-//               ref={inputRef}
-//               value={query}
-//               onChange={(e) => setQuery(e.target.value)}
-//               placeholder={creatable ? "Search or create..." : "Search..."}
-//               className="w-full bg-transparent outline-none text-sm text-neutral-900 placeholder:text-neutral-400"
-//             />
-//           ) : (
-//             <span
-//               className={cn(
-//                 "text-sm truncate",
-//                 selected ? "text-neutral-900" : "text-neutral-400"
-//               )}
-//             >
-//               {selected ? selected.label : placeholder || "Select..."}
-//             </span>
-//           )}
-//         </div>
-
-//         <ArrowDown2
-//           size={18}
-//           color="#6B7280"
-//           className={cn(
-//             "transition-transform duration-150 shrink-0",
-//             open ? "rotate-180" : ""
-//           )}
-//         />
-//       </div>
-
-//       {/* --- Dropdown Menu --- */}
-//       {open && !disabled && (
-//         <div className="absolute z-20 mt-1 w-full rounded-xl border border-neutral-200 bg-[#F5F5F5] py-2 shadow-lg">
-//           <div className="max-h-56 overflow-auto py-1">
-//             {/* Render Filtered Options */}
-//             {filteredOptions.length > 0 ? (
-//               filteredOptions.map((opt) => (
-//                 <button
-//                   key={opt.value}
-//                   type="button"
-//                   onClick={(e) => {
-//                     e.stopPropagation();
-//                     onChange?.(opt.value);
-//                     setOpen(false);
-//                   }}
-//                   className={cn(
-//                     "flex w-[95%] mx-auto items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-white",
-//                     value === opt.value && "bg-white font-medium"
-//                   )}
-//                 >
-//                   {opt.icon && (
-//                     <span className="shrink-0 flex items-center">{opt.icon}</span>
-//                   )}
-//                   <span className="text-[15px] text-[#262626] py-1">{opt.label}</span>
-//                 </button>
-//               ))
-//             ) : !showCreate ? (
-//                <div className="px-4 py-3 text-sm text-neutral-400 text-center">
-//                  No results found
-//                </div>
-//             ) : null}
-
-//             {/* Render "Create Option" if applicable */}
-//             {showCreate && (
-//               <button
-//                 type="button"
-//                 onClick={(e) => {
-//                   e.stopPropagation();
-//                   onChange?.(query); // Pass the raw query as the new value
-//                   setOpen(false);
-//                 }}
-//                 className="flex w-[95%] mx-auto items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-white text-[#0052FF]"
-//               >
-//                 <Add size="16" className="text-[#0052FF]" />
-//                 <span className="font-medium">Use "{query}"</span>
-//               </button>
-//             )}
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default Select;

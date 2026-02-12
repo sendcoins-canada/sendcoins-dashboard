@@ -24,10 +24,9 @@ import { useCrayfiAccount } from "@/store/hooks/useGetAccount";
 const SendFlow: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
+  const [transactionId, setTransactionId] = useState<string>("");
   const isFiatRoute = location.pathname.includes('send-fiat');
   
-
   // flow state
   const [isSendModalOpen, setIsSendModalOpen] = useState(false); // if triggered from Home
   const [step, setStep] = useState<"options" | "select-asset" | "recipient" | "amount" | "confirm" | "fiat-country"
@@ -174,6 +173,7 @@ useEffect(() => {
           narration: notes,
         });
         if (result.isSuccess) {
+          setTransactionId(result.data?.id || result.data?.transactionHash || "TRX-" + Date.now());
           setStep("success");
         }
       } else {
@@ -224,6 +224,14 @@ useEffect(() => {
         }}        
         onSecondaryClick={() => navigate("/dashboard/home")}
         backgroundColor="#35FD82"
+        transactionDetails={{
+        id: transactionId,
+        amount: amount,
+        asset: selectedAsset || "",
+        recipientName: recipient.name,
+        recipientAddress: recipient.address,
+        recipientNetwork: destinationLabel,
+      }}
         iconColor="#0647F7"
       />
     );

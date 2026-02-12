@@ -88,6 +88,12 @@ const defaultFiatBalance = useMemo(() => {
   const handleToggle = () => {
     setShowBalance((prev) => !prev);
   };
+  // swap
+  const [isSwapped, setIsSwapped] = useState(false);
+
+const handleSwap = () => {
+  setIsSwapped(!isSwapped);
+};
 
   return (
     <DashboardLayout>
@@ -104,9 +110,10 @@ const defaultFiatBalance = useMemo(() => {
                 <ArrowDown2 size="14" color="#262626" className="inline" />
                 </h3>
              
-              <p className="text-[28px] text-[#777777]">
+              {/* <p className="text-[28px] text-[#777777]">
                 <span className="text-primary text-5xl">
-                  {showBalance
+                  {showBalance ? (
+                    isSwapped
                     ? String(displayedBalance.amount).replace('$', '') 
                     : <span className="text-[#D2D2D2]"> ***** </span>}
                 </span>
@@ -116,7 +123,38 @@ const defaultFiatBalance = useMemo(() => {
                   ? String(displayedBalance.usd)
                   : "*******"}
                 <ArrowSwapVertical size="14" color="black" variant="Outline" className="inline ml-2" />
-              </p>
+              </p> */}
+              <div className="flex flex-col">
+  <p className="text-[28px] text-[#777777]">
+    <span className="text-primary text-5xl">
+      {showBalance ? (
+        isSwapped 
+          ? String(displayedBalance.usd).replace('$', '') 
+          : String(displayedBalance.amount).replace('$', '')
+      ) : (
+        <span className="text-[#D2D2D2]"> ***** </span>
+      )}
+    </span>
+    {/* Optional: Add currency suffix if needed, e.g., {isSwapped ? 'USD' : 'NGN'} */}
+  </p>
+
+  <p className="text-gray-400 text-sm mt-1 flex items-center">
+    {showBalance ? (
+      isSwapped 
+        ? String(displayedBalance.amount) 
+        : String(displayedBalance.usd)
+    ) : (
+      "*******"
+    )}
+    <ArrowSwapVertical 
+      size="14" 
+      color="black" 
+      variant="Outline" 
+      className="inline ml-2 cursor-pointer hover:opacity-70 transition-opacity" 
+      onClick={handleSwap}
+    />
+  </p>
+</div>
             </div>
             <button onClick={handleToggle} className="cursor-pointer">
               {showBalance ? (
@@ -176,73 +214,7 @@ const defaultFiatBalance = useMemo(() => {
           </>
         )}
 
-        {/* Transactions Section
-        <div>
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="font-semibold text-gray-800">Recent transaction</h2>
-            {!transactionsLoading && !transactionsError && processedTransactions.length > 0 ? (
-              // <button className="text-sm text-[#0647F7] hover:underline">
-              //   See all
-              // </button>
-              <Button variant={'outline'} onClick={() => navigate('/dashboard/transactions')}>See all</Button>
-            )}
-          </div>
-
-          {!transactionsLoading && !transactionsError && processedTransactions.length > 0 ? (
-            <div className="">
-              {transactions.map((tx) => (
-                <div
-                  key={tx.id}
-                  className="flex justify-between items-center py-3 px-2"
-                >
-                  <div className="flex items-center space-x-3 gap-2">
-                    <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center relative ${tx.color}`}
-                    >
-                      <span className="text-xs font-semibold text-gray-700">
-                        {tx.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </span>
-                      <div className={`${tx.tagColor} p-1 rounded-full absolute left-8 top-6`}>
-
-                        <TransmitSqaure2 size="14" color="#697689" variant="Outline" className="" />
-                      </div>
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-800 text-sm md:text-base">{tx.name}</p>
-                      <p
-                        className={`text-xs md:text-sm ${tx.textColor}  mt-1`}
-                      >
-                        {tx.status}
-                        <span className="text-gray-400 ml-1">. {tx.time}</span>
-                      </p>
-                    </div>
-                  </div>
-                  <p className="text-primary text-sm md:text-base">{tx.amount}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center p-10 bg-white rounded-xl">
-              <img
-                src={Search}
-                alt="No transactions"
-                className="w-12 h-12 opacity-50 mb-3"
-              />
-              <p className="text-gray-500 text-sm">No transactions yet</p>
-              <p className="text-gray-400 text-xs mt-1 text-center">
-                Looks like things are quiet here. Start your first transaction
-                to get things moving.
-              </p>
-              <button className="mt-4 px-5 py-2 bg-[#0647F7] text-white rounded-full hover:bg-blue-700">
-                Fund wallet
-              </button>
-            </div>
-          )}
-        </div> */}
-        {/* Transactions Section */}
+      
 <div>
   <div className="flex justify-between items-center mb-3">
     <h2 className="font-semibold text-primary">Recent transaction</h2>

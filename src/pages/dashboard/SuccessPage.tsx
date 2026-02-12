@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import ConfettiImage from "@/assets/Confetti.svg"; 
 import Verify from "@/assets/verify.svg"
+// import ReceiptActions from "./ReceiptActions";
 
 interface SuccessPageProps {
   title?: string;
@@ -14,6 +15,14 @@ interface SuccessPageProps {
   backgroundColor?: string;
   iconColor?: string;
   showSecondaryButton?: boolean;
+  transactionDetails?: {
+    id: string;
+    amount: string;
+    asset: string;
+    recipientName: string;
+    recipientAddress: string;
+    recipientNetwork: string;
+  };
 }
 
 const SuccessPage: React.FC<SuccessPageProps> = ({
@@ -24,7 +33,8 @@ const SuccessPage: React.FC<SuccessPageProps> = ({
   onPrimaryClick,
   onSecondaryClick,
   backgroundColor = "#00E676",
-  showSecondaryButton = true
+  showSecondaryButton = true,
+  // transactionDetails
   // iconColor = "#0647F7",
 }) => {
   const navigate = useNavigate();
@@ -71,6 +81,22 @@ const SuccessPage: React.FC<SuccessPageProps> = ({
           </Button>
         )}
       </div>
+   {/* Only render ReceiptActions if details exist */}
+      {/* {transactionDetails && (
+        <ReceiptActions 
+          transactionData={{
+            id: transactionDetails.id,
+            amount: transactionDetails.amount,
+            currency: transactionDetails.asset,
+            recipientName: transactionDetails.recipientName,
+            bankCode: transactionDetails.recipientNetwork,
+            accountNumber: transactionDetails.recipientAddress,
+            date: new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' }),
+            time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+          }} 
+        />
+      )} */}
+
     </div>
   );
 };
