@@ -81,6 +81,11 @@ const {
     }
     const recipientGets = Math.max(amountNum - currentGasFee);
     const totalNeeded = amountNum + currentGasFee;
+
+    // Case 1: Insufficient funds for amount itself
+    if (amountNum > walletAvailableBalance) {
+      return { recipientGets, totalDeducted: totalNeeded, status: 'insufficient' };
+    }
     // Case 2: Enough for Amount but NOT Amount + Gas (User is sending Max)
     // We must deduct gas from the amount they entered so the total doesn't exceed balance.
     if (totalNeeded > walletAvailableBalance) {
@@ -92,10 +97,7 @@ const {
          status: 'adjusted' // Inform UI we deducted fees
        };
     }
-    // Case 1: Insufficient funds for amount itself
-    if (amountNum > walletAvailableBalance) {
-      return { recipientGets, totalDeducted: totalNeeded, status: 'insufficient' };
-    }
+    
 
 
 
@@ -189,7 +191,7 @@ const handleContinue = () => {
                 className="w-full bg-transparent outline-none text-[40px] font-semibold text-neutral-900"
               />
 <span className={`text-xs font-bold ${calculation.status === 'insufficient' ? 'text-red-500' : 'text-neutral-500'}`}>
-   Available balance: {walletAvailableBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })} {asset.toUpperCase()}
+   Available balance: {walletAvailableBalance.toLocaleString(undefined, { minimumFractionDigits: isFiat ? 2: 6 })} {asset.toUpperCase()}
   </span>
              
                {calculation.status === 'adjusted' && !error && (

@@ -5,7 +5,7 @@ import type { ConversionResponse } from "@/api/convert";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/onboarding/shared/Header";
 import { Select } from "@/components/ui/select";
-import { Convert, Money, Money2, FlashCircle, ArrowLeft2 } from "iconsax-react";
+import { Convert, Money, Money2, FlashCircle, ArrowLeft2, ArrowSwapVertical } from "iconsax-react";
 import SuccessPage from "@/pages/dashboard/SuccessPage";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
@@ -17,7 +17,7 @@ import NGN from '@/assets/nigerianflag.svg'
 const ConvertFlow: React.FC = () => {
   const navigate = useNavigate();
   const token = useSelector((state: RootState) => state.auth.token?.azer_token);
-const { allBalances, loading } = useSelector((state: RootState) => state.wallet);
+  const { allBalances, loading } = useSelector((state: RootState) => state.wallet);
   // Step management
   const [step, setStep] = useState<"amount" | "details" | "success">("amount");
 
@@ -26,12 +26,13 @@ const { allBalances, loading } = useSelector((state: RootState) => state.wallet)
   // --- Transaction State ---
   const [sendAmount, setSendAmount] = useState("");
   const [receiveAmount, setReceiveAmount] = useState("");
-  
+
   // We store the Symbols (e.g., "BTC", "NGN")
-  const [selectedSourceSymbol, setSelectedSourceSymbol] = useState<string>(""); 
+  const [selectedSourceSymbol, setSelectedSourceSymbol] = useState<string>("");
   const [selectedDestSymbol, setSelectedDestSymbol] = useState<string>("");
 
   // --- Quote State ---
+  const [timeLeft, setTimeLeft] = useState(30);
   const [isFetchingQuote, setIsFetchingQuote] = useState(false);
   const [quoteDetails, setQuoteDetails] = useState({
     exchangeRate: "0",
@@ -50,14 +51,14 @@ const { allBalances, loading } = useSelector((state: RootState) => state.wallet)
     address: "0x89f8...a1C3",
   };
 
-// --- 2. Derive Wallets from Redux ---
+  // --- 2. Derive Wallets from Redux ---
   // Safely convert the balances object into an array
   const wallets = React.useMemo(() => {
     const balancesObj = allBalances?.data?.balances as Record<string, WalletBalance> | undefined;
     if (!balancesObj) return [];
 
-return Object.values(balancesObj).filter((w: any) => w.isWalletAvailable === true);  
-}, [allBalances]);
+    return Object.values(balancesObj).filter((w: any) => w.isWalletAvailable === true);
+  }, [allBalances]);
 
   const fiatWallets = React.useMemo(() => {
     // Access the fiatAccounts array from your console log structure
@@ -74,72 +75,138 @@ return Object.values(balancesObj).filter((w: any) => w.isWalletAvailable === tru
     }
     // Default Dest: First Fiat Account
     if (fiatWallets.length > 0 && !selectedDestSymbol) {
-       // Assuming fiat account has 'currency' or 'symbol' property
+      // Assuming fiat account has 'currency' or 'symbol' property
       setSelectedDestSymbol(fiatWallets[0].currency || fiatWallets[0].symbol);
     }
   }, [wallets, selectedSourceSymbol, selectedDestSymbol]);
 
   // --- Helpers to get full objects ---
   const selectedSourceWallet = wallets.find(w => w.symbol === selectedSourceSymbol);
-const selectedDestWallet = fiatWallets.find(w => w.currency === selectedDestSymbol);// --- 2. Live Quote Calculation (Debounced) ---
+  const selectedDestWallet = fiatWallets.find(w => w.currency === selectedDestSymbol);// --- 2. Live Quote Calculation (Debounced) ---
+  console.log(selectedSourceWallet)
+  // useEffect(() => {
+  //   // Reset if input is empty
+  //   if (!sendAmount || isNaN(Number(sendAmount)) || Number(sendAmount) === 0) {
+  //     setReceiveAmount("");
+  //     setQuoteDetails({ exchangeRate: "0", platformFee: "0", destinationAmount: "0", finalAmount: "0" });
+  //     return;
+  //   }
 
+  //   if (!selectedSourceWallet || !selectedDestWallet) return;
+
+  //   // Debounce timer to prevent API spam while typing
+  //   const timer = setTimeout(async () => {
+  //     setIsFetchingQuote(true);
+  //     setError("");
+  //     if (!token) {
+  //       showDanger("Please login again");
+  //       setIsFetchingQuote(false);
+  //       return;
+  //     }
+
+  //     try {
+  //       const network = selectedSourceWallet.network || selectedSourceWallet.name
+  //       // Call the quote endpoint
+  //       const quoteData = await getConvertQuote({
+  //         token,
+  //         sourceAsset: selectedSourceWallet.symbol,
+  //         sourceNetwork: network, // Use fallback if network missing
+  //         sourceAmount: sendAmount,
+  //         destinationCurrency: selectedDestWallet.currency
+  //       });
+
+  //       // Assuming response.data contains these fields based on your previous 'success' response structure
+  //       // Adjust these keys (e.g. quoteData.data.destinationAmount) based on your actual API response shape
+  //       if (quoteData && quoteData.data) {
+  //         const { destinationAmount, exchangeRate, platformFeeAmount, finalAmount } = quoteData.data;
+
+  //         setReceiveAmount(destinationAmount);
+  //         setQuoteDetails({
+  //           exchangeRate: exchangeRate,
+  //           platformFee: platformFeeAmount,
+  //           destinationAmount: destinationAmount,
+  //           finalAmount: finalAmount
+  //         });
+  //       }
+
+  //     } catch (err) {
+  //       console.error("Failed to get quote", err);
+  //       // Optional: don't block the UI with an error alert while typing, just log it
+  //       // or set a subtle inline error
+  //     } finally {
+  //       setIsFetchingQuote(false);
+  //     }
+  //   }, 500); // 500ms delay
+
+  //   return () => clearTimeout(timer);
+  // }, [sendAmount, selectedSourceSymbol, selectedDestSymbol, selectedSourceWallet, selectedDestWallet, token]);
+  // 3. Store the successful conversion response
+
+  // --- Helper for Quote Fetching ---
+  const fetchQuote = async (amount: string) => {
+    if (!amount || isNaN(Number(amount)) || Number(amount) === 0) return;
+    if (!selectedSourceWallet || !selectedDestWallet || !token) return;
+
+    setIsFetchingQuote(true);
+    try {
+      const network = selectedSourceWallet.network || selectedSourceWallet.name;
+      const quoteData = await getConvertQuote({
+        token,
+        sourceAsset: selectedSourceWallet.symbol,
+        sourceNetwork: network,
+        sourceAmount: amount,
+        destinationCurrency: selectedDestWallet.currency
+      });
+
+      if (quoteData && quoteData.data) {
+        const { destinationAmount, exchangeRate, platformFeeAmount, finalAmount } = quoteData.data;
+        setReceiveAmount(destinationAmount);
+        setQuoteDetails({
+          exchangeRate,
+          platformFee: platformFeeAmount,
+          destinationAmount,
+          finalAmount
+        });
+        setTimeLeft(30);
+      }
+    } catch (err) {
+      console.error("Failed to refresh quote", err);
+    } finally {
+      setIsFetchingQuote(false);
+    }
+  };
+
+  // --- 1. Debounced Quote Effect (User Typing) ---
   useEffect(() => {
-    // Reset if input is empty
-    if (!sendAmount || isNaN(Number(sendAmount)) || Number(sendAmount) === 0) {
+    if (!sendAmount) {
       setReceiveAmount("");
-      setQuoteDetails({ exchangeRate: "0", platformFee: "0", destinationAmount: "0", finalAmount:"0" });
+      setQuoteDetails({ exchangeRate: "0", platformFee: "0", destinationAmount: "0", finalAmount: "0" });
       return;
     }
 
-    if (!selectedSourceWallet || !selectedDestWallet) return;
-
-    // Debounce timer to prevent API spam while typing
-    const timer = setTimeout(async () => {
-      setIsFetchingQuote(true);
-      setError("");
-      if (!token) {
-  showDanger("Please login again");
-  setIsFetchingQuote(false);
-  return;
-}
-
-      try {
-       const network = selectedSourceWallet.network || selectedSourceWallet.name 
-        // Call the quote endpoint
-        const quoteData = await getConvertQuote({
-          token ,
-          sourceAsset: selectedSourceWallet.symbol,
-          sourceNetwork: network, // Use fallback if network missing
-          sourceAmount: sendAmount,
-          destinationCurrency: selectedDestWallet.currency
-        });
-
-        // Assuming response.data contains these fields based on your previous 'success' response structure
-        // Adjust these keys (e.g. quoteData.data.destinationAmount) based on your actual API response shape
-        if (quoteData && quoteData.data) {
-           const { destinationAmount, exchangeRate, platformFeeAmount, finalAmount } = quoteData.data;
-           
-           setReceiveAmount(destinationAmount);
-           setQuoteDetails({
-             exchangeRate: exchangeRate,
-             platformFee: platformFeeAmount,
-             destinationAmount: destinationAmount,
-             finalAmount: finalAmount
-           });
-        }
-
-      } catch (err) {
-        console.error("Failed to get quote", err);
-        // Optional: don't block the UI with an error alert while typing, just log it
-        // or set a subtle inline error
-      } finally {
-        setIsFetchingQuote(false);
-      }
-    }, 500); // 500ms delay
+    const timer = setTimeout(() => {
+      fetchQuote(sendAmount);
+    }, 500);
 
     return () => clearTimeout(timer);
-  }, [sendAmount, selectedSourceSymbol, selectedDestSymbol, selectedSourceWallet, selectedDestWallet, token]);
-  // 3. Store the successful conversion response
+  }, [sendAmount, selectedSourceSymbol, selectedDestSymbol]);
+
+  // --- 2. 30-Second Auto-Refresh Effect ---
+  useEffect(() => {
+    if (step !== "amount" || !sendAmount || Number(sendAmount) <= 0) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          fetchQuote(sendAmount); // Trigger refresh at 0
+          return 30;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [step, sendAmount, selectedSourceSymbol, selectedDestSymbol]);
   const [_successData, setSuccessData] = useState<ConversionResponse['data'] | null>(null);
 
   const handleContinue = () => {
@@ -155,7 +222,7 @@ const selectedDestWallet = fiatWallets.find(w => w.currency === selectedDestSymb
       return;
     }
     setError("");
-        setStep("details");
+    setStep("details");
 
     // setWalletModalOpen(true);
   };
@@ -176,9 +243,9 @@ const selectedDestWallet = fiatWallets.find(w => w.currency === selectedDestSymb
     setError("");
 
     if (!token) {
-  showDanger("Please login again");
-  return;
-}
+      showDanger("Please login again");
+      return;
+    }
 
     try {
       // const authToken = localStorage.getItem("token") || "";
@@ -189,16 +256,17 @@ const selectedDestWallet = fiatWallets.find(w => w.currency === selectedDestSymb
         sourceAsset: selectedSourceWallet.symbol,   // e.g., 'eth'
         sourceNetwork: network,            // e.g., 'ethereum' (from API)
         sourceAmount: sendAmount,
-        destinationCurrency: selectedDestWallet.symbol // e.g., 'ngn'
+        destinationCurrency: selectedDestSymbol // e.g., 'ngn'
       });
 
-if (response.success && response.data) {
+      if (response.success && response.data) {
         // 6. Save the actual backend response data
         setSuccessData(response.data);
         setStep("success");
       } else {
         setError("Conversion failed. No data returned.");
-      }    } catch (err: any) {
+      }
+    } catch (err: any) {
       console.error("Conversion failed:", err);
       setError(err.response?.data?.message || "Conversion failed. Please try again.");
     } finally {
@@ -236,12 +304,12 @@ if (response.success && response.data) {
               </div>
               <h2 className="md:text-2xl font-semibold text-center mx-auto w-fit">Transaction details</h2>
             </div>
-            
+
             <Convert size="64" color="#0647F7" variant="Bold" className="text-center mx-auto mb-4" />
             <p className="text-[28px] font-semibold mb-4">
               {sendAmount} {selectedSourceSymbol} → {receiveAmount || "..."} {selectedDestSymbol}
             </p>
-            
+
             {error && <div className="mb-4 p-3 bg-red-50 text-red-500 rounded-lg text-sm">{error}</div>}
 
             <div className="p-2 rounded-2xl bg-[#F5F5F5]">
@@ -317,7 +385,7 @@ if (response.success && response.data) {
           </div>
 
           <div className="bg-[#F5F5F5] rounded-2xl shadow-sm pb-5 pt-2 px-2 space-y-2">
-            
+
             {/* FROM: Select Coin */}
             <div className="bg-white rounded-2xl border border-neutral-200 px-4 py-3">
               <div className="flex justify-between items-center mb-2">
@@ -339,13 +407,33 @@ if (response.success && response.data) {
                   />
                 )}
               </div>
-              <input 
-                type="number" 
-                value={sendAmount} 
-                onChange={(e) => setSendAmount(e.target.value)} 
-                placeholder="0.00" 
-                className="w-full bg-transparent outline-none text-[40px] font-semibold" 
+              <input
+                type="number"
+                value={sendAmount}
+                onChange={(e) => setSendAmount(e.target.value)}
+                placeholder="0.00"
+                className="w-full bg-transparent outline-none text-[40px] font-semibold"
               />
+              {/* WALLET BALANCE DISPLAY */}
+              <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-50">
+                <div className="flex flex-col">
+                  <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Available Balance</p>
+                  <p className="text-sm font-semibold text-gray-700">
+                    {selectedSourceWallet?.totalAvailableBalance} {selectedSourceSymbol.toUpperCase()}
+                    <span className="text-gray-400 font-normal ml-2">
+                      ≈ {selectedSourceWallet?.TotalAvailableBalancePrice || "0.00"}
+                    </span>
+                  </p>
+                </div>
+                {/* Max Button Helper */}
+                <button
+                  onClick={() => setSendAmount(selectedSourceWallet?.totalAvailableBalance.toString() || "")}
+                  className="text-[10px] bg-primaryblue/10 text-primaryblue px-2 py-1 rounded font-bold hover:bg-primaryblue/20 transition-colors"
+                >
+                  MAX
+                </button>
+              </div>
+
               {error && <p className="text-xs text-danger mt-1 font-medium">{error}</p>}
             </div>
 
@@ -363,7 +451,7 @@ if (response.success && response.data) {
                       value: wallet.currency,
                       label: wallet.currency.toUpperCase(),
                       // Use logo from wallet object
-                      icon: <img src={wallet.logo || NGN } alt={wallet.symbol} className="w-4 h-4 object-contain rounded-full" />,
+                      icon: <img src={wallet.logo || NGN} alt={wallet.symbol} className="w-4 h-4 object-contain rounded-full" />,
                     }))}
                     className="w-[150px]"
                     disabled={loading}
@@ -371,19 +459,33 @@ if (response.success && response.data) {
                 )}
               </div>
               <div className="flex flex-col">
-              <input 
-                type="number" 
-                value={receiveAmount} 
-                onChange={(e) => setReceiveAmount(e.target.value)} 
-                placeholder="0.00" 
-                className="w-full bg-transparent outline-none text-[40px] font-semibold text-neutral-400" 
-              />
-              {isFetchingQuote && (
-                   <span className="text-xs text-primaryblue px-2">
-                     Calculating...
-                   </span>
-                )}
+                <input
+                  type="number"
+                  value={receiveAmount}
+                  onChange={(e) => setReceiveAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full bg-transparent outline-none text-[40px] font-semibold text-neutral-400"
+                />
+                <div className="flex items-center justify-between mt-1">
+                  {isFetchingQuote ? (
+                    <span className="text-[10px] text-primaryblue font-bold animate-pulse">
+                      UPDATING RATE...
+                    </span>
+                  ) : (
+                    <div className="flex items-center gap-1.5 ml-auto">
+                      <div
+                        className={`
+  w-1.5 h-1.5 rounded-full animate-pulse
+  ${timeLeft < 10 ? "bg-orange-500" : "bg-green-500"}
+`}
+                      />
+                      <span className="text-[10px] font-medium text-gray-500">
+                        Rate refreshes in <span className="font-bold text-gray-700">{timeLeft}s</span>
+                      </span>
+                    </div>
+                  )}
                 </div>
+              </div>
             </div>
 
             {/* Summary */}
@@ -408,7 +510,7 @@ if (response.success && response.data) {
               <FlashCircle size="16" color="#34C759" variant="Bold" /> Usually takes less than 2 minutes
             </p>
             <div className="flex justify-center mt-5">
-              <Button onClick={handleContinue} className="rounded-full bg-[#0052FF] hover:bg-[#0040CC] text-white px-10 py-2">Continue</Button>
+              <Button onClick={handleContinue} className="rounded-full bg-[#0052FF] hover:bg-[#0040CC] text-white px-10 py-2" disabled={isFetchingQuote}>Continue</Button>
             </div>
           </div>
         </div>
