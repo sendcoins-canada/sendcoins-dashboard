@@ -235,12 +235,20 @@ const handleSwap = () => {
   {!transactionsLoading && !transactionsError && fetchedTransactions.length > 0 ? (
   <div className="">
     {fetchedTransactions.map((tx) => {
-      // --- LOGIC TO DERIVE UI PROPS FROM RAW DATA ---
       
       // 1. Determine Display Name
       // If it's a payout (outgoing), show recipient. If deposit (incoming), show sender.
-      const displayName = tx.recipient_name || tx.sender_name || "Unknown Transaction";
-
+      let displayName = tx.recipient_name || tx.sender_name;
+if (!displayName) {
+  // Check if it's a conversion using the reference prefix or metadata
+  if (tx.reference?.startsWith('conv_') || tx.description?.toLowerCase().includes('conversion')) {
+    const source = tx.metadata?.sourceAsset || "Crypto";
+    const dest = tx.asset || "Fiat";
+    displayName = `${source} to ${dest} Conversion`;
+  } else {
+    displayName = "Unknown Transaction";
+  }
+}
       // 2. Determine Status Colors
       let statusColor = "text-yellow-500"; // Default pending
       let bgColor = "bg-yellow-100";
