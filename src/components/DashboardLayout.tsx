@@ -187,7 +187,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                     </div>
 
                     <div className="w-full space-y-1 text-sm text-left text-primary">
-                      <div className="flex items-center gap-2 hover:bg-[#F5F5F5] rounded-md hover:text-black p-2">
+                      <div className="flex items-center gap-2 hover:bg-[#F5F5F5] rounded-md hover:text-black p-2" onClick={() => navigate('/CTA')}>
                         <ShieldTick size="18" color="#777777" /> KYC
                       </div>
                       <div

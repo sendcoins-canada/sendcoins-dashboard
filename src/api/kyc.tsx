@@ -28,3 +28,27 @@ export const updateKycStatus = async (params: KycStatusParams) => {
 
   return response.data;
 };
+
+// Define the interface for profile update
+export interface UpdateProfileParams {
+  token: string;
+  bvn: string;
+}
+
+export const updateUserProfile = async (params: UpdateProfileParams) => {
+  const formData = new FormData();
+  formData.append("token", params.token);
+  formData.append("bvn", params.bvn);
+
+  const response = await api.put(
+    "/user/profile", 
+    formData, 
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return response.data;
+};

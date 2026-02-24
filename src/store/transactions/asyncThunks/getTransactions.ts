@@ -1,13 +1,12 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { getTransactions } from "@/api/transactions";
+import { getTransactions, type TransactionFilterParams } from "@/api/transactions";
 
 
 export const getTransactionsThunk = createAsyncThunk(
   "transaction/getTransactions",
-  async (data: { token: string}, { rejectWithValue }) => {
+  async (params: TransactionFilterParams, { rejectWithValue }) => {
     try {
-        const { token } = data
-      const res = await getTransactions(token);
+      const res = await getTransactions(params);
       
       return res;
     } catch (err: any) {
