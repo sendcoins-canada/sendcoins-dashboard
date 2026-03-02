@@ -1,27 +1,37 @@
-import {useState} from "react";
+import {useRef, useState} from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import Header from "@/components/onboarding/shared/Header";
 import { ArrowLeft2, ShieldTick } from "iconsax-react";
-import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch, RootState } from "@/store";
-import { updateKycStatus, updateUserProfile } from "@/api/kyc"; // Import the API function
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
+import { updateUserProfile } from "@/api/kyc"; // Import the API function
 import { showSuccess, showDanger } from "@/components/ui/toast";
 // You might want to import an action to refresh user profile here if needed
-import { fetchUser } from "@/store/user/asyncRequests/fetchUser";
+// import { fetchUser } from "@/store/user/asyncRequests/fetchUser";
 import Modal from "@/components/ui/Modal";
 
 const CTA = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch<AppDispatch>();
-  const [_loading, setLoading] = useState(false);
+  // const dispatch = useDispatch<AppDispatch>();
+  // const [_loading, setLoading] = useState(false);
   const token = useSelector((state: RootState) => state.auth.token?.azer_token);
+
+  const metamapRef = useRef<HTMLElement | null>(null);
+
+  const handleCompleteKyc = () => {
+    console.log('pressed')
+    // 2. Trigger the SDK
+    if (metamapRef.current) {
+      metamapRef.current.click();
+    }
+  };
   // 1. Get User Data from Redux
   // Casting to 'any' to safely handle the nested structure found in previous steps
   const userSlice = useSelector((state: RootState) => state.user) as any;
   const userData = userSlice?.user?.data;
-  console.log(userData)
+  // console.log(userData)
   
   // 2. Check if PIN exists
   const hasPin = userData?.isPinAvailable?.found === true;
@@ -29,7 +39,7 @@ const CTA = () => {
   const isBvnMissing = !userData?.bvn || userData?.bvn === "";
 
   // Extract Keychain (Priority: PIN data -> User data -> Hardcoded Fallback)
-  const userKeychain = "7a36424ffd798afa36c52eebcdb702225be0c71f12754cabd8989592523ab458"
+  // const userKeychain = "7a36424ffd798afa36c52eebcdb702225be0c71f12754cabd8989592523ab458"
   // const userKeychain = userData?.isPinAvailable?.data?.[0]?.keychain || userData?.keychain || "3yu120lbys";
 // Inside CTA Component
 const [isBvnModalOpen, setIsBvnModalOpen] = useState(false);
@@ -74,36 +84,36 @@ const handleBvnSubmit = async () => {
   }
 };
   // 3. Handle KYC Update
-  const handleCompleteKyc = async () => {
-    if (!token) {
-      showDanger("Authentication token missing. Please login again.");
-      return;
-    }
+  // const handleCompleteKyc = async () => {
+  //   if (!token) {
+  //     showDanger("Authentication token missing. Please login again.");
+  //     return;
+  //   }
 
-    setLoading(true);
-    try {
-      // Hardcoding status to 'verified' as requested
-      await updateKycStatus({
-        token,
-        keychain: userKeychain, 
-        status: "verified" 
-      });
+  //   setLoading(true);
+  //   try {
+  //     // Hardcoding status to 'verified' as requested
+  //     await updateKycStatus({
+  //       token,
+  //       keychain: userKeychain, 
+  //       status: "verified" 
+  //     });
 
-      showSuccess("KYC verification completed successfully!");
+  //     showSuccess("KYC verification completed successfully!");
       
-      // Optional: Refresh user data here so the UI updates immediately
-      dispatch(fetchUser());
+  //     // Optional: Refresh user data here so the UI updates immediately
+  //     dispatch(fetchUser());
 
-      // Navigate to dashboard or refresh page
-      navigate("/dashboard/home");
+  //     // Navigate to dashboard or refresh page
+  //     navigate("/dashboard/home");
       
-    } catch (error: any) {
-      console.error(error);
-      showDanger(error.response?.data?.message || "Failed to update KYC status.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  //   } catch (error: any) {
+  //     console.error(error);
+  //     showDanger(error.response?.data?.message || "Failed to update KYC status.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   return (
     <>
@@ -161,6 +171,7 @@ const handleBvnSubmit = async () => {
             {!isVerified && (
               <button
                 onClick={handleCompleteKyc}
+                // onClick={() => navigate('/address')}
                 className="w-full flex items-center justify-between bg-gray-100 p-4 rounded-xl cursor-pointer hover:bg-gray-200 transition-colors"
               >
                 <div className="text-left">
@@ -220,6 +231,14 @@ const handleBvnSubmit = async () => {
   </div>
 </Modal>
     </div>
+    {/* 3. Hidden MetaMap component */}
+      {/* @ts-ignore */}
+      <metamap-button
+        ref={metamapRef}
+        clientid={import.meta.env.VITE_METAMAP_CLIENT_ID}
+        flowid={import.meta.env.VITE_METAMAP_FLOW_ID}
+        style={{ display: "none" }}
+      />
     </>
   );
 };

@@ -169,10 +169,10 @@ const handleSwap = () => {
             <button onClick={() => setIsFundingOpen(true)} className="flex items-center space-x-2 px-[20px] py-[12px] bg-primaryblue text-white rounded-full hover:bg-blue-700 cursor-pointer">
               <span>Fund</span><Add size={16} color="white" />
             </button>
-            <button onClick={() => setIsSendModalOpen(true)} className="flex items-center space-x-2 px-[20px] py-[12px] bg-bggray hover:bg-[#777777]  text-primary rounded-full cursor-pointer">
+            <button onClick={() => setIsSendModalOpen(true)} className="flex items-center space-x-2 px-[20px] py-[12px] bg-bggray hover:bg-gray-200 text-primary rounded-full cursor-pointer">
               <span>Send</span> <Send2 size={16} color="black" />
             </button>
-            <button onClick={() => navigate('/dashboard/convert')} className="flex items-center space-x-2 px-[20px] py-[12px] bg-bggray hover:bg-[#777777] text-primary rounded-full cursor-pointer">
+            <button onClick={() => navigate('/dashboard/convert')} className="flex items-center space-x-2 px-[20px] py-[12px] bg-bggray hover:bg-gray-200 text-primary rounded-full cursor-pointer">
               <span>Convert</span><Convert size={16} color="black" />
             </button>
           </div>
@@ -242,9 +242,9 @@ const handleSwap = () => {
 if (!displayName) {
   // Check if it's a conversion using the reference prefix or metadata
   if (tx.reference?.startsWith('conv_') || tx.description?.toLowerCase().includes('conversion')) {
-    const source = tx.metadata?.sourceAsset || "Crypto";
+    const source = (tx.metadata?.sourceAsset) || "Crypto";
     const dest = tx.asset || "Fiat";
-    displayName = `${source} to ${dest} Conversion`;
+    displayName = `${source.toUpperCase()} to ${dest.toUpperCase()} Conversion`
   } else {
     displayName = "Unknown Transaction";
   }
@@ -295,7 +295,7 @@ if (!displayName) {
               className={`w-12 h-12 rounded-full flex items-center justify-center relative ${bgColor}`}
             >
               {/* Initials */}
-              <span className="text-xs font-semibold text-gray-700">
+              <span className="text-xs font-semibold text-gray-700 ">
                 {displayName
                   .split(" ")
                   .slice(0, 2) // Limit to 2 initials
@@ -313,7 +313,7 @@ if (!displayName) {
             {/* Text Details */}
             <div>
               <p className="font-medium text-gray-800 text-sm md:text-base capitalize">
-                {displayName.toLowerCase()}
+                {displayName}
               </p>
               <p className={`text-xs md:text-sm ${statusColor} mt-1 capitalize`}>
                 {tx.status}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { TextInputField } from "@/components/ui/form";
@@ -26,7 +26,14 @@ const schema = Yup.object({
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  const { loading } = useSelector((state: RootState) => state.auth);
+  const { loading, token } = useSelector((state: RootState) => state.auth);
+console.log(token)
+  // 3. Add this effect to handle the redirect
+  useEffect(() => {
+    if (token) {
+      navigate("/dashboard/home", { replace: true });
+    }
+  }, [token, navigate]);
 
   const handleLogin = async (values: { email: string; password: string }) => {
      if (!values.email || !values.password) {
