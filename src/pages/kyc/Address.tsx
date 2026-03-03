@@ -24,8 +24,6 @@ const AddressSchema = Yup.object().shape({
 const Address: React.FC = () => {
   const navigate = useNavigate();
   const metamapRef = useRef<HTMLElement | null>(null);
-  const userSlice = useSelector((state: RootState) => state.user) as any;
-  const userData = userSlice?.user?.data;
   const token = useSelector((state: RootState) => state.auth.token?.azer_token);
   const [metaMapConfig, setMetaMapConfig] = useState<{
     clientId: string;
