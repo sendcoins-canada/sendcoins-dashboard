@@ -8,6 +8,8 @@ import Input from "@/components/ui/input"; // your custom Input component
 import { toast } from "sonner";
 // import MetaMapVerify from "@/components/Metamap";
 import Header from "@/components/onboarding/shared/Header";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
 
 // ✅ Validation schema
 const AddressSchema = Yup.object().shape({
@@ -20,7 +22,15 @@ const AddressSchema = Yup.object().shape({
 
 const Address: React.FC = () => {
   const navigate = useNavigate();
-   const metamapRef = useRef<HTMLElement | null>(null);
+  const metamapRef = useRef<HTMLElement | null>(null);
+  const userSlice = useSelector((state: RootState) => state.user) as any;
+  const userData = userSlice?.user?.data;
+  const metamapMetadata = JSON.stringify({
+    email: userData?.user_email,
+    userId: userData?.api_key,
+    firstName: userData?.first_name,
+    lastName: userData?.last_name,
+  });
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-white px-6 py-8">
@@ -136,6 +146,7 @@ const Address: React.FC = () => {
             ref={metamapRef}
             clientid={import.meta.env.VITE_METAMAP_CLIENT_ID}
             flowid={import.meta.env.VITE_METAMAP_FLOW_ID}
+            metadata={metamapMetadata}
             style={{ display: "none" }}
           >
             {/* @ts-ignore */}

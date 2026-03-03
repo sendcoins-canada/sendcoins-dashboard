@@ -31,6 +31,12 @@ const CTA = () => {
   // Casting to 'any' to safely handle the nested structure found in previous steps
   const userSlice = useSelector((state: RootState) => state.user) as any;
   const userData = userSlice?.user?.data;
+  const metamapMetadata = JSON.stringify({
+    email: userData?.user_email,
+    userId: userData?.api_key,
+    firstName: userData?.first_name,
+    lastName: userData?.last_name,
+  });
   // console.log(userData)
   
   // 2. Check if PIN exists
@@ -237,6 +243,7 @@ const handleBvnSubmit = async () => {
         ref={metamapRef}
         clientid={import.meta.env.VITE_METAMAP_CLIENT_ID}
         flowid={import.meta.env.VITE_METAMAP_FLOW_ID}
+        metadata={metamapMetadata}
         style={{ display: "none" }}
       />
     </>
