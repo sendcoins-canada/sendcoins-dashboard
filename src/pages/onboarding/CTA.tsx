@@ -1,4 +1,4 @@
-import {useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
@@ -6,7 +6,7 @@ import Header from "@/components/onboarding/shared/Header";
 import { ArrowLeft2, ShieldTick } from "iconsax-react";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
-import { updateUserProfile } from "@/api/kyc"; // Import the API function
+import { updateUserProfile, getMetaMapConfig } from "@/api/kyc";
 import { showSuccess, showDanger } from "@/components/ui/toast";
 // You might want to import an action to refresh user profile here if needed
 // import { fetchUser } from "@/store/user/asyncRequests/fetchUser";
@@ -17,11 +17,21 @@ const CTA = () => {
   // const dispatch = useDispatch<AppDispatch>();
   // const [_loading, setLoading] = useState(false);
   const token = useSelector((state: RootState) => state.auth.token?.azer_token);
+  const [metaMapConfig, setMetaMapConfig] = useState<{
+    clientId: string;
+    flowId: string;
+    metadata: string;
+  } | null>(null);
+  const [loadingMetaMapConfig, setLoadingMetaMapConfig] = useState(false);
 
   const metamapRef = useRef<HTMLElement | null>(null);
 
   const handleCompleteKyc = () => {
-    console.log('pressed')
+    console.log("pressed");
+    if (!metaMapConfig) {
+      showDanger("Verification is not ready yet. Please try again in a moment.");
+      return;
+    }
     // 2. Trigger the SDK
     if (metamapRef.current) {
       metamapRef.current.click();
@@ -31,12 +41,6 @@ const CTA = () => {
   // Casting to 'any' to safely handle the nested structure found in previous steps
   const userSlice = useSelector((state: RootState) => state.user) as any;
   const userData = userSlice?.user?.data;
-  const metamapMetadata = JSON.stringify({
-    email: userData?.user_email,
-    userId: userData?.api_key,
-    firstName: userData?.first_name,
-    lastName: userData?.last_name,
-  });
   // console.log(userData)
   
   // 2. Check if PIN exists
@@ -47,12 +51,36 @@ const CTA = () => {
   // Extract Keychain (Priority: PIN data -> User data -> Hardcoded Fallback)
   // const userKeychain = "7a36424ffd798afa36c52eebcdb702225be0c71f12754cabd8989592523ab458"
   // const userKeychain = userData?.isPinAvailable?.data?.[0]?.keychain || userData?.keychain || "3yu120lbys";
-// Inside CTA Component
-const [isBvnModalOpen, setIsBvnModalOpen] = useState(false);
-const [bvnInput, setBvnInput] = useState("");
-const [isUpdating, setIsUpdating] = useState(false);
+  // Inside CTA Component
+  const [isBvnModalOpen, setIsBvnModalOpen] = useState(false);
+  const [bvnInput, setBvnInput] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
 
-const handleBvnSubmit = async () => {
+  useEffect(() => {
+    const loadConfig = async () => {
+      if (!token) return;
+      try {
+        setLoadingMetaMapConfig(true);
+        const res = await getMetaMapConfig({ token });
+        if (res.success && res.config) {
+          setMetaMapConfig({
+            clientId: res.config.clientId,
+            flowId: res.config.flowId,
+            metadata: JSON.stringify(res.config.metadata),
+          });
+        } else {
+          console.error("Failed to load MetaMap config:", res);
+        }
+      } catch (err) {
+        console.error("Error loading MetaMap config", err);
+      } finally {
+        setLoadingMetaMapConfig(false);
+      }
+    };
+    loadConfig();
+  }, [token]);
+
+  const handleBvnSubmit = async () => {
   if (bvnInput.length !== 11) {
     showDanger("Please enter a valid 11-digit BVN");
     return;
@@ -177,13 +205,15 @@ const handleBvnSubmit = async () => {
             {!isVerified && (
               <button
                 onClick={handleCompleteKyc}
-                // onClick={() => navigate('/address')}
-                className="w-full flex items-center justify-between bg-gray-100 p-4 rounded-xl cursor-pointer hover:bg-gray-200 transition-colors"
+                disabled={loadingMetaMapConfig || !metaMapConfig}
+                className="w-full flex items-center justify-between bg-gray-100 p-4 rounded-xl cursor-pointer hover:bg-gray-200 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <div className="text-left">
                   <h3 className="font-semibold">Complete KYC verification</h3>
                   <p className="text-sm text-gray-500">
-                    We’ll run a quick check to verify your details and keep your account secure.
+                    {loadingMetaMapConfig
+                      ? "Preparing verification, please wait..."
+                      : "We’ll run a quick check to verify your details and keep your account secure."}
                   </p>
                 </div>
                 <ChevronRight className="text-gray-400" />
@@ -239,13 +269,15 @@ const handleBvnSubmit = async () => {
     </div>
     {/* 3. Hidden MetaMap component */}
       {/* @ts-ignore */}
-      <metamap-button
-        ref={metamapRef}
-        clientid={import.meta.env.VITE_METAMAP_CLIENT_ID}
-        flowid={import.meta.env.VITE_METAMAP_FLOW_ID}
-        metadata={metamapMetadata}
-        style={{ display: "none" }}
-      />
+      {metaMapConfig && (
+        <metamap-button
+          ref={metamapRef}
+          clientid={metaMapConfig.clientId}
+          flowid={metaMapConfig.flowId}
+          metadata={metaMapConfig.metadata}
+          style={{ display: "none" }}
+        />
+      )}
     </>
   );
 };

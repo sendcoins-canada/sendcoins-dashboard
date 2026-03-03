@@ -1,4 +1,4 @@
-import React, {useRef} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import Header from "@/components/onboarding/shared/Header";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
+import { getMetaMapConfig } from "@/api/kyc";
 
 // ✅ Validation schema
 const AddressSchema = Yup.object().shape({
@@ -25,12 +26,33 @@ const Address: React.FC = () => {
   const metamapRef = useRef<HTMLElement | null>(null);
   const userSlice = useSelector((state: RootState) => state.user) as any;
   const userData = userSlice?.user?.data;
-  const metamapMetadata = JSON.stringify({
-    email: userData?.user_email,
-    userId: userData?.api_key,
-    firstName: userData?.first_name,
-    lastName: userData?.last_name,
-  });
+  const token = useSelector((state: RootState) => state.auth.token?.azer_token);
+  const [metaMapConfig, setMetaMapConfig] = useState<{
+    clientId: string;
+    flowId: string;
+    metadata: string;
+  } | null>(null);
+
+  useEffect(() => {
+    const loadConfig = async () => {
+      if (!token) return;
+      try {
+        const res = await getMetaMapConfig({ token });
+        if (res.success && res.config) {
+          setMetaMapConfig({
+            clientId: res.config.clientId,
+            flowId: res.config.flowId,
+            metadata: JSON.stringify(res.config.metadata),
+          });
+        } else {
+          console.error("Failed to load MetaMap config (Address):", res);
+        }
+      } catch (err) {
+        console.error("Error loading MetaMap config (Address)", err);
+      }
+    };
+    loadConfig();
+  }, [token]);
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-white px-6 py-8">
@@ -142,15 +164,17 @@ const Address: React.FC = () => {
 </Button>
  {/* Hidden MetaMap button */}
  {/* @ts-ignore */}
-          <metamap-button
-            ref={metamapRef}
-            clientid={import.meta.env.VITE_METAMAP_CLIENT_ID}
-            flowid={import.meta.env.VITE_METAMAP_FLOW_ID}
-            metadata={metamapMetadata}
-            style={{ display: "none" }}
-          >
-            {/* @ts-ignore */}
-          </metamap-button>
+          {metaMapConfig && (
+            <metamap-button
+              ref={metamapRef}
+              clientid={metaMapConfig.clientId}
+              flowid={metaMapConfig.flowId}
+              metadata={metaMapConfig.metadata}
+              style={{ display: "none" }}
+            >
+              {/* @ts-ignore */}
+            </metamap-button>
+          )}
             </Form>
           )}
         </Formik>
