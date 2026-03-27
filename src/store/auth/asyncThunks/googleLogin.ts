@@ -1,9 +1,9 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "@/api/axios";
 import type { AuthToken, User } from "../slice";
 
 interface GoogleLoginPayload {
-  accessToken: string;
+  code: string;
 }
 
 interface GoogleLoginResponse {
@@ -39,21 +39,15 @@ export const googleLoginThunk = createAsyncThunk<
   { rejectValue: string }
 >(
   "auth/googleLogin",
-  async ({ accessToken }, { rejectWithValue }) => {
+  async ({ code }, { rejectWithValue }) => {
     try {
-      if (!accessToken) {
-        return rejectWithValue("No access token provided");
+      if (!code) {
+        return rejectWithValue("No authorization code provided");
       }
 
-      const formData = new FormData();
-      formData.append("accessToken", accessToken);
-
-      const response = await axios.post<GoogleLoginResponse>(
-        "https://api.sendcoins.ca/auth/google",
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
+      const response = await api.post<GoogleLoginResponse>(
+        "/auth/google",
+        { code }
       );
 
       const data = response.data?.data;

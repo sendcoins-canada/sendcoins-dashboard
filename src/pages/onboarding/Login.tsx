@@ -55,22 +55,13 @@ console.log(token)
 
 const handleGoogleSuccess = async (tokenResponse: any) => {
   try {
-    const { access_token } = tokenResponse;
-    if (!access_token) {
-      showDanger("No access token returned from Google");
+    const { code } = tokenResponse;
+    if (!code) {
+      showDanger("No authorization code returned from Google");
       return;
     }
 
-    // Create FormData
-    const formData = new FormData();
-    formData.append("accessToken", access_token);
-
-    // Send FormData to backend
-    const { data } = await api.post("/auth/google", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const { data } = await api.post("/auth/google", { code });
 
     if (data.data.token) {
       dispatch(setCredentials({
