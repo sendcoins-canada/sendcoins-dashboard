@@ -33,7 +33,8 @@ const ForgotVerifyOtp: React.FC = () => {
   };
 
   const code = values.join("");
-  const authHash = localStorage.getItem("forgot_auth_hash") || "";
+  const email = localStorage.getItem("forgot_email") || "";
+  const newPassword = localStorage.getItem("forgot_new_password") || "";
 
   const submit = async () => {
     if (code.length !== OTP_LENGTH) {
@@ -41,24 +42,25 @@ const ForgotVerifyOtp: React.FC = () => {
       return;
     }
 
-    // First verify the OTP
+    // Step 2: Verify OTP with email → get authHash
     const verifyResult = await dispatch(verifyPasswordResetOtpThunk({
-      authHash,
+      email,
       otp: code,
     }));
 
     if (verifyPasswordResetOtpThunk.fulfilled.match(verifyResult)) {
-      // If verification successful, update the password
+      const authHash = verifyResult.payload.authHash;
+
+      // Step 3: Reset password with authHash + newPassword
       const updateResult = await dispatch(updatePasswordWithOtpThunk({
         authHash,
-        otp: code,
+        newPassword,
       }));
 
       if (updatePasswordWithOtpThunk.fulfilled.match(updateResult)) {
         // Clear sensitive data
         localStorage.removeItem("forgot_email");
         localStorage.removeItem("forgot_new_password");
-        localStorage.removeItem("forgot_auth_hash");
         showSuccess("Password updated. Please login.");
         navigate("/login");
       } else {

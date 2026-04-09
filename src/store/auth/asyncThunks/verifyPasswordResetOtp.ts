@@ -3,18 +3,19 @@ import { verifyPasswordResetOtp as verifyPasswordResetOtpApi } from "@/api/authA
 import type { RootState } from "@/store";
 
 interface VerifyPasswordResetOtpPayload {
-  authHash: string;
+  email: string;
   otp: string;
 }
 
 interface VerifyPasswordResetOtpReturn {
   isSuccess: boolean;
   message: string;
+  authHash: string;
 }
 
 /**
  * Async thunk for verifying password reset OTP
- * Validates the OTP code sent to user's email
+ * Validates the OTP code sent to user's email, returns authHash for final step
  */
 export const verifyPasswordResetOtpThunk = createAsyncThunk<
   VerifyPasswordResetOtpReturn,
@@ -25,20 +26,22 @@ export const verifyPasswordResetOtpThunk = createAsyncThunk<
   async (payload, { rejectWithValue }) => {
     try {
       const response = await verifyPasswordResetOtpApi({
-        authHash: payload.authHash,
+        email: payload.email,
         otp: payload.otp,
       });
 
       if (!response?.data?.isSuccess) {
-        return rejectWithValue("OTP verification failed");
+        return rejectWithValue(response?.data?.message || "OTP verification failed");
       }
 
       return {
         isSuccess: response.data.isSuccess,
         message: response.data.message || "OTP verified successfully",
+        authHash: response.data.authHash || "",
       };
     } catch (error: any) {
       const message =
+        error.response?.data?.data?.message ||
         error.response?.data?.message ||
         error.message ||
         "Failed to verify OTP. Please try again.";

@@ -4,11 +4,9 @@ import type { RootState } from "@/store";
 
 interface RequestPasswordResetPayload {
   email: string;
-  newPassword: string;
 }
 
 interface RequestPasswordResetReturn {
-  authHash: string;
   message: string;
 }
 
@@ -26,19 +24,18 @@ export const requestPasswordResetThunk = createAsyncThunk<
     try {
       const response = await requestPasswordResetApi({
         email: payload.email,
-        newPassword: payload.newPassword,
       });
 
-      if (!response?.data?.authHash) {
-        return rejectWithValue("No authHash received from server");
+      if (!response?.data?.isSuccess) {
+        return rejectWithValue(response?.data?.message || "Failed to send OTP");
       }
 
       return {
-        authHash: response.data.authHash,
         message: response.data.message || "OTP sent to your email",
       };
     } catch (error: any) {
       const message =
+        error.response?.data?.data?.message ||
         error.response?.data?.message ||
         error.message ||
         "Failed to request password reset. Please try again.";

@@ -31,14 +31,9 @@ const ForgotConfirmPassword: React.FC = () => {
   const handleSubmitPasswordReset = async () => {
     const result = await dispatch(requestPasswordResetThunk({
       email,
-      newPassword,
     }));
 
     if (requestPasswordResetThunk.fulfilled.match(result)) {
-      const authHash = result.payload.authHash;
-      if (authHash) {
-        localStorage.setItem("forgot_auth_hash", authHash);
-      }
       showSuccess(result.payload.message || "Code sent to your email");
       navigate("/forgot-password/otp");
     } else {

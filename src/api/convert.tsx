@@ -31,43 +31,22 @@ export interface ConversionResponse {
 
 // Define the function
 export const convertCryptoToFiat = async (data: ConvertCryptoParams) => {
-  const formData = new FormData();
-  
-  // Append all keys to FormData as required
-  formData.append("token", data.token);
-  formData.append("sourceAsset", data.sourceAsset);
-  formData.append("sourceNetwork", data.sourceNetwork || '');
-  formData.append("sourceAmount", data.sourceAmount.toString());
-  formData.append("destinationCurrency", data.destinationCurrency);
-
-  try {
-    const response = await api.post("/user/convert/crypto-to-fiat", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await api.post("/user/convert/crypto-to-fiat", {
+    token: data.token,
+    sourceAsset: data.sourceAsset,
+    sourceNetwork: data.sourceNetwork || '',
+    sourceAmount: data.sourceAmount,
+    destinationCurrency: data.destinationCurrency,
+  });
+  return response.data;
 };
-export const getConvertQuote = async (data: ConvertCryptoParams) => {
-  const formData = new FormData();
-  
-  // Append all keys to FormData as required
-  formData.append("token", data.token);
-  formData.append("sourceAsset", data.sourceAsset);
-  formData.append("sourceAmount", data.sourceAmount.toString());
-  formData.append("destinationCurrency", data.destinationCurrency);
 
-  try {
-    const response = await api.post("/user/convert/quote", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+export const getConvertQuote = async (data: ConvertCryptoParams) => {
+  const response = await api.post("/user/convert/quote", {
+    token: data.token,
+    sourceAsset: data.sourceAsset,
+    sourceAmount: data.sourceAmount,
+    destinationCurrency: data.destinationCurrency,
+  });
+  return response.data;
 };

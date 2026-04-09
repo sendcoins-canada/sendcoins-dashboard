@@ -4,7 +4,7 @@ import type { RootState } from "@/store";
 
 interface UpdatePasswordWithOtpPayload {
   authHash: string;
-  otp: string;
+  newPassword: string;
 }
 
 interface UpdatePasswordWithOtpReturn {
@@ -13,8 +13,8 @@ interface UpdatePasswordWithOtpReturn {
 }
 
 /**
- * Async thunk for updating password with OTP
- * Completes the password reset process after OTP verification
+ * Async thunk for resetting password
+ * Uses authHash from OTP verification + new password to complete the reset
  */
 export const updatePasswordWithOtpThunk = createAsyncThunk<
   UpdatePasswordWithOtpReturn,
@@ -26,11 +26,11 @@ export const updatePasswordWithOtpThunk = createAsyncThunk<
     try {
       const response = await updatePasswordWithOtpApi({
         authHash: payload.authHash,
-        otp: payload.otp,
+        newPassword: payload.newPassword,
       });
 
       if (!response?.data?.isSuccess) {
-        return rejectWithValue("Password update failed");
+        return rejectWithValue(response?.data?.message || "Password update failed");
       }
 
       return {
@@ -39,6 +39,7 @@ export const updatePasswordWithOtpThunk = createAsyncThunk<
       };
     } catch (error: any) {
       const message =
+        error.response?.data?.data?.message ||
         error.response?.data?.message ||
         error.message ||
         "Failed to update password. Please try again.";
