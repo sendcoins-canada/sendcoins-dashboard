@@ -116,6 +116,11 @@ const handleContinue = () => {
       return;
     }
 
+    if (!isFiat && Number(sendAmount) < 5) {
+      setError("Minimum send amount is 5 USDT.");
+      return;
+    }
+
     if (calculation.status === 'insufficient') {
       setError(`Insufficient ${asset.toUpperCase()} balance.`);
       return;
@@ -205,6 +210,11 @@ const handleContinue = () => {
     ⚠️ Insufficient funds. You only have {walletAvailableBalance} {asset.toUpperCase()} available.
   </p>
 )}
+              {!isFiat && (
+                <p className="text-xs text-neutral-400 mt-1">
+                  Min: 5 {asset.toUpperCase()} · Max: 10,000 {asset.toUpperCase()} (verified) / 5,000 (unverified)
+                </p>
+              )}
             </div>
 
             {/* Amount they'll receive */}
@@ -263,7 +273,7 @@ const handleContinue = () => {
           {/* Info & Continue button */}
           <div className="mt-6 text-center">
             {gasError && (
-                 <p className="text-xs text-red-500 mb-2">Error calculating fees</p>
+                 <p className="text-xs text-red-500 mb-2">{typeof gasError === 'string' ? gasError : 'Error calculating fees'}</p>
             )}
             <p className="text-xs text-green-700 bg-green-50 border border-green-300 border-dashed inline-block px-3 py-1 rounded-full">
               Usually takes less than 2 minutes
@@ -274,9 +284,10 @@ const handleContinue = () => {
                 onClick={handleContinue}
                 className="rounded-full bg-[#0052FF] hover:bg-[#0040CC] text-white px-10 py-2"
                 disabled={
-      isGasLoading || 
-      !sendAmount || 
-      calculation.status === 'insufficient' || 
+      isGasLoading ||
+      !sendAmount ||
+      (!isFiat && Number(sendAmount) < 5) ||
+      calculation.status === 'insufficient' ||
       calculation.recipientGets <= 0
     }
               >

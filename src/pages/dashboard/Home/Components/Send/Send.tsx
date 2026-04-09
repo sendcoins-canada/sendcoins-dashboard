@@ -13,7 +13,7 @@ import FiatRecipientSelect from "./FiatRecipientSelection";
 import FiatCountrySelection from "./FiatCountrySelect";
 import EnterBankDetails from "./FiatBankDetails";
 import { sendFiat } from "@/api/fiat";
-import { sendCrypto } from "@/api/authApi";
+import { sendCrypto, pollTransferStatus } from "@/api/authApi";
 import { showSuccess, showDanger } from "@/components/ui/toast";
 import { useCrayfiAccount } from "@/store/hooks/useGetAccount";
 
@@ -177,8 +177,7 @@ useEffect(() => {
           setStep("success");
         }
       } else {
-        // --- 2. CRYPTO FLOW ---
-        // Payload: token, asset, network, walletAddress, amount
+        // --- 2. CRYPTO FLOW (async with polling) ---
         const result = await sendCrypto({
           token,
           asset: selectedAsset || "",
@@ -187,10 +186,35 @@ useEffect(() => {
           amount: amount
         });
 
-        // The endpoint returns { data: { isSuccess: true, ... } } based on your JSON
         if (result.isSuccess || result.data?.isSuccess) {
-          showSuccess(result.message || "Crypto sent successfully");
-          setStep("success");
+          const reference = result.data?.reference;
+
+          if (reference && result.data?.status === 'processing') {
+            // Async mode: show processing, then poll for completion
+            showSuccess("Transfer initiated! Processing on the blockchain...");
+            setStep("success");
+            setTransactionId(reference);
+
+            // Poll in background — update UI when done
+            pollTransferStatus(
+              reference,
+              (transfer) => {
+                if (transfer.status === 'completed') {
+                  showSuccess(`Transfer completed! TX: ${transfer.txid?.slice(0, 12)}...`);
+                } else if (transfer.status === 'failed') {
+                  showDanger("Transfer failed. Please check your transfer history.");
+                }
+              },
+              (err) => {
+                showDanger(err.message);
+              }
+            );
+          } else {
+            // Sync mode fallback (shouldn't happen, but handle it)
+            showSuccess(result.message || "Crypto sent successfully");
+            setTransactionId(result.data?.reference || result.data?.txid || "TRX-" + Date.now());
+            setStep("success");
+          }
         } else {
           throw new Error(result.message || "Transfer failed");
         }

@@ -84,7 +84,7 @@ const { bankDetails} = useSelector((state: RootState) => state.user) as any;
               Your Wallet
             </p>
           </div>
-            <p className="text-xs text-gray-400 text-right">{bankDetails.accountNumber || formatAddress(userAddress)}</p>
+            <p className="text-xs text-gray-400 text-right">{bankDetails?.accountNumber || formatAddress(userAddress)}</p>
         </div>
 
         <div className="px-4 py-2 flex justify-between items-center">

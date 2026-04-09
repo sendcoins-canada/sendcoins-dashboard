@@ -161,50 +161,34 @@ export const createPasscode = async (data: { code: string; token: string }) => {
 };
 
 // Forgot password - Step 1: request reset & send OTP
-
 export const requestPasswordReset = async (
   data: RequestPasswordResetRequest
 ): Promise<RequestPasswordResetResponse> => {
-  const formData = new FormData();
-  formData.append("email", data.email);
-  formData.append("newPassword", data.newPassword);
-
   const response = await api.post<RequestPasswordResetResponse>(
-    "/user/auth/request_password_reset",
-    formData,
-    { headers: { "Content-Type": "multipart/form-data" } }
+    "/auth/password/reset/request",
+    { email: data.email }
   );
   return response.data;
 };
 
-// Forgot password - Step 2: verify OTP
+// Forgot password - Step 2: verify OTP (returns authHash)
 export const verifyPasswordResetOtp = async (
   data: VerifyPasswordResetOtpRequest
 ): Promise<VerifyPasswordResetOtpResponse> => {
-  const formData = new FormData();
-  formData.append("authHash", data.authHash);
-  formData.append("otp", data.otp);
-
   const response = await api.post<VerifyPasswordResetOtpResponse>(
-    "/user/auth/auth_verify_password_otp",
-    formData,
-    { headers: { "Content-Type": "multipart/form-data" } }
+    "/auth/otp/verify",
+    { email: data.email, otp: data.otp, purpose: "password_reset" }
   );
   return response.data;
 };
 
-// Forgot password - Step 3: finalize update
+// Forgot password - Step 3: reset password with authHash
 export const updatePasswordWithOtp = async (
   data: UpdatePasswordWithOtpRequest
 ): Promise<UpdatePasswordWithOtpResponse> => {
-  const formData = new FormData();
-  formData.append("authHash", data.authHash);
-  formData.append("otp", data.otp);
-
   const response = await api.post<UpdatePasswordWithOtpResponse>(
-    "/user/auth/auth_update_password_with_otp",
-    formData,
-    { headers: { "Content-Type": "multipart/form-data" } }
+    "/auth/password/reset",
+    { authHash: data.authHash, newPassword: data.newPassword }
   );
   return response.data;
 };
@@ -302,9 +286,50 @@ export const sendCrypto = async (data: {
   formData.append("token", data.token);
 
   const response = await api.post("/send", formData, {
-    headers: { 
+    headers: {
       "Content-Type": "multipart/form-data",
     },
   });
   return response.data;
+};
+
+// --- Transfer Status Polling ---
+export const getTransferStatus = async (reference: string) => {
+  const response = await api.get(`/transfer/${reference}`);
+  return response.data;
+};
+
+export const pollTransferStatus = (
+  reference: string,
+  onUpdate: (data: any) => void,
+  onError: (error: any) => void,
+  intervalMs = 3000,
+  maxAttempts = 60
+) => {
+  let attempts = 0;
+  const interval = setInterval(async () => {
+    attempts++;
+    try {
+      const result = await getTransferStatus(reference);
+      if (result.isSuccess && result.data) {
+        const status = result.data.status;
+        if (status === 'completed' || status === 'failed') {
+          clearInterval(interval);
+          onUpdate(result.data);
+          return;
+        }
+      }
+    } catch (err) {
+      // Don't stop polling on network errors, just log
+      console.warn(`Poll attempt ${attempts} failed:`, err);
+    }
+
+    if (attempts >= maxAttempts) {
+      clearInterval(interval);
+      onError(new Error('Transfer is taking longer than expected. Check your transfer history for updates.'));
+    }
+  }, intervalMs);
+
+  // Return cleanup function
+  return () => clearInterval(interval);
 };
