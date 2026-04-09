@@ -151,16 +151,10 @@ export interface CountryResponse {
 // Forgot Password types
 export interface RequestPasswordResetRequest {
   email: string;
-  newPassword: string;
-  currentPassword?: string; // not used for forgotten flow
-  created_for?: string; // default 'password_reset'
 }
 
 export interface RequestPasswordResetResponse {
   data: {
-    authHash: string;
-    emailAccount: string;
-    created_for: string;
     title: string;
     message: string;
     isSuccess: boolean;
@@ -169,25 +163,25 @@ export interface RequestPasswordResetResponse {
 }
 
 export interface VerifyPasswordResetOtpRequest {
-  authHash: string;
+  email: string;
   otp: string;
 }
 
 export interface VerifyPasswordResetOtpResponse {
   data: {
-    Oauth_hash: string;
-    emailAccount: string;
-    created_for: string;
     title: string;
     message: string;
     isSuccess: boolean;
     icon?: string;
+    authHash?: string;
+    expiresIn?: number;
+    purpose?: string;
   };
 }
 
 export interface UpdatePasswordWithOtpRequest {
   authHash: string;
-  otp: string;
+  newPassword: string;
 }
 
 export interface UpdatePasswordWithOtpResponse {
@@ -196,5 +190,6 @@ export interface UpdatePasswordWithOtpResponse {
     message: string;
     isSuccess: boolean;
     icon?: string;
+    token?: any;
   };
 }
