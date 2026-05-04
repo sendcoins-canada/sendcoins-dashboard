@@ -87,12 +87,12 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const network = wallet.symbol.toLowerCase(); 
     
     // Immediately set the currently clicked wallet for display purposes 
-    dispatch(setSelectedBalance({
-        usd: wallet.usd,
-        amount: wallet.amount,
-        symbol: wallet.symbol,
-        logo: wallet.logo
-    }));
+  dispatch(setSelectedBalance({
+    usd: wallet.usd ? String(wallet.usd) : "",
+    amount: wallet.amount !== undefined && wallet.amount !== null ? String(wallet.amount) : "",
+    symbol: wallet.symbol,
+    logo: wallet.logo
+  }));
     
     // const specificThunk = balanceThunkMap[symbol as keyof typeof balanceThunkMap];
     
@@ -125,14 +125,14 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             dispatch(specificThunk({ token, network: network }) as any)
                 .unwrap()
                 .then((newBalanceData: any) => {
-                    if (newBalanceData && newBalanceData.TotalAvailableBalancePrice) {
-                        dispatch(setSelectedBalance({
-                            usd: newBalanceData.TotalAvailableBalancePrice, 
-                            amount: `${newBalanceData.totalAvailableBalance} ${newBalanceData.symbol}`, 
-                            symbol: newBalanceData.symbol,
-                            logo: newBalanceData.logo
-                        }));
-                    }
+          if (newBalanceData && newBalanceData.TotalAvailableBalancePrice) {
+            dispatch(setSelectedBalance({
+              usd: String(newBalanceData.TotalAvailableBalancePrice), 
+              amount: `${newBalanceData.totalAvailableBalance} ${newBalanceData.symbol}`, 
+              symbol: newBalanceData.symbol,
+              logo: newBalanceData.logo
+            }));
+          }
                 })
                 .catch((error: any) => {
                     console.error(`Failed to fetch fresh ${symbol} balance:`, error);

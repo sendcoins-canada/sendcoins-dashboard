@@ -130,6 +130,15 @@ const ConvertFlow: React.FC = () => {
   const selectedSourceWallet = direction === "CRYPTO_TO_FIAT" ? selectedSourceCryptoWallet : selectedSourceFiatWallet;
   const selectedDestWallet = direction === "CRYPTO_TO_FIAT" ? selectedDestFiatWallet : selectedDestCryptoWallet;
 
+  // Safely derive display fields for source wallet depending on whether it's crypto or fiat
+  const selectedSourceName = direction === "CRYPTO_TO_FIAT"
+    ? (selectedSourceCryptoWallet as WalletBalance | undefined)?.name
+    : (selectedSourceFiatWallet as FiatAccount | undefined)?.bankName || (selectedSourceFiatWallet as FiatAccount | undefined)?.currency;
+
+  const selectedSourceNetwork = direction === "CRYPTO_TO_FIAT"
+    ? (selectedSourceCryptoWallet as WalletBalance | undefined)?.network
+    : undefined;
+
   const recipient = React.useMemo(() => {
     if (direction === "CRYPTO_TO_FIAT") {
       const bankName = (selectedDestFiatWallet as any)?.bankName;
@@ -468,15 +477,15 @@ const ConvertFlow: React.FC = () => {
                     <p className="text-sm font-medium text-gray-900">Your Wallet</p>
                   </div>
                   <p className="text-xs text-gray-400 text-right">
-                    {selectedSourceWallet?.name} | {selectedSourceWallet?.network}
+                    {selectedSourceName} {selectedSourceNetwork ? `| ${selectedSourceNetwork}` : ""}
                   </p>
                 </div>
                 <div className="px-4 py-2 flex justify-between items-center">
                   <p className="text-sm text-gray-500">Network</p>
                   <div className="flex items-center gap-2">
-                    {selectedSourceWallet && <img src={selectedSourceWallet.logo} alt="Network" className="w-4 h-4" />}
+                    {selectedSourceWallet && <img src={(selectedSourceWallet as any).logo} alt="Network" className="w-4 h-4" />}
                     <span className="text-sm font-medium text-gray-800">
-                      {selectedSourceWallet?.network}
+                      {selectedSourceNetwork ?? (direction === "FIAT_TO_CRYPTO" ? (selectedSourceWallet as any).network : "")}
                     </span>
                   </div>
                 </div>

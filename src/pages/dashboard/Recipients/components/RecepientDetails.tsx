@@ -119,7 +119,7 @@ const RecipientDetails: React.FC<RecipientDetailsProps> = ({ recipient }) => {
 
         <div className="space-y-4 px-4">
           {transactions.map((tx) => (
-            <div key={tx.tx_id || tx.reference || String(tx.id)} className="flex items-center justify-between">
+            <div key={String(tx.id)} className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div
                   className={`w-10 h-10 flex items-center justify-center rounded-full ${tx.color} text-sm font-semibold`}
