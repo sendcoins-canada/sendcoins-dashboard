@@ -1,18 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { convertCryptoToFiat, getConvertQuote } from "@/api/convert";
+import { convertCryptoToFiat, executeBuyCrypto, getBuyCryptoQuote, getConvertQuote } from "@/api/convert";
 import type { ConversionResponse } from "@/api/convert";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/onboarding/shared/Header";
 import { Select } from "@/components/ui/select";
-import { Convert, Money, Money2, FlashCircle, ArrowLeft2 } from "iconsax-react";
+import { Convert, Money, Money2, FlashCircle, ArrowLeft2, ArrowSwapVertical } from "iconsax-react";
 import SuccessPage from "@/pages/dashboard/SuccessPage";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import { showDanger } from "@/components/ui/toast";
 import type { WalletBalance } from "@/types/wallet";
 import NGN from '@/assets/nigerianflag.svg'
+import { formatCryptoAmount, formatFiatAmount } from "@/utils/formatAmount";
 // import WalletSelectionModal from "@/pages/dashboard/WalletSelectionModal";
+
+type ConvertDirection = "CRYPTO_TO_FIAT" | "FIAT_TO_CRYPTO";
+
+type FiatAccount = {
+  currency: string;
+  availableBalance: number | string;
+  bankName?: string;
+  logo?: string;
+};
 
 const ConvertFlow: React.FC = () => {
   const navigate = useNavigate();
@@ -20,6 +30,8 @@ const ConvertFlow: React.FC = () => {
   const { allBalances, loading } = useSelector((state: RootState) => state.wallet);
   // Step management
   const [step, setStep] = useState<"amount" | "details" | "success">("amount");
+
+  const [direction, setDirection] = useState<ConvertDirection>("CRYPTO_TO_FIAT");
 
 
 
@@ -46,10 +58,9 @@ const ConvertFlow: React.FC = () => {
   const [error, setError] = useState("");
 
 
-  const recipient = {
-    name: "John Doe",
-    address: "0x89f8...a1C3",
-  };
+  const user = useSelector((state: RootState) => state.user.user);
+  const userFullName =
+    `${user?.data?.first_name ?? ""} ${user?.data?.last_name ?? ""}`.trim() || "You";
 
   // --- 2. Derive Wallets from Redux ---
   // Safely convert the balances object into an array
@@ -64,26 +75,85 @@ const ConvertFlow: React.FC = () => {
     // Access the fiatAccounts array from your console log structure
     const accounts = allBalances?.data?.fiatAccounts;
     if (!accounts || !Array.isArray(accounts)) return [];
-    return accounts;
+    return accounts as FiatAccount[];
   }, [allBalances]);
 
-  // Set defaults on mount if available
+  const cryptoOptions = wallets.map((wallet: any) => ({
+    value: wallet.symbol,
+    label: wallet.symbol.toUpperCase(),
+    icon: <img src={wallet.logo} alt={wallet.symbol} className="w-4 h-4 object-contain rounded-full" />,
+  }));
+
+  const fiatOptions = fiatWallets.map((wallet: any) => ({
+    value: wallet.currency,
+    label: wallet.currency.toUpperCase(),
+    icon: <img src={wallet.logo || NGN} alt={wallet.currency} className="w-4 h-4 object-contain rounded-full" />,
+  }));
+
+  const sourceOptions = direction === "CRYPTO_TO_FIAT" ? cryptoOptions : fiatOptions;
+  const destOptions = direction === "CRYPTO_TO_FIAT" ? fiatOptions : cryptoOptions;
+
+  const toggleDirection = () => {
+    setDirection((prev) => (prev === "CRYPTO_TO_FIAT" ? "FIAT_TO_CRYPTO" : "CRYPTO_TO_FIAT"));
+    setSendAmount("");
+    setReceiveAmount("");
+    setQuoteDetails({ exchangeRate: "0", platformFee: "0", destinationAmount: "0", finalAmount: "0" });
+    setTimeLeft(30);
+    setError("");
+  };
+
+  // Set defaults on mount / direction change if available
   useEffect(() => {
-    if (wallets.length > 0 && !selectedSourceSymbol) {
-      // Default Source: First wallet found
-      setSelectedSourceSymbol(wallets[0].symbol);
+    if (direction === "CRYPTO_TO_FIAT") {
+      if (wallets.length > 0 && (!selectedSourceSymbol || !wallets.some(w => w.symbol === selectedSourceSymbol))) {
+        setSelectedSourceSymbol(wallets[0].symbol);
+      }
+      if (fiatWallets.length > 0 && (!selectedDestSymbol || !fiatWallets.some((w: any) => w.currency === selectedDestSymbol))) {
+        setSelectedDestSymbol((fiatWallets[0] as any).currency || (fiatWallets[0] as any).symbol);
+      }
+    } else {
+      if (fiatWallets.length > 0 && (!selectedSourceSymbol || !fiatWallets.some((w: any) => w.currency === selectedSourceSymbol))) {
+        setSelectedSourceSymbol((fiatWallets[0] as any).currency || (fiatWallets[0] as any).symbol);
+      }
+      if (wallets.length > 0 && (!selectedDestSymbol || !wallets.some(w => w.symbol === selectedDestSymbol))) {
+        setSelectedDestSymbol(wallets[0].symbol);
+      }
     }
-    // Default Dest: First Fiat Account
-    if (fiatWallets.length > 0 && !selectedDestSymbol) {
-      // Assuming fiat account has 'currency' or 'symbol' property
-      setSelectedDestSymbol(fiatWallets[0].currency || fiatWallets[0].symbol);
-    }
-  }, [wallets, selectedSourceSymbol, selectedDestSymbol]);
+  }, [direction, wallets, fiatWallets, selectedSourceSymbol, selectedDestSymbol]);
 
   // --- Helpers to get full objects ---
-  const selectedSourceWallet = wallets.find(w => w.symbol === selectedSourceSymbol);
-  const selectedDestWallet = fiatWallets.find(w => w.currency === selectedDestSymbol);// --- 2. Live Quote Calculation (Debounced) ---
-  console.log(selectedSourceWallet)
+  const selectedSourceCryptoWallet = wallets.find(w => w.symbol === selectedSourceSymbol);
+  const selectedDestCryptoWallet = wallets.find(w => w.symbol === selectedDestSymbol);
+  const selectedSourceFiatWallet = fiatWallets.find((w: any) => w.currency === selectedSourceSymbol);
+  const selectedDestFiatWallet = fiatWallets.find((w: any) => w.currency === selectedDestSymbol);
+
+  const selectedSourceWallet = direction === "CRYPTO_TO_FIAT" ? selectedSourceCryptoWallet : selectedSourceFiatWallet;
+  const selectedDestWallet = direction === "CRYPTO_TO_FIAT" ? selectedDestFiatWallet : selectedDestCryptoWallet;
+
+  const recipient = React.useMemo(() => {
+    if (direction === "CRYPTO_TO_FIAT") {
+      const bankName = (selectedDestFiatWallet as any)?.bankName;
+      const accountNumber = (selectedDestFiatWallet as any)?.accountNumber;
+      return {
+        name: userFullName,
+        address: bankName && accountNumber ? `${bankName} | ${accountNumber}` : (selectedDestSymbol || "Fiat account"),
+      };
+    }
+
+    // FIAT_TO_CRYPTO
+    const network = (selectedDestCryptoWallet as any)?.network || (selectedDestCryptoWallet as any)?.name;
+    const addr = (selectedDestCryptoWallet as any)?.walletAddress;
+    return {
+      name: userFullName,
+      address: addr ? String(addr) : (network ? String(network) : (selectedDestSymbol || "Crypto wallet")),
+    };
+  }, [
+    direction,
+    selectedDestFiatWallet,
+    selectedDestCryptoWallet,
+    selectedDestSymbol,
+    userFullName,
+  ]);
   // useEffect(() => {
   //   // Reset if input is empty
   //   if (!sendAmount || isNaN(Number(sendAmount)) || Number(sendAmount) === 0) {
@@ -149,25 +219,58 @@ const ConvertFlow: React.FC = () => {
 
     setIsFetchingQuote(true);
     try {
-      const network = selectedSourceWallet.network || selectedSourceWallet.name;
-      const quoteData = await getConvertQuote({
-        token,
-        sourceAsset: selectedSourceWallet.symbol,
-        sourceNetwork: network,
-        sourceAmount: amount,
-        destinationCurrency: selectedDestWallet.currency
-      });
+      if (direction === "CRYPTO_TO_FIAT") {
+        const source = selectedSourceCryptoWallet;
+        const dest = selectedDestFiatWallet;
+        if (!source || !dest) return;
 
-      if (quoteData && quoteData.data) {
-        const { destinationAmount, exchangeRate, platformFeeAmount, finalAmount } = quoteData.data;
-        setReceiveAmount(destinationAmount);
-        setQuoteDetails({
-          exchangeRate,
-          platformFee: platformFeeAmount,
-          destinationAmount,
-          finalAmount
+        const network = (source as any).network || (source as any).name;
+        const quoteData = await getConvertQuote({
+          token,
+          sourceAsset: (source as any).symbol,
+          sourceNetwork: network,
+          sourceAmount: amount,
+          destinationCurrency: (dest as any).currency
         });
-        setTimeLeft(30);
+
+        if (quoteData && quoteData.data) {
+          const { destinationAmount, exchangeRate, platformFeeAmount, finalAmount } = quoteData.data;
+          setReceiveAmount(String(destinationAmount));
+          setQuoteDetails({
+            exchangeRate: String(exchangeRate),
+            platformFee: String(platformFeeAmount),
+            destinationAmount: String(destinationAmount),
+            finalAmount: String(finalAmount)
+          });
+          setTimeLeft(30);
+        }
+      } else {
+        const source = selectedSourceFiatWallet;
+        const dest = selectedDestCryptoWallet;
+        if (!source || !dest) return;
+
+        const destinationNetwork = (dest as any).network || (dest as any).name || "";
+        const quoteData = await getBuyCryptoQuote({
+          token,
+          sourceCurrency: (source as any).currency,
+          sourceAmount: amount,
+          destinationAsset: (dest as any).symbol,
+          destinationNetwork
+        });
+
+        if (quoteData && quoteData.data) {
+          const destinationAmount = quoteData.data.destinationAmount;
+          const exchangeRate = quoteData.data.exchangeRate;
+          const platformFeeAmount = quoteData.data.feeFiat;
+          setReceiveAmount(String(destinationAmount));
+          setQuoteDetails({
+            exchangeRate: String(exchangeRate),
+            platformFee: String(platformFeeAmount),
+            destinationAmount: String(destinationAmount),
+            finalAmount: String(destinationAmount)
+          });
+          setTimeLeft(30);
+        }
       }
     } catch (err) {
       console.error("Failed to refresh quote", err);
@@ -215,11 +318,18 @@ const ConvertFlow: React.FC = () => {
       return;
     }
     // --- 4. Validation against Redux Balance ---
-    const availableBalance = Number(selectedSourceWallet?.totalAvailableBalance || 0);
-
-    if (Number(sendAmount) > availableBalance) {
-      setError("Not enough in this wallet");
-      return;
+    if (direction === "CRYPTO_TO_FIAT") {
+      const availableBalance = Number((selectedSourceCryptoWallet as any)?.totalAvailableBalance || 0);
+      if (Number(sendAmount) > availableBalance) {
+        setError("Not enough in this wallet");
+        return;
+      }
+    } else {
+      const availableBalance = Number((selectedSourceFiatWallet as any)?.availableBalance || 0);
+      if (Number(sendAmount) > availableBalance) {
+        setError("Not enough in this account");
+        return;
+      }
     }
     setError("");
     setStep("details");
@@ -249,22 +359,51 @@ const ConvertFlow: React.FC = () => {
 
     try {
       // const authToken = localStorage.getItem("token") || "";
-      const network = selectedSourceWallet.network || selectedSourceWallet.name; // fallback if missing
+      if (direction === "CRYPTO_TO_FIAT") {
+        const source = selectedSourceCryptoWallet;
+        const dest = selectedDestFiatWallet;
+        if (!source || !dest) {
+          setError("Invalid asset selection");
+          return;
+        }
 
-      const response = await convertCryptoToFiat({
-        token,
-        sourceAsset: selectedSourceWallet.symbol,   // e.g., 'eth'
-        sourceNetwork: network,            // e.g., 'ethereum' (from API)
-        sourceAmount: sendAmount,
-        destinationCurrency: selectedDestSymbol // e.g., 'ngn'
-      });
+        const network = (source as any).network || (source as any).name;
+        const response = await convertCryptoToFiat({
+          token,
+          sourceAsset: (source as any).symbol,
+          sourceNetwork: network,
+          sourceAmount: sendAmount,
+          destinationCurrency: (dest as any).currency
+        });
 
-      if (response.success && response.data) {
-        // 6. Save the actual backend response data
-        setSuccessData(response.data);
-        setStep("success");
+        if (response.success && response.data) {
+          setSuccessData(response.data);
+          setStep("success");
+        } else {
+          setError("Conversion failed. No data returned.");
+        }
       } else {
-        setError("Conversion failed. No data returned.");
+        const source = selectedSourceFiatWallet;
+        const dest = selectedDestCryptoWallet;
+        if (!source || !dest) {
+          setError("Invalid asset selection");
+          return;
+        }
+
+        const destinationNetwork = (dest as any).network || (dest as any).name || "";
+        const response = await executeBuyCrypto({
+          token,
+          sourceCurrency: (source as any).currency,
+          sourceAmount: sendAmount,
+          destinationAsset: (dest as any).symbol,
+          destinationNetwork
+        });
+
+        if (response?.isSuccess && response.data) {
+          setStep("success");
+        } else {
+          setError(response?.message || "Conversion failed. Please try again.");
+        }
       }
     } catch (err: any) {
       console.error("Conversion failed:", err);
@@ -307,7 +446,16 @@ const ConvertFlow: React.FC = () => {
 
             <Convert size="64" color="#0647F7" variant="Bold" className="text-center mx-auto mb-4" />
             <p className="text-[28px] font-semibold mb-4">
-              {sendAmount} {selectedSourceSymbol} → {receiveAmount || "..."} {selectedDestSymbol}
+              {direction === "CRYPTO_TO_FIAT"
+                ? `${formatCryptoAmount(sendAmount, selectedSourceSymbol || "", { minimumFractionDigits: 2, maximumFractionDigits: 8 })} → ${formatFiatAmount(
+                    receiveAmount || 0,
+                    { currencyCode: selectedDestSymbol || "NGN", currencySign: selectedDestSymbol || "NGN" }
+                  )}`
+                : `${formatFiatAmount(sendAmount || 0, { currencyCode: selectedSourceSymbol || "NGN", currencySign: selectedSourceSymbol || "NGN" })} → ${formatCryptoAmount(
+                    receiveAmount || 0,
+                    selectedDestSymbol || "",
+                    { minimumFractionDigits: 2, maximumFractionDigits: 8 }
+                  )}`}
             </p>
 
             {error && <div className="mb-4 p-3 bg-red-50 text-red-500 rounded-lg text-sm">{error}</div>}
@@ -347,11 +495,19 @@ const ConvertFlow: React.FC = () => {
               <div className="pt-2 space-y-2 text-sm text-neutral bg-white rounded-2xl mt-2 p-2">
                 <div className="flex justify-between">
                   <span><Convert size="16" color="#777777" className="inline" />Amount received</span>
-                  <span className="text-primary">{quoteDetails.finalAmount}</span>
+                  <span className="text-primary">
+                    {direction === "CRYPTO_TO_FIAT"
+                      ? formatFiatAmount(quoteDetails.finalAmount, { currencyCode: selectedDestSymbol || "NGN", currencySign: selectedDestSymbol || "NGN" })
+                      : formatCryptoAmount(quoteDetails.finalAmount, selectedDestSymbol || "", { minimumFractionDigits: 2, maximumFractionDigits: 8 })}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span><Money2 size="16" color="#777777" className="inline" /> Platform fee</span>
-                  <span className="text-primary">{quoteDetails.platformFee} {selectedDestSymbol}</span>
+                  <span className="text-primary">
+                    {direction === "CRYPTO_TO_FIAT"
+                      ? formatFiatAmount(quoteDetails.platformFee, { currencyCode: selectedDestSymbol || "NGN", currencySign: selectedDestSymbol || "NGN" })
+                      : formatFiatAmount(quoteDetails.platformFee, { currencyCode: selectedSourceSymbol || "NGN", currencySign: selectedSourceSymbol || "NGN" })}
+                  </span>
                 </div>
               </div>
             </div>
@@ -396,12 +552,7 @@ const ConvertFlow: React.FC = () => {
                   <Select
                     value={selectedSourceSymbol}
                     onChange={setSelectedSourceSymbol}
-                    options={wallets.map((wallet: any) => ({
-                      value: wallet.symbol,
-                      label: wallet.symbol.toUpperCase(),
-                      // Use logo from wallet object
-                      icon: <img src={wallet.logo} alt={wallet.symbol} className="w-4 h-4 object-contain rounded-full" />,
-                    }))}
+                    options={sourceOptions}
                     className="w-[150px]"
                     disabled={loading}
                   />
@@ -419,15 +570,29 @@ const ConvertFlow: React.FC = () => {
                 <div className="flex flex-col">
                   <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Available Balance</p>
                   <p className="text-sm font-semibold text-gray-700">
-                    {selectedSourceWallet?.totalAvailableBalance} {selectedSourceSymbol.toUpperCase()}
-                    <span className="text-gray-400 font-normal ml-2">
-                      ≈ {selectedSourceWallet?.TotalAvailableBalancePrice || "0.00"}
-                    </span>
+                    {direction === "CRYPTO_TO_FIAT" ? (
+                      <>
+                        {(selectedSourceCryptoWallet as any)?.totalAvailableBalance} {selectedSourceSymbol.toUpperCase()}
+                        <span className="text-gray-400 font-normal ml-2">
+                          ≈ {(selectedSourceCryptoWallet as any)?.TotalAvailableBalancePrice || "0.00"}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        {(selectedSourceFiatWallet as any)?.availableBalance} {selectedSourceSymbol.toUpperCase()}
+                      </>
+                    )}
                   </p>
                 </div>
                 {/* Max Button Helper */}
                 <button
-                  onClick={() => setSendAmount(selectedSourceWallet?.totalAvailableBalance.toString() || "")}
+                  onClick={() => {
+                    if (direction === "CRYPTO_TO_FIAT") {
+                      setSendAmount(String((selectedSourceCryptoWallet as any)?.totalAvailableBalance || ""));
+                    } else {
+                      setSendAmount(String((selectedSourceFiatWallet as any)?.availableBalance || ""));
+                    }
+                  }}
                   className="text-[10px] bg-primaryblue/10 text-primaryblue px-2 py-1 rounded font-bold hover:bg-primaryblue/20 transition-colors"
                 >
                   MAX
@@ -435,6 +600,17 @@ const ConvertFlow: React.FC = () => {
               </div>
 
               {error && <p className="text-xs text-danger mt-1 font-medium">{error}</p>}
+            </div>
+
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={toggleDirection}
+                aria-label="Swap conversion direction"
+                className="w-10 h-10 rounded-full bg-white border border-neutral-200 flex items-center justify-center hover:bg-[#F7F9FF] transition-colors"
+              >
+                <ArrowSwapVertical size="18" color="black" variant="Outline" />
+              </button>
             </div>
 
             {/* TO: Select Currency */}
@@ -447,12 +623,7 @@ const ConvertFlow: React.FC = () => {
                   <Select
                     value={selectedDestSymbol}
                     onChange={setSelectedDestSymbol}
-                    options={fiatWallets.map((wallet: any) => ({
-                      value: wallet.currency,
-                      label: wallet.currency.toUpperCase(),
-                      // Use logo from wallet object
-                      icon: <img src={wallet.logo || NGN} alt={wallet.symbol} className="w-4 h-4 object-contain rounded-full" />,
-                    }))}
+                    options={destOptions}
                     className="w-[150px]"
                     disabled={loading}
                   />
@@ -492,15 +663,25 @@ const ConvertFlow: React.FC = () => {
             <div className="pt-2 space-y-2 text-sm text-neutral">
               <div className="flex justify-between">
                 <span><Convert size="16" color="#0088FF" className="inline" /> Exchange rate</span>
-                <span className="text-primary">{quoteDetails.exchangeRate}</span>
+                <span className="text-primary">
+                  {Number(quoteDetails.exchangeRate || 0).toLocaleString(undefined, { maximumFractionDigits: 8 })}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span><Money2 size="16" color="#0088FF" className="inline" /> Platform fee</span>
-                <span className="text-primary">{quoteDetails.platformFee} {selectedDestSymbol || "Fiat"}</span>
+                <span className="text-primary">
+                  {direction === "CRYPTO_TO_FIAT"
+                    ? formatFiatAmount(quoteDetails.platformFee, { currencyCode: selectedDestSymbol || "NGN", currencySign: selectedDestSymbol || "NGN" })
+                    : formatFiatAmount(quoteDetails.platformFee, { currencyCode: selectedSourceSymbol || "NGN", currencySign: selectedSourceSymbol || "NGN" })}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span><Money size="16" color="#0088FF" className="inline" /> Total amount</span>
-                <span className="text-primary">{quoteDetails.finalAmount} {selectedDestSymbol || "Fiat"}</span>
+                <span className="text-primary">
+                  {direction === "CRYPTO_TO_FIAT"
+                    ? formatFiatAmount(quoteDetails.finalAmount, { currencyCode: selectedDestSymbol || "NGN", currencySign: selectedDestSymbol || "NGN" })
+                    : formatCryptoAmount(quoteDetails.finalAmount, selectedDestSymbol || "", { minimumFractionDigits: 2, maximumFractionDigits: 8 })}
+                </span>
               </div>
             </div>
           </div>

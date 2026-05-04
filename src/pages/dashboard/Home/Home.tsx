@@ -14,6 +14,7 @@ import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "@/store";
 import { getTransactionsThunk } from "@/store/transactions/asyncThunks/getTransactions";
 import { getAllBalanceThunk } from "@/store/wallet/asyncThunks/getBalances";
+import { formatCryptoAmount, formatFiatAmount, formatSignedAmount } from "@/utils/formatAmount";
 
 
 const Home: React.FC = () => {
@@ -33,9 +34,8 @@ const defaultFiatBalance = useMemo(() => {
     if (fiatAccount) {
       return {
         symbol: fiatAccount.currency,
-        
-        usd: `${fiatAccount.currency} ${fiatAccount.availableBalance}`, 
-        amount: `${fiatAccount.availableBalance} ${fiatAccount.currency}`,
+        usdAmount: Number(fiatAccount.availableBalance),
+        amount: Number(fiatAccount.availableBalance),
         logo: "https://flagcdn.com/w40/ng.png" 
       };
     }
@@ -44,8 +44,8 @@ const defaultFiatBalance = useMemo(() => {
   const displayedBalance = selectedBalance?.symbol ? selectedBalance : defaultFiatBalance || 
   {
     symbol: "",
-    usd: "$0.00",
-    amount: "0.00 XXX",
+    usdAmount: 0,
+    amount: 0,
     logo: ""
   }
 
@@ -104,7 +104,9 @@ const handleSwap = () => {
               <h3 onClick={() => setWalletOpen(true)} 
               className="text-primary text-xs cursor-pointer mb-4 flex gap-2 bg-[#F5F5F5] w-fit p-2 rounded-full">
                 
-                <img src={displayedBalance.logo} alt="logo"  className="h-4 w-4 rounded-full"/>
+                {displayedBalance.logo ? (
+                  <img src={displayedBalance.logo} alt="logo" className="h-4 w-4 rounded-full" />
+                ) : null}
                 {displayedBalance.symbol} 
                 <ArrowDown2 size="14" color="#262626" className="inline" />
                 </h3>
@@ -128,8 +130,8 @@ const handleSwap = () => {
     <span className="text-primary text-5xl">
       {showBalance ? (
         isSwapped 
-          ? String(displayedBalance.usd).replace('$', '') 
-          : String(displayedBalance.amount).replace('$', '')
+          ? formatFiatAmount((displayedBalance as any).usdAmount ?? 0, { currencySign: "$", fallbackToCode: false })
+          : formatFiatAmount((displayedBalance as any).amount ?? 0, { currencyCode: (displayedBalance as any).symbol || "NGN", currencySign: (displayedBalance as any).currency_sign })
       ) : (
         <span className="text-[#D2D2D2]"> ***** </span>
       )}
@@ -140,8 +142,8 @@ const handleSwap = () => {
   <p className="text-gray-400 text-sm mt-1 flex items-center">
     {showBalance ? (
       isSwapped 
-        ? String(displayedBalance.amount) 
-        : String(displayedBalance.usd)
+        ? formatFiatAmount((displayedBalance as any).amount ?? 0, { currencyCode: (displayedBalance as any).symbol || "NGN", currencySign: (displayedBalance as any).currency_sign })
+        : formatFiatAmount((displayedBalance as any).usdAmount ?? 0, { currencySign: "$", fallbackToCode: false })
     ) : (
       "*******"
     )}
@@ -277,16 +279,24 @@ if (!displayName) {
 
       if (tx.asset_type === 'crypto') {
         // Crypto Format: "2 BTC"
-        displayAmount = `${amountPrefix}${tx.amount} ${tx.asset}`;
+        displayAmount = formatSignedAmount(
+          amountPrefix as "+" | "-",
+          formatCryptoAmount(tx.amount, tx.asset, { minimumFractionDigits: 2, maximumFractionDigits: 8 })
+        );
       } else {
         // Fiat Format: "₦50.00" (Fallback to empty string if sign is null)
-        const sign = tx.currency_sign || ""; 
-        displayAmount = `${amountPrefix}${sign}${tx.amount}`;
+        displayAmount = formatSignedAmount(
+          amountPrefix as "+" | "-",
+          formatFiatAmount(tx.amount, {
+            currencyCode: tx.asset || "NGN",
+            currencySign: tx.currency_sign || tx.asset,
+          })
+        );
       }
 
       return (
         <div
-          key={tx.id}
+          key={tx.tx_id || tx.reference || String(tx.id)}
           className="flex justify-between items-center py-3 px-2 border-b border-gray-50 last:border-none"
         >
           <div className="flex items-center space-x-3 gap-2">

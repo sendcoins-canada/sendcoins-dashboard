@@ -8,13 +8,14 @@ import type { BalancesResponse } from "@/types/wallet";
 import { setSelectedBalance } from "@/store/wallet/slice";
 import { Bank } from "iconsax-react";
 import NGN from '@/assets/nigerianflag.svg'
+import { formatCryptoAmount, formatFiatAmount } from "@/utils/formatAmount";
 
 
 type ParsedWallet = {
   name: string;
   address: string;
-  usd: string; 
-  amount: string; 
+  usd?: string; 
+  amount: number | string; 
   logo: string;
   symbol: string; 
   isFiat?: boolean;
@@ -53,7 +54,7 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       name: wallet.name,
       address: shortenAddress(wallet.walletAddress),
       usd: wallet.TotalAvailableBalancePrice,
-      amount: `${wallet.totalAvailableBalance} ${wallet.symbol}`,
+      amount: wallet.totalAvailableBalance,
       logo: wallet.logo,
       symbol: wallet.symbol,
       isFiat: false
@@ -64,9 +65,8 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const parsedFiatWallets: ParsedWallet[] = fiatAccounts.map((account) => ({
     name: account.bankName, // Display Bank Name (e.g., Moniepoint...)
     address: account.accountNumber, // Display Account Number
-    // Formatting balance (Assuming NGN for now based on your response, or use currency symbol)
-    usd: account.currency === 'NGN' ? `₦${account.availableBalance}` : `${account.availableBalance} ${account.currency}`, 
-    amount: `${account.availableBalance} ${account.currency}`,
+    usd: undefined,
+    amount: account.availableBalance,
     logo: NGN, // API doesn't return logo for fiat, handled in render
     symbol: account.currency,
     isFiat: true
@@ -172,8 +172,15 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </div>
         </div>
         <div className="text-right">
-          <p className="font-bold text-gray-900">{wallet.usd}</p>
-          <p className="text-xs text-gray-500">{wallet.amount}</p> 
+          <p className="font-bold text-gray-900">
+            {wallet.isFiat
+              ? formatFiatAmount(wallet.amount, { currencyCode: wallet.symbol, currencySign: wallet.symbol })
+              : formatCryptoAmount(wallet.amount, wallet.symbol, { minimumFractionDigits: 2, maximumFractionDigits: 8 })}
+          </p>
+          {/* For crypto: show USD value as the small line. For fiat: hide the duplicate line. */}
+          {!wallet.isFiat && wallet.usd ? (
+            <p className="text-xs text-gray-500">{wallet.usd}</p>
+          ) : null}
          
         </div>
       </div>

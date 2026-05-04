@@ -6,6 +6,7 @@ import { Convert, Money, Money2 } from "iconsax-react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
+import { formatCryptoAmount, formatFiatAmount } from "@/utils/formatAmount";
 
 
 type Props = {
@@ -23,6 +24,7 @@ const ConfirmSend: React.FC<Props> = ({
   recipient,
   amount,
   platformFee = "0.00",
+  isFiat,
   onConfirm,
 }) => {
   const estimatedArrival = "3 mins";
@@ -30,7 +32,10 @@ const ConfirmSend: React.FC<Props> = ({
 
   // 1. Get User's Wallet Data from Redux
   const { allBalances } = useSelector((state: RootState) => state.wallet);
-const { bankDetails} = useSelector((state: RootState) => state.user) as any;
+  const bankDetails = useSelector(
+    (state: RootState) =>
+      (state.user as unknown as { bankDetails?: { accountNumber?: string } }).bankDetails
+  );
   // 2. Find the specific wallet address for the asset we are sending
   const userWallet = useMemo(() => {
     if (!allBalances?.data?.balances) return null;
@@ -70,8 +75,17 @@ const { bankDetails} = useSelector((state: RootState) => state.user) as any;
                            </div>
           <TransmitSqaure2 size="64" color="#0647F7" variant="Bold"/>
         <p className="text-[#777777] text-sm">You are sending</p>
-        <p className="text-4xl font-bold text-gray-900">{amount} {asset}</p>
-        <p className="text-sm text-[#0052FF] mt-1">~{amount} {asset}</p>
+        <p className="text-4xl font-bold text-gray-900">
+          {isFiat
+            ? formatFiatAmount(amount, { currencyCode: asset || "NGN", currencySign: asset || "NGN" })
+            : formatCryptoAmount(amount, asset, { minimumFractionDigits: 2, maximumFractionDigits: 8 })}
+        </p>
+        <p className="text-sm text-[#0052FF] mt-1">
+          ~
+          {isFiat
+            ? formatFiatAmount(amount, { currencyCode: asset || "NGN", currencySign: asset || "NGN" })
+            : formatCryptoAmount(amount, asset, { minimumFractionDigits: 2, maximumFractionDigits: 8 })}
+        </p>
       </div>
 
 <div className="bg-[#F5F5F5] max-w-xl w-full p-2 rounded-2xl">
@@ -140,15 +154,27 @@ const { bankDetails} = useSelector((state: RootState) => state.user) as any;
           <span className="flex items-center gap-2">
              <Money2 size="16" color="#777777" className="inline"/> Platform fee
           </span>
-          <span className="text-primary">{platformFee}</span>
+          <span className="text-primary">
+            {isFiat
+              ? formatFiatAmount(platformFee, { currencyCode: asset || "NGN", currencySign: asset || "NGN" })
+              : formatCryptoAmount(platformFee, asset, { minimumFractionDigits: 2, maximumFractionDigits: 8 })}
+          </span>
         </div>
         <div className="flex items-center justify-between p-3 text-sm font-semibold">
           <span className="flex items-center gap-2">
              <Money size="16" color="#777777" className="inline"/> Amount Received
           </span>
           <span className="text-primary">
-            {amount} {asset}
-            <span className="text-xs text-neutral ml-1">(≈ {amount} {asset})</span>
+            {isFiat
+              ? formatFiatAmount(amount, { currencyCode: asset || "NGN", currencySign: asset || "NGN" })
+              : formatCryptoAmount(amount, asset, { minimumFractionDigits: 2, maximumFractionDigits: 8 })}
+            <span className="text-xs text-neutral ml-1">
+              (≈{" "}
+              {isFiat
+                ? formatFiatAmount(amount, { currencyCode: asset || "NGN", currencySign: asset || "NGN" })
+                : formatCryptoAmount(amount, asset, { minimumFractionDigits: 2, maximumFractionDigits: 8 })}
+              )
+            </span>
           </span>
         </div>
       </div>

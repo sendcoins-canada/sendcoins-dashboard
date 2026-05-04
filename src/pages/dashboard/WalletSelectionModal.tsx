@@ -3,6 +3,7 @@ import React from "react";
 import Modal from "@/components/ui/Modal";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
+import { formatCryptoAmount } from "@/utils/formatAmount";
 
 interface WalletSelectionModalProps {
   open: boolean;
@@ -29,9 +30,10 @@ const parsedWallets = Object.values(allBalances?.data?.balances || {})
     name: wallet.name,
     address: shortenAddress(wallet.walletAddress),
     usd: wallet.TotalAvailableBalancePrice,
-    amount: `${wallet.totalAvailableBalance} ${wallet.symbol}`,
+    amount: wallet.totalAvailableBalance,
     color: "bg-gray-200", // or dynamic if available
     icon: wallet.logo,
+    symbol: wallet.symbol,
   }));
 
 
@@ -77,9 +79,9 @@ const parsedWallets = Object.values(allBalances?.data?.balances || {})
             {/* Balance Info */}
             <div className="text-right">
               <p className="font-semibold text-neutral-900">
-                {wallet.usd}
+                {formatCryptoAmount(wallet.amount, wallet.symbol, { minimumFractionDigits: 2, maximumFractionDigits: 8 })}
               </p>
-              <p className="text-xs text-gray-500">{wallet.amount}</p>
+              <p className="text-xs text-gray-500">{wallet.usd}</p>
             </div>
           </div>
         ))}

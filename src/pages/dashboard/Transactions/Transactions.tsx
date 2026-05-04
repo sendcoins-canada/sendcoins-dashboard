@@ -9,6 +9,7 @@ import { getTransactionsThunk } from "@/store/transactions/asyncThunks/getTransa
 import type { RawApiTransactionList } from "@/types/transaction";
 import SearchIcon from "@/assets/search.png"; // Renamed to avoid confusion with search state
 import { useNavigate } from "react-router-dom";
+import { formatCryptoAmount, formatFiatAmount, formatSignedAmount } from "@/utils/formatAmount";
 
 const Transactions = () => {
   const dispatch = useDispatch();
@@ -139,10 +140,17 @@ const Transactions = () => {
               const timeDisplay = new Date(tx.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
               const isOutgoing = ['payout', 'outgoing', 'send'].includes(tx.transaction_type?.toLowerCase() || tx.option_type?.toLowerCase());
               const amountPrefix = isOutgoing ? "-" : "+";
+              const formattedAmount =
+                tx.asset_type === "crypto"
+                  ? formatCryptoAmount(tx.amount, tx.asset || "", { minimumFractionDigits: 2, maximumFractionDigits: 8 })
+                  : formatFiatAmount(tx.amount, {
+                      currencyCode: tx.asset || "NGN",
+                      currencySign: tx.currency_sign || tx.asset,
+                    });
 
               return (
                 <div
-                  key={tx.id}
+                  key={tx.tx_id || tx.reference || String(tx.id)}
                   className="flex justify-between items-center py-3 px-2 cursor-pointer hover:bg-gray-50 rounded-xl transition-colors"
                   onClick={() => handleTransactionSelect(tx.tx_id)}
                 >
@@ -174,7 +182,7 @@ const Transactions = () => {
                   </div>
                   
                   <p className={`text-sm md:text-base font-bold ${isOutgoing ? 'text-red-500' : 'text-green-600'}`}>
-                    {amountPrefix}{tx.currency_sign || ""}{Number(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })} {tx.asset_type === 'crypto' ? tx.asset : ''}
+                    {formatSignedAmount(amountPrefix as "+" | "-", formattedAmount)}
                   </p>
                 </div>
               );

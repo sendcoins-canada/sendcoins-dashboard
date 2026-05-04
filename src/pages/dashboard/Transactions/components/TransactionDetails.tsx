@@ -8,6 +8,7 @@ import type { RootState } from "@/store";
 import { getTransactionDetailThunk } from "@/store/transactions/asyncThunks/getTransactionDetail";
 import type { RawApiTransactionList } from "@/types/transaction";
 import MinimalLayout from "@/components/MinimalLayout";
+import { formatCryptoAmount, formatFiatAmount } from "@/utils/formatAmount";
 
 // --- STATUS CONFIG ---
 const statusStyles = {
@@ -113,8 +114,9 @@ const TransactionDetails: React.FC = () => {
 
   // Derive Display Values
   const isCrypto = tx.asset_type === 'crypto';
-  const currencySymbol = isCrypto ? tx.asset : (tx.currency_sign || "NGN"); 
-  const displayAmount = `${tx.amount} ${currencySymbol}`;
+  const displayAmount = isCrypto
+    ? formatCryptoAmount(tx.amount, tx.asset || "", { minimumFractionDigits: 2, maximumFractionDigits: 8 })
+    : formatFiatAmount(tx.amount, { currencyCode: tx.asset || "NGN", currencySign: tx.currency_sign || tx.asset });
   // Logic to determine Status Key for Styles
   let statusKey: "Processing" | "Successful" | "Failed" = "Processing";
   if (tx.status === 'completed') statusKey = "Successful";
