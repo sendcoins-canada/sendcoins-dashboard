@@ -72,7 +72,7 @@ export const TextInputField: React.FC<TextInputFieldProps> = ({
 type SelectFieldProps = {
   name: string;
   label?: React.ReactNode;
-  options: { value: string; label: string; icon?: React.ReactNode }[];
+  options: { value: string; label: string | React.ReactNode; icon?: React.ReactNode; isGroupHeader?: boolean }[];
   placeholder?: string;
 };
 
