@@ -57,7 +57,7 @@ const submit = async (overrideCode?: string) => {
     // 2. Call the API
     const response = await verifyOtp({ 
       email: email || "", // Fix: ensure string
-      code: Number(finalCode), 
+      code: finalCode,
       purpose: purpose 
     });
 
