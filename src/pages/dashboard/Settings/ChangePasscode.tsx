@@ -72,7 +72,7 @@ const ResetPasscode: React.FC = () => {
         // Verify OTP (Step 2)
         const otpResult = await verifyOtp({
           email: userData?.user_email || "",
-          code: currentCodeAsNumber,
+          code: currentCodeAsString,
           purpose: "passcode_reset"
         });
 
