@@ -10,6 +10,8 @@ import { useDispatch } from "react-redux";
 import { setCountry } from "@/store/registration/slice";
 import { useQuery } from "@tanstack/react-query";
 import { getCountries } from "@/api/authApi";
+import { allCountries } from "@/data/countries";
+import type { SelectOption } from "@/components/ui/select";
 
 
 const Country: React.FC = () => {
@@ -23,17 +25,45 @@ const Country: React.FC = () => {
     queryFn: getCountries,
   });
 
-  // Map API response into options for SelectField
-  const options =
-    data?.data.map((c) => ({
-      value: c.country, // unique key (or you can use c.country)
+  // Build grouped options: supported countries at top, then all others
+  const options: SelectOption[] = React.useMemo(() => {
+    const supportedCountries = data?.data || [];
+    const supportedNames = new Set(supportedCountries.map((c) => c.country));
+
+    // Supported countries group
+    const supported: SelectOption[] = supportedCountries.map((c) => ({
+      value: c.country,
       label: c.country,
       icon: <img
-        src={c.flag} // <-- backend gives you full image URL
+        src={c.flag}
         alt={c.country}
         className="w-5 h-5 mr-2 inline-block rounded-full"
-      /> // emoji flag
-    })) || [];
+      />,
+    }));
+
+    // Other countries from static list (excluding already-supported ones)
+    const others: SelectOption[] = allCountries
+      .filter((c) => !supportedNames.has(c.name))
+      .map((c) => ({
+        value: c.name,
+        label: c.name,
+        icon: <span className="w-5 h-5 mr-2 inline-block text-center leading-5">{c.flag}</span>,
+      }));
+
+    const result: SelectOption[] = [];
+
+    if (supported.length > 0) {
+      result.push({ value: "__supported__", label: "Supported Countries", isGroupHeader: true });
+      result.push(...supported);
+    }
+
+    if (others.length > 0) {
+      result.push({ value: "__others__", label: "All Countries", isGroupHeader: true });
+      result.push(...others);
+    }
+
+    return result;
+  }, [data]);
 
   return (
     <>
@@ -51,16 +81,13 @@ const Country: React.FC = () => {
 
             <h1 className="text-[28px] font-semibold">Select your country</h1>
             <p className="mt-1 text-[#8C8C8C] text-[15px]">
-              We’ll personalize your experience based on where you are.            </p>
+              We'll personalize your experience based on where you are.            </p>
 
             <Formik
               initialValues={{ country: "Canada" }}
               validationSchema={schema}
               onSubmit={(values) => {
-                // ✅ Save to Redux
                 dispatch(setCountry(values.country));
-
-                // go to next step
                 navigate("/personal-info");
               }}
             >
@@ -68,7 +95,6 @@ const Country: React.FC = () => {
                 <Form className="mt-6 space-y-4">
                   <SelectField
                     name="country"
-                    // label="Country"
                     placeholder="Select country"
                     options={options}
                   />

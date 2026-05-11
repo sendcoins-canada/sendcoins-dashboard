@@ -10,6 +10,7 @@ import { showSuccess } from "@/components/ui/toast";
 import { QRCodeSVG } from 'qrcode.react';
 import logo from "@/assets/Logosingle.png"
 import { useCrayfiAccount } from "@/store/hooks/useGetAccount";
+import { useNavigate } from "react-router-dom";
 
 interface WalletOption {
   name: string;
@@ -29,6 +30,7 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
   const [step, setStep] = useState<1 | 2>(1);
   const [selected, setSelected] = useState<"bank" | "crypto" | "apple" | null>(null);
   const dispatch = useDispatch()
+  const navigate = useNavigate();
   const token = useSelector((state: RootState) => state.auth.token?.azer_token);
   // State to hold the currently selected wallet address for funding
   const [selectedWalletAddress, setSelectedWalletAddress] = useState<string>("");
@@ -242,12 +244,19 @@ const handleCopy = (text: string, label?: string) => {
               </div>
             )}
 
-            {/* Error State */}
+            {/* No Fiat Account - Setup Prompt */}
             {bankError && !bankLoading && (
-              <div className="py-10 text-center">
-                <p className="text-red-500 mb-2">{bankError}</p>
-                <Button onClick={() => token && fetchAccount(token, "CAD")} variant="outline" className="text-sm">
-                  Try Again
+              <div className="py-8 text-center">
+                <div className="mx-auto mb-3 inline-flex items-center justify-center rounded-full bg-[#E8EDFF] p-3">
+                  <Bank size="24" color="#0647F7" variant="Bold" />
+                </div>
+                <p className="text-sm text-[#555] mb-1">No fiat account yet</p>
+                <p className="text-xs text-[#8C8C8C] mb-4">Set up your Naira account to receive bank transfers.</p>
+                <Button
+                  onClick={() => { onOpenChange(false); navigate('/dashboard/setup-fiat'); }}
+                  className="bg-[#0647F7] hover:bg-[#2563EB] text-white text-sm"
+                >
+                  Set Up Fiat Account
                 </Button>
               </div>
             )}

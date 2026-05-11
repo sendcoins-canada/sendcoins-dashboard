@@ -215,7 +215,24 @@ const handleSwap = () => {
           </>
         )}
 
-      
+        {/* --- FIAT ACCOUNT SETUP PROMPT (No fiat account) --- */}
+        {!defaultFiatBalance && !showReminder && (
+          <div
+            onClick={() => navigate('/dashboard/setup-fiat')}
+            className="bg-gradient-to-r from-[#EEF2FF] to-[#E8EDFF] border border-[#C7D2FE] rounded-2xl px-5 py-5 flex items-center justify-between mb-6 cursor-pointer hover:shadow-md transition-all"
+          >
+            <div>
+              <h2 className="font-semibold text-primary text-sm md:text-base">Set up your Naira account</h2>
+              <p className="text-[#6B7280] mt-1 text-xs md:text-sm">
+                Add your BVN to receive and send NGN directly from your dashboard.
+              </p>
+            </div>
+            <div className="bg-[#0647F7] rounded-full px-4 py-2 text-white text-xs font-medium whitespace-nowrap ml-4">
+              Get Started
+            </div>
+          </div>
+        )}
+
 <div>
   <div className="flex justify-between items-center mb-3">
     <h2 className="font-semibold text-primary">Recent transaction</h2>

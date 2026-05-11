@@ -7,6 +7,7 @@ export type SelectOption = {
   value: string;
   label: string | React.ReactNode;
   icon?: React.ReactNode;
+  isGroupHeader?: boolean;
 };
 
 export type SelectProps = {
@@ -33,12 +34,30 @@ export const Select: React.FC<SelectProps> = ({
   const selected = options.find((o) => o.value === value);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
 
-  // Filter options based on search term
+  // Filter options based on search term (group headers included if any child matches)
   const filteredOptions = React.useMemo(() => {
-    return options.filter((opt) => {
+    if (!searchTerm) return options;
+    const term = searchTerm.toLowerCase();
+    const result: SelectOption[] = [];
+    let lastHeader: SelectOption | null = null;
+    let headerAdded = false;
+
+    for (const opt of options) {
+      if (opt.isGroupHeader) {
+        lastHeader = opt;
+        headerAdded = false;
+        continue;
+      }
       const labelText = typeof opt.label === 'string' ? opt.label : opt.value;
-      return labelText.toLowerCase().includes(searchTerm.toLowerCase());
-    });
+      if (labelText.toLowerCase().includes(term)) {
+        if (lastHeader && !headerAdded) {
+          result.push(lastHeader);
+          headerAdded = true;
+        }
+        result.push(opt);
+      }
+    }
+    return result;
   }, [options, searchTerm]);
 
   React.useEffect(() => {
@@ -116,25 +135,33 @@ export const Select: React.FC<SelectProps> = ({
           )}
           <div className="max-h-56 overflow-auto py-1">
             {filteredOptions.length > 0 ? (
-            filteredOptions.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => {
-                  onChange?.(opt.value);
-                  setOpen(false);
-                }}
-                className={cn(
-                  "flex w-[95%] mx-auto items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-white",
-                  value === opt.value && "bg-white font-medium "
-                )}
-              >
-                {opt.icon && (
-                  <span className="shrink-0 flex items-center">{opt.icon}</span>
-                )}
-                <span className="text-[15px] text-[#262626] py-1 mb-1">{opt.label}</span>
-              </button>
-            ))
+            filteredOptions.map((opt, idx) =>
+              opt.isGroupHeader ? (
+                <div
+                  key={`header-${opt.value}-${idx}`}
+                  className="px-4 pt-3 pb-1 text-xs font-semibold text-neutral-500 uppercase tracking-wide select-none"
+                >
+                  {opt.label}
+                </div>
+              ) : (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    onChange?.(opt.value);
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    "flex w-[95%] mx-auto items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-white",
+                    value === opt.value && "bg-white font-medium "
+                  )}
+                >
+                  {opt.icon && (
+                    <span className="shrink-0 flex items-center">{opt.icon}</span>
+                  )}
+                  <span className="text-[15px] text-[#262626] py-1 mb-1">{opt.label}</span>
+                </button>
+              ))
             ) : (
               <div className="text-center py-4 text-sm text-neutral-500">
                 No results found

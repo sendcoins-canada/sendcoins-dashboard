@@ -56,6 +56,46 @@ export const sendFiat = async (params: SendFiatParams) => {
   return response.data;
 };
 
+export interface UpdateProfileParams {
+  token: string;
+  first_name?: string;
+  middle_name?: string;
+  last_name?: string;
+  bvn?: string;
+}
+
+export interface RequestFiatAccountParams {
+  token: string;
+}
+
+export const updateProfile = async (params: UpdateProfileParams) => {
+  const formData = new FormData();
+  formData.append("token", params.token);
+  if (params.first_name) formData.append("first_name", params.first_name);
+  if (params.middle_name) formData.append("middle_name", params.middle_name);
+  if (params.last_name) formData.append("last_name", params.last_name);
+  if (params.bvn) formData.append("bvn", params.bvn);
+
+  const response = await api.put(
+    "/user/profile",
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return response.data;
+};
+
+export const requestFiatAccount = async (params: RequestFiatAccountParams) => {
+  const formData = new FormData();
+  formData.append("token", params.token);
+
+  const response = await api.post(
+    "/user/fiat/request",
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return response.data;
+};
+
 export const getAccount = async (params: GetAccountParams) => {
   const formData = new FormData();
   

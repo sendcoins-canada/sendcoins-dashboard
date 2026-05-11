@@ -61,7 +61,7 @@ export const registerWithPassword = async (
   formData.append("lastName", data.lastName);
   formData.append("password", data.password);
   formData.append("country", data.country);
-  formData.append("bvn", data.bvn);
+  if (data.bvn) formData.append("bvn", data.bvn);
   formData.append("authHash", data.authHash);
 
   const response = await api.post<RegisterResponse>(
