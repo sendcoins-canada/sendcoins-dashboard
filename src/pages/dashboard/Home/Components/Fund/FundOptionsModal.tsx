@@ -256,7 +256,7 @@ const handleCopy = (text: string, label?: string) => {
                   onClick={() => { onOpenChange(false); navigate('/dashboard/setup-fiat'); }}
                   className="bg-[#0647F7] hover:bg-[#2563EB] text-white text-sm"
                 >
-                  Set Up Fiat Account
+                  Set Up NGN Account
                 </Button>
               </div>
             )}

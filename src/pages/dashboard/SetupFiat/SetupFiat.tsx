@@ -156,7 +156,7 @@ const SetupFiat: React.FC = () => {
                     className="w-full bg-[#0647F7] hover:bg-[#2563EB] text-white mt-4"
                     disabled={loading}
                   >
-                    {loading ? "Setting up your account..." : "Create Fiat Account"}
+                    {loading ? "Setting up your account..." : "Set Up NGN Account"}
                   </Button>
                 </Form>
               )}

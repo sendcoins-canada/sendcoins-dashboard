@@ -8,7 +8,7 @@ interface RegistrationState {
   country: string;
   firstName: string;
   lastName: string;
-  dob: string;
+  phoneNumber: string;
   password: string;
 }
 
@@ -18,7 +18,7 @@ const initialState: RegistrationState = {
   country: "",
   firstName: "",
   lastName: "",
-  dob: "",
+  phoneNumber: "",
   password: "",
 };
 
@@ -41,8 +41,8 @@ const registrationSlice = createSlice({
     setLastName(state, action: PayloadAction<string>) {
       state.lastName = action.payload;
     },
-    setDob(state, action: PayloadAction<string>) {
-      state.dob = action.payload;
+    setPhoneNumber(state, action: PayloadAction<string>) {
+      state.phoneNumber = action.payload;
     },
     setPassword(state, action: PayloadAction<string>) {
       state.password = action.payload;
@@ -59,7 +59,7 @@ export const {
   setCountry,
   setFirstName,
   setLastName,
-  setDob,
+  setPhoneNumber,
   setPassword,
   resetRegistration,
 } = registrationSlice.actions;

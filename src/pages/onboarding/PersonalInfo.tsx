@@ -7,15 +7,13 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setFirstName, setLastName, setDob } from "@/store/registration/slice";
+import { setFirstName, setLastName, setPhoneNumber } from "@/store/registration/slice";
 
 const PersonalInfo: React.FC = () => {
   const schema = Yup.object({
     firstName: Yup.string().required("First name is required"),
     lastName: Yup.string().required("Last name is required"),
-    dob: Yup.date()
-      .required("Date of birth is required")
-      .max(new Date(), "Date of birth cannot be in the future"),
+    phoneNumber: Yup.string(),
   });
 
   const navigate = useNavigate();
@@ -39,17 +37,17 @@ const PersonalInfo: React.FC = () => {
 
             <h2 className="text-[28px] font-semibold">Tell us a bit about you</h2>
             <p className="mt-1 text-[#8C8C8C] text-[15px]">
-              Enter your full legal name and date of birth. We’ll use this to verify your identity later.
+              Enter your full legal name and contact details. We’ll use this to verify your identity later.
             </p>
 
             <Formik
-              initialValues={{ firstName: "", lastName: "", dob: "" }}
+              initialValues={{ firstName: "", lastName: "", phoneNumber: "" }}
               validationSchema={schema}
                onSubmit={(values) => {
                 // ✅ Save to Redux
                 dispatch(setFirstName(values.firstName));
                 dispatch(setLastName(values.lastName));
-                dispatch(setDob(values.dob));
+                dispatch(setPhoneNumber(values.phoneNumber));
 
                 // ✅ Go to next step
                 navigate("/password");
@@ -69,9 +67,10 @@ const PersonalInfo: React.FC = () => {
                     label="Last name"
                   />
                   <TextInputField
-                    name="dob"
-                    type="date"
-                    label="Date of birth"
+                    name="phoneNumber"
+                    type="tel"
+                    label="Phone number (optional)"
+                    placeholder="eg: +234 801 234 5678"
                   />
 
                   <Button
