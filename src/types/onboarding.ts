@@ -17,6 +17,7 @@ export interface VerifyOtpRequest {
   email: string;
   code: string;
   purpose: "login" | "registration" | "passcode_reset" | "passcode_create";
+  token?: string;
 }
 
 // export interface VerifyOtpResponse {

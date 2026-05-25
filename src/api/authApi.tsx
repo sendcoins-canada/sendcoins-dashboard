@@ -28,6 +28,7 @@ export const verifyOtp = async (
   formData.append("email", data.email);
   formData.append("otp", data.code.toString());
   formData.append("purpose", data.purpose);
+  if (data.token) formData.append("token", data.token);
 
   const response = await api.post<VerifyOtpResponse>("/auth/otp/verify", formData, {
     headers: {
@@ -39,11 +40,12 @@ export const verifyOtp = async (
 };
 
 // resend otp
-export const resendOtp = async (email: string): Promise<{ message: string }> => {
+export const resendOtp = async (email: string, purpose?: string): Promise<{ message: string }> => {
   const formData = new FormData();
   formData.append("email", email);
+  formData.append("purpose", purpose || "registration");
 
-  const response = await api.post("/user/auth/resendOTP", formData, {
+  const response = await api.post("/auth/otp/resend", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
 
@@ -242,11 +244,12 @@ export const requestPasscodeCreate = async (data: {
   return response.data;
 };
 
-// Step 2: Finalize Creation (Requires authHash + passcode)
-export const finalizePasscodeCreate = async (passcode: string, authHash: string) => {
+// Step 2: Finalize Creation (Requires authHash + passcode + token)
+export const finalizePasscodeCreate = async (passcode: string, authHash: string, token: string) => {
   const formData = new FormData();
   formData.append("passcode", passcode);
   formData.append("authHash", authHash);
+  formData.append("token", token);
 
   const response = await api.post("/auth/passcode/create", formData, {
     headers: { "Content-Type": "multipart/form-data" },

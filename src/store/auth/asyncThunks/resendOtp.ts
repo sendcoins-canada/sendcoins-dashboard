@@ -4,6 +4,7 @@ import type { RootState } from "@/store";
 
 interface ResendOtpPayload {
   email: string;
+  purpose?: string;
 }
 
 interface ResendOtpReturn {
@@ -21,7 +22,7 @@ export const resendOtpThunk = createAsyncThunk<
   "auth/resendOtp",
   async (payload, { rejectWithValue }) => {
     try {
-      const response = await resendOtpApi(payload.email);
+      const response = await resendOtpApi(payload.email, payload.purpose);
 
       return {
         message: response?.message || "OTP resent successfully!",

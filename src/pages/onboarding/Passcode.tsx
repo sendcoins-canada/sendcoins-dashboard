@@ -61,11 +61,13 @@ const SetupPasscode: React.FC = () => {
         // 3. Move to OTP screen
         // IMPORTANT: We pass 'finalCode' and 'purpose' in the state 
         // so the Verify screen knows what to do after the OTP is correct.
-        navigate("/verify", { 
-          state: { 
-            purpose: "passcode_create", 
-            tempPasscode: finalCode 
-          } 
+        const userEmail = JSON.parse(localStorage.getItem("user") || "{}")?.useremail || "";
+        navigate("/verify", {
+          state: {
+            purpose: "passcode_create",
+            tempPasscode: finalCode,
+            email: userEmail
+          }
         });
       }
         

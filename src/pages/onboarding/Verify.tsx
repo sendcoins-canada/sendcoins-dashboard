@@ -41,9 +41,9 @@ const { purpose: statePurpose, tempPasscode } = location.state || {};
 const submit = async (overrideCode?: string) => {
   if (isBusy) return;
   const finalCode = overrideCode ?? values.join("");
-  
+
   // 1. Dispatch the imported action
-  dispatch(setLoading(true)); 
+  dispatch(setLoading(true));
   // 1. Get the raw string from storage
   const rawPurpose = statePurpose || localStorage.getItem("purpose");
 
@@ -51,14 +51,31 @@ const submit = async (overrideCode?: string) => {
   // Use "registration" as a fallback if the storage is empty
   const purpose = (rawPurpose || "registration") as "registration" | "login" | "passcode_reset" | "passcode_create";
 
-  // const storedPurpose = localStorage.getItem("purpose") ;
+  // Validate email before making API call
+  if (!email || email.trim() === "") {
+    showDanger("Email is missing. Please restart the process.");
+    dispatch(setLoading(false));
+    return;
+  }
+
+  // Get token for sensitive operations (passcode_create, passcode_update, passcode_reset)
+  const token = localStorage.getItem("azertoken") || "";
+  const isSensitivePurpose = ["passcode_create", "passcode_update", "passcode_reset"].includes(purpose);
+
+  if (isSensitivePurpose && !token) {
+    showDanger("Session expired. Please log in again.");
+    dispatch(setLoading(false));
+    navigate("/login");
+    return;
+  }
 
   try {
-    // 2. Call the API
-    const response = await verifyOtp({ 
-      email: email || "", // Fix: ensure string
+    // 2. Call the API — pass token for sensitive purposes
+    const response = await verifyOtp({
+      email: email,
       code: finalCode,
-      purpose: purpose 
+      purpose: purpose,
+      ...(isSensitivePurpose && { token })
     });
 
     showSuccess("Verified!");
@@ -71,9 +88,9 @@ const submit = async (overrideCode?: string) => {
         throw new Error("Missing session data. Please restart passcode setup.");
       }
 
-      // STEP 3: Finalize Passcode Creation immediately
-      const finalRes = await finalizePasscodeCreate(tempPasscode, authHash);
-      
+      // STEP 3: Finalize Passcode Creation immediately (with token for auth binding)
+      const finalRes = await finalizePasscodeCreate(tempPasscode, authHash, token);
+
       showSuccess(finalRes.message || "Passcode created successfully!");
       navigate("/dashboard/home");
 
@@ -176,7 +193,8 @@ const submit = async (overrideCode?: string) => {
 
   // Resend OTP handler using Redux thunk
   const handleResendOtp = async () => {
-    const result = await dispatch(resendOtpThunk({ email }));
+    const purpose = statePurpose || localStorage.getItem("purpose") || "registration";
+    const result = await dispatch(resendOtpThunk({ email, purpose }));
 
     if (resendOtpThunk.fulfilled.match(result)) {
       showSuccess(result.payload.message || "OTP resent successfully!");
