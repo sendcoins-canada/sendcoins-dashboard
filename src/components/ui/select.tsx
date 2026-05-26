@@ -145,7 +145,7 @@ export const Select: React.FC<SelectProps> = ({
                 </div>
               ) : (
                 <button
-                  key={opt.value}
+                  key={`${opt.value}-${idx}`}
                   type="button"
                   onClick={() => {
                     onChange?.(opt.value);

@@ -116,7 +116,7 @@ const submit = async (overrideCode?: string) => {
       }
     }
   } catch (e: any) {
-    showDanger(e.response?.data?.message || "Verification failed");
+    showDanger(e.response?.data?.data?.message || e.response?.data?.message || "Verification failed");
   } finally {
     dispatch(setLoading(false));
   }

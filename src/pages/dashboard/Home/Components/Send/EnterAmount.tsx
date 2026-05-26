@@ -57,16 +57,28 @@ useEffect(() => {
     return currentWallet?.totalAvailableBalance || 0;
   }
 }, [allBalances, asset, isFiat]);
-// fetch gas fee
-const { 
-    gasFee,      
-    loading: isGasLoading, 
-    error: gasError 
-  } = useGasFee({
+// fetch gas fee (crypto only — fiat uses platform fee calculated locally)
+const {
+    gasFee: cryptoGasFee,
+    loading: isCryptoGasLoading,
+    error: cryptoGasError
+  } = useGasFee(isFiat ? undefined : {
     amount: sendAmount,
-    asset: isFiat ? 'fiat' : 'crypto',
+    asset: 'crypto',
     symbol: asset.toLowerCase()
   });
+
+// Fiat platform fee: 1.2% (matches backend payout handler)
+const PLATFORM_FEE_PERCENTAGE = 1.2;
+const fiatPlatformFee = useMemo(() => {
+  const amountNum = Number(sendAmount);
+  if (!amountNum || amountNum <= 0) return 0;
+  return parseFloat(((amountNum * PLATFORM_FEE_PERCENTAGE) / 100).toFixed(2));
+}, [sendAmount]);
+
+const gasFee = isFiat ? fiatPlatformFee : cryptoGasFee;
+const isGasLoading = isFiat ? false : isCryptoGasLoading;
+const gasError = isFiat ? null : cryptoGasError;
 
 
  // 3. Calculation Logic
@@ -74,13 +86,13 @@ const {
   // Determine amounts based on wallet balance
   const calculation = useMemo(() => {
     const amountNum = Number(sendAmount);
-    // Use the gasFee from the hook, default to 0 if not loaded yet
-    const currentGasFee = Number(gasFee) || 0;
+    // Use the fee (platform fee for fiat, gas fee for crypto)
+    const currentFee = Number(gasFee) || 0;
     if (!amountNum || amountNum <= 0) {
       return { recipientGets: 0, totalDeducted: 0, status: 'idle' };
     }
-    const recipientGets = Math.max(amountNum - currentGasFee);
-    const totalNeeded = amountNum + currentGasFee;
+    const recipientGets = Math.max(amountNum - currentFee);
+    const totalNeeded = amountNum;
 
     // Case 1: Insufficient funds for amount itself
     if (amountNum > walletAvailableBalance) {
@@ -223,7 +235,7 @@ const handleContinue = () => {
                 <label className="text-sm text-neutral-500">
                   Amount they’ll receive
                 </label>
-                <p className="bg-[#F5F5F5] px-6 py-1 rounded-full text-primary">{recipient.network || asset.toUpperCase()}</p>
+                <p className="bg-[#F5F5F5] px-6 py-1 rounded-full text-primary">{isFiat ? asset.toUpperCase() : (recipient.network || asset.toUpperCase())}</p>
                 {/* <Select
                   value={receiveAsset}
                   onChange={setReceiveAsset}

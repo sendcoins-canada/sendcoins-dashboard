@@ -110,9 +110,9 @@ const FiatCountrySelection: React.FC<FiatCountrySelectionProps> = ({ onBack, onC
               filteredCountries.map((country) => (
                 <div
                   key={country.currency_name}
-                  onClick={() => setSelectedCurrency(country.currency_name)}
+                  onClick={() => setSelectedCurrency(country.currency_init)}
                   className={`w-full flex items-center px-3 py-2 rounded-2xl transition-all cursor-pointer group ${
-                    selectedCurrency === country.currency_name 
+                    selectedCurrency === country.currency_init 
                       ? 'bg-[#F5F5F5]' 
                       : 'bg-white hover:bg-[#F5F5F5]'
                   }`}
@@ -126,7 +126,7 @@ const FiatCountrySelection: React.FC<FiatCountrySelectionProps> = ({ onBack, onC
                    
                   </div>
                   <div className="ml-auto">
-                    {selectedCurrency === country.currency_name && (
+                    {selectedCurrency === country.currency_init && (
                       <TickCircle size={16} color="#34C759" variant="Bold" />
                     )}
                   </div>

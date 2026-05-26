@@ -135,7 +135,15 @@ export const useBanks = (currency?: string): UseBanksResult => {
           };
         });
 
-        setBanks(mergedBanks);
+        // Deduplicate by bank_name to prevent React key collisions in Select
+        const seen = new Set<string>();
+        const uniqueBanks = mergedBanks.filter((bank: Bank) => {
+          if (seen.has(bank.bank_name)) return false;
+          seen.add(bank.bank_name);
+          return true;
+        });
+
+        setBanks(uniqueBanks);
       } catch (err: any) {
         setError("Failed to sync bank codes");
       } finally {
