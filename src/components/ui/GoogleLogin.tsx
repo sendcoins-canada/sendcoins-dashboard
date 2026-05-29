@@ -3,7 +3,12 @@ import { Button } from "@/components/ui/button"; // your styled button component
 // import { FcGoogle } from "react-icons/fc"
 import Google from "@/assets/Google.svg"
 
-const GoogleLoginButton = ({ onSuccess, onError }: any) => {
+interface GoogleLoginButtonProps {
+  onSuccess: (response: { code: string }) => void;
+  onError?: () => void;
+}
+
+const GoogleLoginButton = ({ onSuccess, onError }: GoogleLoginButtonProps) => {
   const login = useGoogleLogin({
     flow: "auth-code",
     onSuccess,

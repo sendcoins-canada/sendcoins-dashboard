@@ -116,7 +116,7 @@ export interface GetGasFee {
 }
 
 export interface GasFeeData {
-  isSuccess: boolean | string;
+  isSuccess: boolean;
   amount: string;
   initialFeeUsd: number;
   gasFee: number;

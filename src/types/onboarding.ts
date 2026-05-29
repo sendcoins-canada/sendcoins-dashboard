@@ -191,6 +191,6 @@ export interface UpdatePasswordWithOtpResponse {
     message: string;
     isSuccess: boolean;
     icon?: string;
-    token?: any;
+    token?: { azer_token: string; expires_at: number };
   };
 }
