@@ -73,23 +73,8 @@ const initialState: WalletState = {
   networks: [],
   loading: false,
   allBalances: undefined,
-  // selectedBalance: {
-  //   symbol: "",
-  //   usd: "",
-  //   amount: "",
-  //   logo: ""
-  // },
   selectedBalance: null,
 };
-
-// type SingleWalletData = {
-//     isWalletAvailable: boolean;
-//     symbol: string;
-//     TotalAvailableBalancePrice: string;
-//     totalAvailableBalance: number;
-//     logo: string
-//     // ... other properties
-// };
 
 const walletSlice = createSlice({
   name: "wallet",
@@ -269,54 +254,7 @@ const walletSlice = createSlice({
     .addCase(getAllBalanceThunk.pending, (state) => {
       state.loading = true;
     })
-    // .addCase(getAllBalanceThunk.fulfilled, (state, action) => {
-    //   state.loading = false;
-    //   state.allBalances = action.payload; // all balances at once
-    //   // Optionally set an initial selected balance from the first wallet found
-    //       const firstBalanceKey = Object.keys(action.payload.data?.balances || {})[0];
-    //       if (firstBalanceKey) {
-    //         const firstWallet = Object.values(action.payload.data.balances[firstBalanceKey])[0] as SingleWalletData;
-    //         if (firstWallet.isWalletAvailable) {
-    //             state.selectedBalance = {
-    //                 symbol: firstWallet.symbol,
-    //                 usd: firstWallet.TotalAvailableBalancePrice,
-    //                 amount: `${firstWallet.totalAvailableBalance} ${firstWallet.symbol}`,
-    //                                 logo: firstWallet.logo
-
-    //             };
-    //         }
-    //       }
-    // })
-//    .addCase(getAllBalanceThunk.fulfilled, (state, action) => {
-//   state.loading = false;
-//   state.allBalances = action.payload;
-
-//   const balances = action.payload?.data?.balances;
-//   const fetchedKeys = action.payload?.data?.fetchedSuccessfully; 
-
-//   if (balances && fetchedKeys && fetchedKeys.length > 0) {
-//     // Only auto-select if we don't have a selection yet
-//     if (!state.selectedBalance || state.selectedBalance.symbol === "") {
-      
-//       // Get the first successful key (e.g., 'btc')
-//       const firstKey = fetchedKeys[0];
-//       const firstWallet = balances[firstKey];
-
-//       if (firstWallet ) {
-//         // Map the API fields to your SelectedBalance type
-//         state.selectedBalance = {
-//           symbol: firstWallet.symbol,
-//           // Use the price field from your API log 
-//           usd: firstWallet.TotalAvailableBalancePrice || "$0.00",
-//           amount: `${firstWallet.totalAvailableBalance} ${firstWallet.symbol}`,
-//           logo: firstWallet.logo,
-//           isWalletAvailable: firstWallet.isWalletAvailable
-//         };
-//       }
-//     }
-//   }
-// })
-.addCase(getAllBalanceThunk.fulfilled, (state, action) => {
+    .addCase(getAllBalanceThunk.fulfilled, (state, action) => {
   state.loading = false;
   state.allBalances = action.payload;
 

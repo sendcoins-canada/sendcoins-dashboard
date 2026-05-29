@@ -48,17 +48,7 @@ function App() {
         <Route path="/forgot-password/new" element={<ForgotNewPassword />} />
         <Route path="/forgot-password/confirm" element={<ForgotConfirmPassword />} />
         <Route path="/forgot-password/otp" element={<ForgotVerifyOtp />} />
-        {/* 
-        <Route path="/survey" element={<Survey />} />
-        <Route path="/welcome" element={<Welcome />} />
-        <Route path="/setup-passcode" element={<Passcode />} />
-        <Route path="/cta" element={<CTA />} />
-        <Route path="/address" element={<Address />} />
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="*" element={<Navigate to="/login" replace />} /> */}
         {/* Protected routes */}
-
-
         <Route
           path="/survey"
           element={

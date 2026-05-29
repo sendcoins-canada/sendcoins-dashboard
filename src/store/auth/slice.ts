@@ -1,15 +1,4 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-// import { loginWithPasswordThunk } from "./asyncThunks/loginWithPassword";
-// import { googleLoginThunk } from "./asyncThunks/googleLogin";
-// import { verifyEmailThunk } from "./asyncThunks/verifyEmail";
-// import { verifyOtpThunk } from "./asyncThunks/verifyOtp";
-// import { registerWithPasswordThunk } from "./asyncThunks/registerWithPassword";
-// import { createPasscodeThunk } from "./asyncThunks/createPasscode";
-// import { requestPasswordResetThunk } from "./asyncThunks/requestPasswordReset";
-// import { verifyPasswordResetOtpThunk } from "./asyncThunks/verifyPasswordResetOtp";
-// import { updatePasswordWithOtpThunk } from "./asyncThunks/updatePasswordWithOtp";
-// import { changePasscodeThunk } from "./asyncThunks/changePasscode";
-// import { resendOtpThunk } from "./asyncThunks/resendOtp";
 
 export interface AuthToken {
   azer_token: string;
@@ -94,11 +83,3 @@ const authSlice = createSlice({
 
 export const { setCredentials, setLoading, logout, setSurveyIndex } = authSlice.actions;
 export default authSlice.reducer;
-
-// export const {  
-//   setCredentials,
-//   logout,
-//   clearAuthState,
-// } = authSlice.actions;
-
-// export default authSlice.reducer;
