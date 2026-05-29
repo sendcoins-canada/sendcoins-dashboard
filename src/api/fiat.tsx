@@ -45,12 +45,7 @@ export const sendFiat = async (params: SendFiatParams) => {
 
   const response = await api.post(
     "/user/crayfi/payout",
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
+    formData
   );
 
   return response.data;
@@ -78,8 +73,7 @@ export const updateProfile = async (params: UpdateProfileParams) => {
 
   const response = await api.put(
     "/user/profile",
-    formData,
-    { headers: { "Content-Type": "multipart/form-data" } }
+    formData
   );
   return response.data;
 };
@@ -90,8 +84,7 @@ export const requestFiatAccount = async (params: RequestFiatAccountParams) => {
 
   const response = await api.post(
     "/user/fiat/request",
-    formData,
-    { headers: { "Content-Type": "multipart/form-data" } }
+    formData
   );
   return response.data;
 };
@@ -104,12 +97,7 @@ export const getAccount = async (params: GetAccountParams) => {
 
   const response = await api.post(
     "/user/crayfi/account",
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
+    formData
   );
 
   return response.data;

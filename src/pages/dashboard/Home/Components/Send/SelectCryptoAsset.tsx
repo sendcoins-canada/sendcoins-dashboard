@@ -24,6 +24,7 @@ const SelectCryptoAsset = ({ onContinue }: Props) => {
   const [selected, setSelected] = useState<string | null>(null);
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
+  const token = useSelector((state: RootState) => state.auth.token?.azer_token);
 
    const { allBalances, loading } = useSelector(
     (state: RootState) => state.wallet
@@ -52,13 +53,10 @@ const SelectCryptoAsset = ({ onContinue }: Props) => {
 
   // 3. Fetch data if not already loaded (initial load)
   useEffect(() => {
-    if (!allBalances && !loading) {
-      const token = localStorage.getItem("azertoken");
-      if (token) {
-        dispatch(getAllBalanceThunk({ token }));
-      }
+    if (!allBalances && !loading && token) {
+      dispatch(getAllBalanceThunk({ token }));
     }
-  }, [allBalances, loading, dispatch]);
+  }, [allBalances, loading, dispatch, token]);
 
 
   // 4. Filter logic now applied to fetchedAssets

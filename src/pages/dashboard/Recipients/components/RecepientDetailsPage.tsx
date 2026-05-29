@@ -1,9 +1,9 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import RecipientDetails from "./RecepientDetails";
 import MinimalLayout from "@/components/MinimalLayout";
-import type { AppDispatch } from "@/store";
+import type { AppDispatch, RootState } from "@/store";
 import { getSingleRecipientThunk } from "@/store/recipients/asyncThunks/getSingleRecipient";
 
 
@@ -17,6 +17,7 @@ const colors = [
 
 const RecipientDetailsPage = () => {
   const dispatch = useDispatch<AppDispatch>()
+  const token = useSelector((state: RootState) => state.auth.token?.azer_token);
   const { keychain } = useParams<{ keychain: string }>();
    const [recipient, setRecipient] = useState<any | null>(null);
  const [loading, setLoading] = useState(true);
@@ -28,7 +29,6 @@ const RecipientDetailsPage = () => {
     return (parts[0][0] + parts[1][0]).toUpperCase();
   };
 useEffect(() => {
-  const token = localStorage.getItem("azertoken");
   if (!token || !keychain) return;
 
   setLoading(true);

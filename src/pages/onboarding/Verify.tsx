@@ -25,6 +25,7 @@ const Verify: React.FC = () => {
   const [seconds, setSeconds] = React.useState(50);
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  const token = useSelector((state: RootState) => state.auth.token?.azer_token);
   const location = useLocation();
 const { purpose: statePurpose, tempPasscode } = location.state || {};
 
@@ -59,7 +60,6 @@ const submit = async (overrideCode?: string) => {
   }
 
   // Get token for sensitive operations (passcode_create, passcode_update, passcode_reset)
-  const token = localStorage.getItem("azertoken") || "";
   const isSensitivePurpose = ["passcode_create", "passcode_update", "passcode_reset"].includes(purpose);
 
   if (isSensitivePurpose && !token) {
@@ -89,7 +89,7 @@ const submit = async (overrideCode?: string) => {
       }
 
       // STEP 3: Finalize Passcode Creation immediately (with token for auth binding)
-      const finalRes = await finalizePasscodeCreate(tempPasscode, authHash, token);
+      const finalRes = await finalizePasscodeCreate(tempPasscode, authHash, token!);
 
       showSuccess(finalRes.message || "Passcode created successfully!");
       navigate("/dashboard/home");

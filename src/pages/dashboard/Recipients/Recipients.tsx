@@ -33,6 +33,7 @@ type FormattedRecipient = RawRecipient & {
     const navigate = useNavigate()
     const [search, setSearch] = useState("");
     const dispatch = useAppDispatch()
+    const token = useSelector((state: RootState) => state.auth.token?.azer_token);
     const { recipients, hasLoaded, loading } = useSelector((state: RootState) => state.recipients)
    
     const getInitials = (name: string) => {
@@ -62,13 +63,10 @@ const formattedRecipients: FormattedRecipient[] = recipients.map((rec, index) =>
 
      useEffect(() => {
        // Only fetch if NOT loaded and NOT currently loading
-       if (!hasLoaded && !loading) {
-         const token = localStorage.getItem("azertoken");
-         if (token) {
+       if (!hasLoaded && !loading && token) {
            dispatch(getRecipientsThunk({ token }));
-         }
        }
-     }, [dispatch, hasLoaded, loading]);
+     }, [dispatch, hasLoaded, loading, token]);
 
      const shortenAddress = (address: string) => {
     if (!address) return "N/A";

@@ -63,13 +63,10 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
   }, [open]);
 
   useEffect(() => {
-    if (open && !allBalances) {
-      const token = localStorage.getItem("azertoken");
-      if (token) {
-        dispatch(getAllBalanceThunk({ token }));
-      }
+    if (open && !allBalances && token) {
+      dispatch(getAllBalanceThunk({ token }));
     }
-  }, [open, allBalances, dispatch]);
+  }, [open, allBalances, dispatch, token]);
 
   // 2. Fetch Bank Details when Bank Step is Active
   useEffect(() => {

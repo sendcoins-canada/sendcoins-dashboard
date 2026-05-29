@@ -16,12 +16,7 @@ export const getSupportedNetwork = async (symbol: string) => {
 
   const response = await api.post(
     "/wallet/supported/network",
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
+    formData
   );
 
   return response.data;
@@ -41,11 +36,7 @@ export const createWallet = async (data: {
   formData.append("token", data.token);
   formData.append("name", data.name);
 
-  const response = await api.post("/user/create/wallet", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const response = await api.post("/user/create/wallet", formData);
 
   return response.data;
 };
@@ -56,11 +47,7 @@ export const getBTCBalance = async (data: { token: string; network: string }) =>
   formData.append("token", data.token);
   formData.append("network", data.network);
 
-  const response = await api.post("/user/wallet/btc", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const response = await api.post("/user/wallet/btc", formData);
 
   return response.data;
 };
@@ -71,11 +58,7 @@ export const getETHBalance = async (data: { token: string; network: string }) =>
   formData.append("token", data.token);
   formData.append("network", data.network);
 
-  const response = await api.post("/user/wallet/eth", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const response = await api.post("/user/wallet/eth", formData);
 
   return response.data;
 };
@@ -86,11 +69,7 @@ export const getBNBBalance = async (data: { token: string; network: string }) =>
   formData.append("token", data.token);
   formData.append("network", data.network);
 
-  const response = await api.post("/user/wallet/bnb", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const response = await api.post("/user/wallet/bnb", formData);
 
   return response.data;
 };
@@ -101,11 +80,7 @@ export const getUSDTBalance = async (data: { token: string; network: string }) =
   formData.append("token", data.token);
   formData.append("network", data.network);
 
-  const response = await api.post("/user/wallet/usdt", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const response = await api.post("/user/wallet/usdt", formData);
 
   return response.data;
 };
@@ -116,11 +91,7 @@ export const getUSDCBalance = async (data: { token: string; network: string }) =
   formData.append("token", data.token);
   formData.append("network", data.network);
 
-  const response = await api.post("/user/wallet/usdc", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const response = await api.post("/user/wallet/usdc", formData);
 
   return response.data;
 };
@@ -130,11 +101,7 @@ export const getAllBalances = async (data: { token: string }) => {
   const formData = new FormData();
   formData.append("token", data.token);
 
-  const response = await api.post("/user/wallet/balances", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const response = await api.post("/user/wallet/balances", formData);
 
   return response.data;
 };

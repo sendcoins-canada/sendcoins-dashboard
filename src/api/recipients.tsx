@@ -9,12 +9,7 @@ export const getRecipients = async (token: string) => {
 
   const response = await api.post(
     "/user/recipients/list",
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
+    formData
   );
 
   return response.data;
@@ -23,12 +18,7 @@ export const getRecipients = async (token: string) => {
 export const addRecipient = async (formData: FormData) => {
   const response = await api.post<RecipientResponse>(
     "user/recipients",
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
+    formData
   );
 
   return response.data;
@@ -41,12 +31,7 @@ export const getSingleRecipient = async ({ token, keychain }: { token: string; k
 
   const response = await api.post(
     "/user/recipients/get",
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
+    formData
   );
 
   return response.data.recipient;

@@ -14,11 +14,7 @@ export const updateKycStatus = async (params: KycStatusParams) => {
   formData.append("keychain", params.keychain);
   formData.append("status", params.status);
 
-  const response = await api.post("/user/auth/kyc/status", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const response = await api.post("/user/auth/kyc/status", formData);
 
   return response.data;
 };
@@ -34,11 +30,7 @@ export const updateUserProfile = async (params: UpdateProfileParams) => {
   formData.append("token", params.token);
   formData.append("bvn", params.bvn);
 
-  const response = await api.put("/user/profile", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const response = await api.put("/user/profile", formData);
 
   return response.data;
 };

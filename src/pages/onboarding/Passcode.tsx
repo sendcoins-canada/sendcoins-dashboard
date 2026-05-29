@@ -14,7 +14,8 @@ import { setLoading } from "@/store/auth/slice";
 const SetupPasscode: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  const { loading } = useSelector((state: RootState) => state.auth);
+  const { loading, token: authToken } = useSelector((state: RootState) => state.auth);
+  const token = authToken?.azer_token || "";
 
   const [step, setStep] = useState<"create" | "confirm">("create");
   const [passcode, setPasscode] = useState<string[]>([]);
@@ -45,8 +46,7 @@ const SetupPasscode: React.FC = () => {
       dispatch(setLoading(true));
 
       try {
-       // Get the token from your auth state
-  const token = localStorage.getItem("azertoken") || "";
+       // Get the token from auth state
 
   // --- STEP 1: Request the Create (Get the Hash) ---
   // Pass the object that the function is asking for:

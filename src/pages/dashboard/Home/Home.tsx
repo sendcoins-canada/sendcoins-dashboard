@@ -20,6 +20,7 @@ import { formatCryptoAmount, formatFiatAmount, formatSignedAmount } from "@/util
 const Home: React.FC = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
+  const token = useSelector((state: RootState) => state.auth.token?.azer_token);
   const [showBalance, setShowBalance] = useState(false);
   const [walletOpen, setWalletOpen] = useState(false);
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
@@ -61,7 +62,6 @@ const defaultFiatBalance = useMemo(() => {
   
   // 3. Fetch transactions on component mount
    useEffect(() => {
-  const token = localStorage.getItem("azertoken");
   if (token) {
     // 1. Fetch transactions immediately
     dispatch(getTransactionsThunk({ token }));

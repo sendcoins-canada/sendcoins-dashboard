@@ -28,12 +28,7 @@ export const getUser = async (): Promise<User> => {
   // Send the token in the request body
   const response = await api.post<User>(
     "/user/profile",
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
+    formData
   );
 
   // SAVE USER TO LOCAL STORAGE HERE

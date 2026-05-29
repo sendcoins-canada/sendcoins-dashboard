@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, PlusIcon } from 'lucide-react';
 import { useSelector } from 'react-redux';
-import { useAppDispatch } from '@/store';
+import { useAppDispatch, type RootState } from '@/store';
 import { getRecipientsThunk } from "@/store/recipients/asyncThunks/getAllRecipients";
 import { HeaderWithCancel } from '@/components/onboarding/shared/Header';
 import { ArrowLeft2 } from 'iconsax-react';
@@ -50,16 +50,14 @@ const FiatRecipientSelect: React.FC<FiatRecipientSelectProps> = ({ country, onSe
   const [search, setSearch] = useState('');
   const dispatch = useAppDispatch();
   const navigate = useNavigate()
-  const { recipients, hasLoaded, loading } = useSelector((state: any) => state.recipients);
+  const token = useSelector((state: RootState) => state.auth.token?.azer_token);
+  const { recipients, hasLoaded, loading } = useSelector((state: RootState) => state.recipients);
 
   useEffect(() => {
-    if (!hasLoaded && !loading) {
-      const token = localStorage.getItem("azertoken");
-      if (token) {
-        dispatch(getRecipientsThunk({ token }));
-      }
+    if (!hasLoaded && !loading && token) {
+      dispatch(getRecipientsThunk({ token }));
     }
-  }, [dispatch, hasLoaded, loading]);
+  }, [dispatch, hasLoaded, loading, token]);
 
   // Known crypto assets — everything else is treated as fiat
   const CRYPTO_ASSETS = ['BTC', 'ETH', 'USDT', 'USDC', 'BNB', 'ADA', 'SOL', 'CELO', 'DOGE', 'LINK', 'XRP', 'LTC', 'BCH', 'TRX'];

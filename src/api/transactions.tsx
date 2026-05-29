@@ -35,12 +35,7 @@ export const getTransactions = async (params: TransactionFilterParams) => {
   }
   const response = await api.post(
     "/user/transactions/history",
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
+    formData
   );
 
   return response.data;
@@ -52,23 +47,14 @@ export const getTransactionDetail = async (data: {token: string; txId: string}) 
 
   const response = await api.post(
     "/user/transactions/details",
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
+    formData
   );
 
   return response.data;
 };
 
 export const GetGasFees = (formData: FormData) => {
-  return api.post("/user/get/gasfees", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  return api.post("/user/get/gasfees", formData);
 };
 
 

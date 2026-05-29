@@ -14,6 +14,7 @@ import { formatCryptoAmount, formatFiatAmount, formatSignedAmount } from "@/util
 const Transactions = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const token = useSelector((state: RootState) => state.auth.token?.azer_token);
   const [search, setSearch] = useState("");
   const [openFilter, setOpenFilter] = useState(false);
 
@@ -36,7 +37,6 @@ const Transactions = () => {
 
   // --- Logic: Fetch Data ---
   const fetchTransactions = (currentFilters = filters) => {
-    const token = localStorage.getItem("azertoken");
     if (!token) return;
     const dateFilterMapping: Record<string, string> = {
     "All": "All",

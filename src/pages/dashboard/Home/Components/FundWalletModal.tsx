@@ -30,8 +30,8 @@ const balanceThunkMap = {
 
 const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const navigate = useNavigate();
-  const token = localStorage.getItem("azertoken")
   const dispatch = useAppDispatch()
+  const token = useSelector((state: RootState) => state.auth.token?.azer_token);
 
   const shortenAddress = (address: string, chars = 6) => {
     if (!address) return "";

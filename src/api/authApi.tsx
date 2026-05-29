@@ -30,11 +30,7 @@ export const verifyOtp = async (
   formData.append("purpose", data.purpose);
   if (data.token) formData.append("token", data.token);
 
-  const response = await api.post<VerifyOtpResponse>("/auth/otp/verify", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const response = await api.post<VerifyOtpResponse>("/auth/otp/verify", formData);
 
   return response.data;
 };
@@ -45,9 +41,7 @@ export const resendOtp = async (email: string, purpose?: string): Promise<{ mess
   formData.append("email", email);
   formData.append("purpose", purpose || "registration");
 
-  const response = await api.post("/auth/otp/resend", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const response = await api.post("/auth/otp/resend", formData);
 
   return response.data;
 };
@@ -68,10 +62,7 @@ export const registerWithPassword = async (
 
   const response = await api.post<RegisterResponse>(
     "/user/auth/registerWithPassword",
-    formData,
-    {
-      headers: { "Content-Type": "multipart/form-data" },
-    }
+    formData
   );
 
   // Token storage is now handled by Redux auth slice
@@ -86,10 +77,7 @@ export const loginUser = async (data: LoginRequest): Promise<LoginWithPasswordRe
 
   const response = await api.post<LoginWithPasswordResponse>(
     "/user/auth/loginWithPassword",
-    formData,
-    {
-      headers: { "Content-Type": "multipart/form-data" },
-    }
+    formData
   );
 
   return response.data;
@@ -101,9 +89,7 @@ export const verifyLoginOtp = async (data: { email: string; code: string }) => {
   formData.append("email", data.email);
   formData.append("code", data.code);
 
-  const response = await api.post("/user/auth/verify_login_otp", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const response = await api.post("/user/auth/verify_login_otp", formData);
 
   // Token storage is now handled by Redux auth slice
   return response.data;
@@ -133,9 +119,7 @@ export const submitSurvey = async (data: {
   formData.append("answers", data.answer);
   formData.append("azerId", String(data.azerId));
 
-  const response = await api.post("/user/survey/submit", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const response = await api.post("/user/survey/submit", formData);
 
   return response.data;
 };
@@ -155,9 +139,7 @@ export const createPasscode = async (data: { code: string; token: string }) => {
   formData.append("token", data.token);
   formData.append("passcode", data.code);
 
-  const response = await api.post("/user/auth/create/passcode", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const response = await api.post("/user/auth/create/passcode", formData);
 
   return response.data;
 };
@@ -215,9 +197,7 @@ export const requestPasscodeReset = async (data: {
   formData.append("newPasscode", String(data.newPasscode));
   formData.append("confirmPasscode", String(data.confirmPasscode));
 
-  const response = await api.post("/auth/passcode/reset/request", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const response = await api.post("/auth/passcode/reset/request", formData);
   return response.data;
 };
 
@@ -242,9 +222,7 @@ export const requestPasscodeCreate = async (data: {
   formData.append("token", data.token);
   formData.append("passcode", data.passcode);
 
-  const response = await api.post("/auth/passcode/create/request", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const response = await api.post("/auth/passcode/create/request", formData);
   return response.data;
 };
 
@@ -255,9 +233,7 @@ export const finalizePasscodeCreate = async (passcode: string, authHash: string,
   formData.append("authHash", authHash);
   formData.append("token", token);
 
-  const response = await api.post("/auth/passcode/create", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const response = await api.post("/auth/passcode/create", formData);
   return response.data;
 };
 
@@ -269,11 +245,7 @@ export const verifyPasscode = async (data: { token: string; passcode: string }) 
   formData.append("token", data.token);
   
   
-  const response = await api.post("/user/auth/verify/passcode", formData, {
-    headers: { 
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const response = await api.post("/user/auth/verify/passcode", formData);
   return response.data;
 };
 
@@ -292,11 +264,7 @@ export const sendCrypto = async (data: {
   formData.append("amount", data.amount);
   formData.append("token", data.token);
 
-  const response = await api.post("/send", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const response = await api.post("/send", formData);
   return response.data;
 };
 

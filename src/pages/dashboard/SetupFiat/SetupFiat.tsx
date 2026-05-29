@@ -25,6 +25,7 @@ const bvnSchema = Yup.object({
 
 const SetupFiat: React.FC = () => {
   const navigate = useNavigate();
+  const token = useSelector((state: RootState) => state.auth.token?.azer_token);
   const [step, setStep] = useState<"name" | "bvn">("name");
   const [nameData, setNameData] = useState({ firstName: "", middleName: "", lastName: "" });
   const [loading, setLoading] = useState(false);
@@ -39,7 +40,6 @@ const SetupFiat: React.FC = () => {
 
   const handleBvnSubmit = async (values: { bvn: string }) => {
     setLoading(true);
-    const token = localStorage.getItem("azertoken");
     if (!token) {
       showDanger("Session expired. Please log in again.");
       navigate("/login");

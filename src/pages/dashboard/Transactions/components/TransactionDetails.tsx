@@ -47,6 +47,7 @@ const statusStyles = {
 const TransactionDetails: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const token = useSelector((state: RootState) => state.auth.token?.azer_token);
   const [activeTab, setActiveTab] = useState<"timeline" | "details">("timeline");
   const [copied, setCopied] = useState(false);
 
@@ -61,13 +62,10 @@ const TransactionDetails: React.FC = () => {
 
   // 3. Fetch data
   useEffect(() => {
-    if (txId) {
-      const token = localStorage.getItem("azertoken");
-      if (token) {
-        dispatch(getTransactionDetailThunk({ token, txId }));
-      }
+    if (txId && token) {
+      dispatch(getTransactionDetailThunk({ token, txId }));
     }
-  }, [dispatch, txId]);
+  }, [dispatch, txId, token]);
 
   // 4. Helper to copy
   const handleCopy = (text: string) => {
