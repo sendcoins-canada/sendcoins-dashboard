@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { createWallet as createWalletApi } from "@/api/wallet.tsx";
+import { createWallet as createWalletApi } from "@/api/wallet";
 import type { RootState } from "@/store";
 
 interface CreateWalletPayload {

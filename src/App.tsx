@@ -1,5 +1,5 @@
 import "./App.css";
-import Signup from "./components/onboarding/Signup";
+import Signup from "./pages/onboarding/Signup";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/onboarding/Login";
 import Verify from "./pages/onboarding/Verify";
