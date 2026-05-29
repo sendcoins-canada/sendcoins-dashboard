@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Search, PlusIcon } from 'lucide-react';
-import { useSelector } from 'react-redux';
-import { useAppDispatch, type RootState } from '@/store';
-import { getRecipientsThunk } from "@/store/recipients/asyncThunks/getAllRecipients";
 import { HeaderWithCancel } from '@/components/onboarding/shared/Header';
 import { ArrowLeft2 } from 'iconsax-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/input';
+import { useRecipients } from '@/query/hooks/useRecipients';
 
 interface FormattedRecipient {
   keychain: string;
@@ -48,16 +46,8 @@ const shortenAddress = (address: string) => {
 
 const FiatRecipientSelect: React.FC<FiatRecipientSelectProps> = ({ country, onSelectRecipient, onAddNew }) => {
   const [search, setSearch] = useState('');
-  const dispatch = useAppDispatch();
   const navigate = useNavigate()
-  const token = useSelector((state: RootState) => state.auth.token?.azer_token);
-  const { recipients, hasLoaded, loading } = useSelector((state: RootState) => state.recipients);
-
-  useEffect(() => {
-    if (!hasLoaded && !loading && token) {
-      dispatch(getRecipientsThunk({ token }));
-    }
-  }, [dispatch, hasLoaded, loading, token]);
+  const { data: recipients = [], isLoading: loading } = useRecipients();
 
   // Known crypto assets — everything else is treated as fiat
   const CRYPTO_ASSETS = ['BTC', 'ETH', 'USDT', 'USDC', 'BNB', 'ADA', 'SOL', 'CELO', 'DOGE', 'LINK', 'XRP', 'LTC', 'BCH', 'TRX'];

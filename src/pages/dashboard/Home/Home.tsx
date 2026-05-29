@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Add, Send2, Convert, EyeSlash, Eye, ArrowSwapVertical, TransmitSqaure2, ArrowDown2 } from "iconsax-react";
 import Coins from "@/assets/coin.svg"
@@ -11,38 +11,41 @@ import SendOptionsModal from "./Components/Send/SendModal";
 import { useNavigate } from "react-router-dom";
 import FundOptionsModal from "./Components/Fund/FundOptionsModal";
 import { useSelector } from "react-redux";
-import { useAppDispatch, type RootState } from "@/store";
-import { getTransactionsThunk } from "@/store/transactions/asyncThunks/getTransactions";
-import { getAllBalanceThunk } from "@/store/wallet/asyncThunks/getBalances";
+import type { RootState } from "@/store";
+import { useBalances } from "@/query/hooks/useBalances";
+import { useTransactions } from "@/query/hooks/useTransactions";
 import { formatCryptoAmount, formatFiatAmount, formatSignedAmount } from "@/utils/formatAmount";
 
 
 const Home: React.FC = () => {
   const navigate = useNavigate()
-  const dispatch = useAppDispatch()
-  const token = useSelector((state: RootState) => state.auth.token?.azer_token);
   const [showBalance, setShowBalance] = useState(false);
   const [walletOpen, setWalletOpen] = useState(false);
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
   const [isFundingOpen, setIsFundingOpen] = useState(false)
-  // 1. Get transaction data and loading state from the Redux store
-    const { transactions: fetchedTransactions, loading: transactionsLoading, error: transactionsError, hasLoaded: transactionsHasLoaded   } = useSelector((state: RootState) => state.transaction);
-    
-const {selectedBalance, allBalances, loading: walletLoading, hasLoaded: walletHasLoaded } = useSelector((state: RootState) => state.wallet);
+
+  // Server data via React Query
+  const { data: balancesData } = useBalances();
+  const { data: fetchedTransactions = [], isLoading: transactionsLoading, error: transactionsErrorObj } = useTransactions();
+  const transactionsError = transactionsErrorObj?.message ?? null;
+
+  // UI-only state from Redux
+  const { selectedBalance } = useSelector((state: RootState) => state.wallet);
+
 const defaultFiatBalance = useMemo(() => {
-    const fiatAccount = allBalances?.data?.fiatAccounts?.[0]; // Get the first fiat account
-    
+    const fiatAccount = balancesData?.fiatAccounts?.[0];
+
     if (fiatAccount) {
       return {
         symbol: fiatAccount.currency,
         usdAmount: Number(fiatAccount.availableBalance),
         amount: Number(fiatAccount.availableBalance),
-        logo: "https://flagcdn.com/w40/ng.png" 
+        logo: "https://flagcdn.com/w40/ng.png"
       };
     }
     return null;
-  }, [allBalances]);
-  const displayedBalance = selectedBalance?.symbol ? selectedBalance : defaultFiatBalance || 
+  }, [balancesData]);
+  const displayedBalance = selectedBalance?.symbol ? selectedBalance : defaultFiatBalance ||
   {
     symbol: "",
     usdAmount: 0,
@@ -54,23 +57,11 @@ const defaultFiatBalance = useMemo(() => {
   // Casting to 'any' to handle the nested structure safely as done before
   const userSlice = useSelector((state: RootState) => state.user) as any;
   const userData = userSlice?.user?.data;
-  
+
   // Check conditions: Show reminder if PIN is NOT found OR User is NOT verified
   const hasPin = userData?.isPinAvailable?.found === true;
   const isVerified = userData?.verified === true;
   const showReminder = !hasPin || !isVerified;
-  
-  // 3. Fetch transactions on component mount
-   useEffect(() => {
-  if (token) {
-    if (!transactionsHasLoaded && !transactionsLoading) {
-      dispatch(getTransactionsThunk({ token }));
-    }
-    if (!walletHasLoaded && !walletLoading) {
-      dispatch(getAllBalanceThunk({ token }));
-    }
-  }
-}, [dispatch, token, transactionsHasLoaded, transactionsLoading, walletHasLoaded, walletLoading]);
 
 
   const handleSelectOption = (option: "crypto" | "fiat") => {
@@ -254,7 +245,7 @@ const handleSwap = () => {
   {/* Display Fetched Transactions (using processedTransactions) */}
   {!transactionsLoading && !transactionsError && fetchedTransactions.length > 0 ? (
   <div className="">
-    {fetchedTransactions.map((tx) => {
+    {fetchedTransactions.map((tx: any) => {
       
       // 1. Determine Display Name
       // If it's a payout (outgoing), show recipient. If deposit (incoming), show sender.
@@ -327,7 +318,7 @@ if (!displayName) {
                 {displayName
                   .split(" ")
                   .slice(0, 2) // Limit to 2 initials
-                  .map((n) => n[0])
+                  .map((n: string) => n[0])
                   .join("")
                   .toUpperCase()}
               </span>

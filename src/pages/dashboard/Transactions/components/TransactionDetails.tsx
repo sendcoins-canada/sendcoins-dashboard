@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { CheckCircle2, Loader2, XCircle, Copy, CheckCircle } from "lucide-react";
 import Send from "@/assets/Send.svg";
 import { ArrowLeft2 } from "iconsax-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { useAppDispatch, type RootState } from "@/store";
-import { getTransactionDetailThunk } from "@/store/transactions/asyncThunks/getTransactionDetail";
 import type { RawApiTransactionList } from "@/types/transaction";
 import MinimalLayout from "@/components/MinimalLayout";
 import { formatCryptoAmount, formatFiatAmount } from "@/utils/formatAmount";
+import { useTransactionDetail } from "@/query/hooks/useTransactions";
 
 // --- STATUS CONFIG ---
 const statusStyles = {
@@ -46,26 +44,15 @@ const statusStyles = {
 
 const TransactionDetails: React.FC = () => {
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
-  const token = useSelector((state: RootState) => state.auth.token?.azer_token);
   const [activeTab, setActiveTab] = useState<"timeline" | "details">("timeline");
   const [copied, setCopied] = useState(false);
 
   // 1. Get ID from URL
   const { txId } = useParams<{ txId: string }>();
 
-  // 2. Get Raw Data from Redux
-  // Ensure your slice/thunk populates 'selectedDetail' with the RawApiTransactionList object
-  const { selectedDetail, detailLoading, detailError } = useSelector(
-    (state: RootState) => state.transaction
-  );
-
-  // 3. Fetch data
-  useEffect(() => {
-    if (txId && token) {
-      dispatch(getTransactionDetailThunk({ token, txId }));
-    }
-  }, [dispatch, txId, token]);
+  // 2. Fetch via React Query
+  const { data: selectedDetail, isLoading: detailLoading, error: detailErrorObj } = useTransactionDetail(txId);
+  const detailError = detailErrorObj?.message ?? null;
 
   // 4. Helper to copy
   const handleCopy = (text: string) => {

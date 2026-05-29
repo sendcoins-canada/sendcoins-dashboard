@@ -1,13 +1,14 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useSelector } from "react-redux";
-import { getAllBalanceThunk, getBNBBalanceThunk, getBTCBalanceThunk, getETHBalanceThunk, getUSDCBalanceThunk, getUSDTBalanceThunk } from "@/store/wallet/asyncThunks/getBalances";
+import { getBNBBalanceThunk, getBTCBalanceThunk, getETHBalanceThunk, getUSDCBalanceThunk, getUSDTBalanceThunk } from "@/store/wallet/asyncThunks/getBalances";
 import { useAppDispatch, type RootState } from "@/store";
 import { setSelectedBalance } from "@/store/wallet/slice";
 import { Bank } from "iconsax-react";
 import NGN from '@/assets/nigerianflag.svg'
 import { formatCryptoAmount, formatFiatAmount } from "@/utils/formatAmount";
+import { useBalances } from "@/query/hooks/useBalances";
 
 
 type ParsedWallet = {
@@ -38,10 +39,9 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     return `${address.slice(0, chars)}...${address.slice(-chars)}`;
   };
 
-  const { allBalances, loading, hasLoaded } = useSelector(
-    (state: RootState) => state.wallet
-  );
-  const balances = allBalances?.data?.balances || {};
+  // Server data via React Query (auto-cached, no manual fetch needed)
+  const { data: balancesData, isLoading: loading } = useBalances();
+  const balances = balancesData?.balances || {};
 
   const parsedCryptoWallets = Object.keys(balances)
     .map((key) => {
@@ -60,25 +60,16 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }))
 
     // 2. Parse Fiat Accounts
-  const fiatAccounts = (allBalances?.data?.fiatAccounts || []) as any[];
+  const fiatAccounts = (balancesData?.fiatAccounts || []) as any[];
   const parsedFiatWallets: ParsedWallet[] = fiatAccounts.map((account) => ({
-    name: account.bankName, // Display Bank Name (e.g., Moniepoint...)
-    address: account.accountNumber, // Display Account Number
+    name: account.bankName,
+    address: account.accountNumber,
     usd: undefined,
     amount: account.availableBalance,
-    logo: NGN, // API doesn't return logo for fiat, handled in render
+    logo: NGN,
     symbol: account.currency,
     isFiat: true
   }));
-
-  // 3. Combine Lists
-  // const allWallets = [...parsedFiatWallets, ...parsedCryptoWallets];
-
-  useEffect(() => {
-    if (token && !hasLoaded && !loading) {
-      dispatch(getAllBalanceThunk({ token }));
-    }
-  }, [token, dispatch, hasLoaded, loading]);
 
  const handleWalletClick = (wallet: ParsedWallet) => {
     const symbol = wallet.symbol.toUpperCase();   

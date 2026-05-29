@@ -1,12 +1,10 @@
-import  { useState, useEffect } from "react";
+import  { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { TickCircle, SearchNormal1, ArrowLeft2 } from "iconsax-react";
 import { HeaderWithCancel } from "@/components/onboarding/shared/Header";
-import { useSelector } from "react-redux";
-import { useAppDispatch, type RootState } from "@/store";
-import { getAllBalanceThunk } from "@/store/wallet/asyncThunks/getBalances";
+import { useBalances } from "@/query/hooks/useBalances";
 
 type Asset = {
   id: string;
@@ -23,40 +21,27 @@ const SelectCryptoAsset = ({ onContinue }: Props) => {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
   const navigate = useNavigate()
-  const dispatch = useAppDispatch()
-  const token = useSelector((state: RootState) => state.auth.token?.azer_token);
 
-   const { allBalances, loading } = useSelector(
-    (state: RootState) => state.wallet
-  );
+  // Server data via React Query
+  const { data: balancesData } = useBalances();
+  const walletMap = balancesData?.balances || {};
 
-  // 2. Process wallet data into the Asset[] structure
-  const walletMap = allBalances?.data?.balances || {};
-  
   const fetchedAssets: Asset[] = Object.keys(walletMap)
     .map(key => {
-      // Access the wallet data directly (based on the previous fix)
-      const walletData = walletMap[key]; 
-      
+      const walletData = walletMap[key];
+
       if (walletData && walletData.isWalletAvailable) {
         return {
-          id: walletData.symbol, // Use symbol as the unique ID for selection
+          id: walletData.symbol,
           name: walletData.name,
           icon: walletData.logo,
           balance: `${walletData.totalAvailableBalance} ${walletData.symbol}`,
           symbol: walletData.symbol,
-        } as Asset; 
+        } as Asset;
       }
       return null;
     })
     .filter((w): w is Asset => w !== null);
-
-  // 3. Fetch data if not already loaded (initial load)
-  useEffect(() => {
-    if (!allBalances && !loading && token) {
-      dispatch(getAllBalanceThunk({ token }));
-    }
-  }, [allBalances, loading, dispatch, token]);
 
 
   // 4. Filter logic now applied to fetchedAssets

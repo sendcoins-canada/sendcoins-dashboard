@@ -6,6 +6,7 @@ import { Convert, Money, Money2 } from "iconsax-react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
+import { useBalances } from "@/query/hooks/useBalances";
 import { formatCryptoAmount, formatFiatAmount } from "@/utils/formatAmount";
 
 
@@ -30,17 +31,18 @@ const ConfirmSend: React.FC<Props> = ({
   const estimatedArrival = "3 mins";
   const navigate = useNavigate()
 
-  // 1. Get User's Wallet Data from Redux
-  const { allBalances } = useSelector((state: RootState) => state.wallet);
+  // 1. Get User's Wallet Data via React Query
+  const { data: balancesData } = useBalances();
   const bankDetails = useSelector(
     (state: RootState) =>
       (state.user as unknown as { bankDetails?: { accountNumber?: string } }).bankDetails
   );
+
   // 2. Find the specific wallet address for the asset we are sending
   const userWallet = useMemo(() => {
-    if (!allBalances?.data?.balances) return null;
-    return allBalances.data.balances[asset.toLowerCase()];
-  }, [allBalances, asset]);
+    if (!balancesData?.balances) return null;
+    return balancesData.balances[asset.toLowerCase()];
+  }, [balancesData, asset]);
 
   const userAddress = userWallet?.walletAddress || "Loading...";
 // 3. Get Dynamic Logo (Fallback to null if not found)

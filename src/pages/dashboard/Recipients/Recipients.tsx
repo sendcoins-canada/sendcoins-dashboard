@@ -1,13 +1,11 @@
-  import { useState, useEffect } from "react";
+  import { useState } from "react";
   import DashboardLayout from "@/components/DashboardLayout";
   import { SearchNormal1 } from "iconsax-react";
   import { useNavigate } from "react-router-dom";
   import Input from "@/components/ui/input";
-  import { useSelector } from "react-redux";
-  import { useAppDispatch, type RootState } from "@/store";
-  import { getRecipientsThunk } from "@/store/recipients/asyncThunks/getAllRecipients";
 import type { RawRecipient } from "@/types/recipients";
 import Search from "@/assets/search.png"
+import { useRecipients } from "@/query/hooks/useRecipients";
 
 
 
@@ -32,16 +30,14 @@ type FormattedRecipient = RawRecipient & {
   const Recipients = () => {
     const navigate = useNavigate()
     const [search, setSearch] = useState("");
-    const dispatch = useAppDispatch()
-    const token = useSelector((state: RootState) => state.auth.token?.azer_token);
-    const { recipients, hasLoaded, loading } = useSelector((state: RootState) => state.recipients)
+    const { data: recipients = [], isLoading: loading } = useRecipients();
    
     const getInitials = (name: string) => {
   const parts = name.trim().split(" ");
   if (parts.length === 1) return parts[0][0].toUpperCase();
   return (parts[0][0] + parts[1][0]).toUpperCase();
 };
-const formattedRecipients: FormattedRecipient[] = recipients.map((rec, index) => ({
+const formattedRecipients: FormattedRecipient[] = recipients.map((rec: any, index: number) => ({
   ...rec,
   initials: getInitials(rec.name),
   color: colors[index % colors.length], // rotate colors
@@ -61,12 +57,6 @@ const formattedRecipients: FormattedRecipient[] = recipients.map((rec, index) =>
       return groups;
     }, {} as { [key: string]: FormattedRecipient[] });
 
-     useEffect(() => {
-       // Only fetch if NOT loaded and NOT currently loading
-       if (!hasLoaded && !loading && token) {
-           dispatch(getRecipientsThunk({ token }));
-       }
-     }, [dispatch, hasLoaded, loading, token]);
 
      const shortenAddress = (address: string) => {
     if (!address) return "N/A";

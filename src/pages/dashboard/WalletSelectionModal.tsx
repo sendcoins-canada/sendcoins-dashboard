@@ -1,9 +1,7 @@
 import React from "react";
-// import { ArrowLeft2 } from "iconsax-react";
 import Modal from "@/components/ui/Modal";
-import { useSelector } from "react-redux";
-import type { RootState } from "@/store";
 import { formatCryptoAmount } from "@/utils/formatAmount";
+import { useBalances } from "@/query/hooks/useBalances";
 
 interface WalletSelectionModalProps {
   open: boolean;
@@ -17,14 +15,14 @@ const WalletSelectionModal: React.FC<WalletSelectionModalProps> = ({
   onSelect,
 }) => {
 
-  const { allBalances } = useSelector((state: RootState) => state.wallet);
+  const { data: balancesData } = useBalances();
 
 const shortenAddress = (address: string, chars = 6) => {
   if (!address) return "";
   return `${address.slice(0, chars)}...${address.slice(-chars)}`;
 };
 
-const parsedWallets = Object.values(allBalances?.data?.balances || {})
+const parsedWallets = Object.values(balancesData?.balances || {})
   .filter((wallet: any) => wallet?.isWalletAvailable)
   .map((wallet: any) => ({
     name: wallet.name,

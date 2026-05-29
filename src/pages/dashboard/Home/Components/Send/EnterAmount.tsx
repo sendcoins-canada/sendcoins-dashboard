@@ -1,14 +1,12 @@
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/onboarding/shared/Header";
 import { useNavigate } from "react-router-dom";
 import { Money, Money2, ArrowLeft2 } from "iconsax-react";
 import WalletSelectionModal from "@/pages/dashboard/WalletSelectionModal";
 import { useGasFee } from "@/store/hooks/useGasFee";
-import { useSelector } from "react-redux";
-import { useAppDispatch, type RootState } from "@/store";
-import { getAllBalanceThunk } from "@/store/wallet/asyncThunks/getBalances";
+import { useBalances } from "@/query/hooks/useBalances";
 
 
 interface EnterAmountProps {
@@ -31,32 +29,20 @@ const EnterAmount: React.FC<EnterAmountProps> = ({ asset, onNext, isFiat, recipi
   const [error, setError] = useState("");
   const [isWalletModalOpen, setWalletModalOpen] = useState(false);
 
-const dispatch = useAppDispatch();
-const token = useSelector((state: RootState) => state.auth.token?.azer_token);
-// 1. Get Wallet Balance from Redux
-  const { allBalances } = useSelector((state: RootState) => state.wallet);
-useEffect(() => {
-  if (token && (!allBalances || !allBalances.data)) {
-    dispatch(getAllBalanceThunk({token}));
-  }
-}, [dispatch, token, allBalances]);
+// Server data via React Query
+const { data: balancesData } = useBalances();
 
-  
- const walletAvailableBalance = useMemo(() => {
-  if (!allBalances?.data) return 0;
+const walletAvailableBalance = useMemo(() => {
+  if (!balancesData) return 0;
 
   if (isFiat) {
-    // For Fiat Route: Access the top-level totalFiatBalance string
-    // Based on your API: data.totalFiatBalance is "250.00"
-    return parseFloat(allBalances.data.totalFiatBalance) || 0;
+    return parseFloat(balancesData.totalFiatBalance) || 0;
   } else {
-    // For Crypto Route: Access the balances object for the specific asset
-    // Based on your API: data.balances.btc.totalAvailableBalance
     const key = asset.toLowerCase();
-    const currentWallet = allBalances.data.balances?.[key];
+    const currentWallet = balancesData.balances?.[key];
     return currentWallet?.totalAvailableBalance || 0;
   }
-}, [allBalances, asset, isFiat]);
+}, [balancesData, asset, isFiat]);
 // fetch gas fee (crypto only — fiat uses platform fee calculated locally)
 const {
     gasFee: cryptoGasFee,

@@ -4,9 +4,9 @@ import { Apple, ArrowRight2, Bank, BuyCrypto, Copy, Refresh, TickCircle } from "
 import { Button } from "@/components/ui/button";
 import Select from "@/components/ui/select";
 import { useSelector } from "react-redux";
-import { useAppDispatch, type RootState } from "@/store";
-import { getAllBalanceThunk } from "@/store/wallet/asyncThunks/getBalances";
+import type { RootState } from "@/store";
 import { showSuccess } from "@/components/ui/toast";
+import { useBalances } from "@/query/hooks/useBalances";
 import { QRCodeSVG } from 'qrcode.react';
 import logo from "@/assets/Logosingle.png"
 import { useCrayfiAccount } from "@/store/hooks/useGetAccount";
@@ -29,7 +29,6 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
 }) => {
   const [step, setStep] = useState<1 | 2>(1);
   const [selected, setSelected] = useState<"bank" | "crypto" | "apple" | null>(null);
-  const dispatch = useAppDispatch()
   const navigate = useNavigate();
   const token = useSelector((state: RootState) => state.auth.token?.azer_token);
   // State to hold the currently selected wallet address for funding
@@ -41,10 +40,8 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
   // State for copy operation
   const [copied, setCopied] = useState(false);
 
-  // 1. Get all balances from the Redux store
-  const { allBalances } = useSelector(
-    (state: RootState) => state.wallet
-  );
+  // Server data via React Query
+  const { data: balancesData } = useBalances();
 
   // --- CUSTOM HOOK FOR BANK ACCOUNT ---
   const { data: bankDetails, loading: bankLoading, error: bankError, fetchAccount } = useCrayfiAccount();
@@ -62,12 +59,6 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
     }
   }, [open]);
 
-  useEffect(() => {
-    if (open && !allBalances && token) {
-      dispatch(getAllBalanceThunk({ token }));
-    }
-  }, [open, allBalances, dispatch, token]);
-
   // 2. Fetch Bank Details when Bank Step is Active
   useEffect(() => {
     if (open && step === 2 && selected === "bank" && token) {
@@ -78,7 +69,7 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
   }, [step, selected, open, token, fetchAccount]);
 
   // 3. Process wallet data for dropdown and details
-  const walletMap = allBalances?.data?.balances || {};
+  const walletMap = balancesData?.balances || {};
   // Convert fetched balances into a clean list of options
   const walletOptions: WalletOption[] = Object.keys(walletMap)
     .map(key => {

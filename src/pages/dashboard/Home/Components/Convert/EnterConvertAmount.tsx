@@ -11,6 +11,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import { showDanger } from "@/components/ui/toast";
 import type { WalletBalance } from "@/types/wallet";
+import { useBalances } from "@/query/hooks/useBalances";
 import NGN from '@/assets/nigerianflag.svg'
 import { formatCryptoAmount, formatFiatAmount } from "@/utils/formatAmount";
 // import WalletSelectionModal from "@/pages/dashboard/WalletSelectionModal";
@@ -27,7 +28,7 @@ type FiatAccount = {
 const ConvertFlow: React.FC = () => {
   const navigate = useNavigate();
   const token = useSelector((state: RootState) => state.auth.token?.azer_token);
-  const { allBalances, loading } = useSelector((state: RootState) => state.wallet);
+  const { data: balancesData, isLoading: loading } = useBalances();
   // Step management
   const [step, setStep] = useState<"amount" | "details" | "success">("amount");
 
@@ -65,18 +66,17 @@ const ConvertFlow: React.FC = () => {
   // --- 2. Derive Wallets from Redux ---
   // Safely convert the balances object into an array
   const wallets = React.useMemo(() => {
-    const balancesObj = allBalances?.data?.balances as Record<string, WalletBalance> | undefined;
+    const balancesObj = balancesData?.balances as Record<string, WalletBalance> | undefined;
     if (!balancesObj) return [];
 
     return Object.values(balancesObj).filter((w: any) => w.isWalletAvailable === true);
-  }, [allBalances]);
+  }, [balancesData]);
 
   const fiatWallets = React.useMemo(() => {
-    // Access the fiatAccounts array from your console log structure
-    const accounts = allBalances?.data?.fiatAccounts;
+    const accounts = balancesData?.fiatAccounts;
     if (!accounts || !Array.isArray(accounts)) return [];
     return accounts as FiatAccount[];
-  }, [allBalances]);
+  }, [balancesData]);
 
   const cryptoOptions = wallets.map((wallet: any) => ({
     value: wallet.symbol,

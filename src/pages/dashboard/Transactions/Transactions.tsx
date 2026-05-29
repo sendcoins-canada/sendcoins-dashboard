@@ -1,20 +1,16 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { SearchNormal1, Filter, TransmitSqaure2, Convert } from "iconsax-react";
 import FilterDrawer from "./components/FilterDrawer";
 import Input from "@/components/ui/input";
-import { useSelector } from "react-redux";
-import { useAppDispatch, type RootState } from "@/store";
-import { getTransactionsThunk } from "@/store/transactions/asyncThunks/getTransactions";
 import type { RawApiTransactionList } from "@/types/transaction";
-import SearchIcon from "@/assets/search.png"; // Renamed to avoid confusion with search state
+import SearchIcon from "@/assets/search.png";
 import { useNavigate } from "react-router-dom";
 import { formatCryptoAmount, formatFiatAmount, formatSignedAmount } from "@/utils/formatAmount";
+import { useTransactions } from "@/query/hooks/useTransactions";
 
 const Transactions = () => {
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const token = useSelector((state: RootState) => state.auth.token?.azer_token);
   const [search, setSearch] = useState("");
   const [openFilter, setOpenFilter] = useState(false);
 
@@ -25,46 +21,32 @@ const Transactions = () => {
     fiat: "All",
     crypto: "All",
     dateRange: { start: "", end: "", value: "All" },
-    // crypto_currency: "All",
     asset_type: "All"
   });
 
-  const {
-    transactions: fetchedTransactions,
-    loading: transactionsLoading,
-    hasLoaded,
-  } = useSelector((state: RootState) => state.transaction);
-
-  // --- Logic: Fetch Data ---
-  const fetchTransactions = (currentFilters = filters) => {
-    if (!token) return;
-    const dateFilterMapping: Record<string, string> = {
+  // Build query filters for React Query
+  const dateFilterMapping: Record<string, string> = {
     "All": "All",
     "This week": "this_week",
     "This month": "this_month",
     "Custom": "custom"
   };
-
-  const backendDateFilter = dateFilterMapping[currentFilters.dateRange.value] || "All";
-
-    dispatch(getTransactionsThunk({
-      token,
-      date_filter: currentFilters.dateRange.start ? "custom" : backendDateFilter,
-      status: currentFilters.status,
-      transaction_type: currentFilters.transactionType,
-      asset_type: currentFilters.currencyType,
-      crypto_currency: currentFilters.crypto
-    }) as any);
+  const backendDateFilter = dateFilterMapping[filters.dateRange.value] || "All";
+  const queryFilters = {
+    date_filter: filters.dateRange.start ? "custom" : backendDateFilter,
+    status: filters.status,
+    transaction_type: filters.transactionType,
+    asset_type: filters.currencyType,
+    crypto_currency: filters.crypto,
   };
 
-  useEffect(() => {
-    if (!hasLoaded && !transactionsLoading) {
-      fetchTransactions();
-    }
-  }, [hasLoaded]);
+  const {
+    data: fetchedTransactions = [],
+    isLoading: transactionsLoading,
+  } = useTransactions(queryFilters);
 
   const handleApplyFilters = () => {
-    fetchTransactions();
+    // React Query auto-refetches when queryFilters change via setFilters
     setOpenFilter(false);
   };
 
