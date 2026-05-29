@@ -37,12 +37,8 @@ const ForgotVerifyOtp: React.FC = () => {
   const email = localStorage.getItem("forgot_email") || "";
   const newPassword = (location.state as { newPassword?: string })?.newPassword || "";
 
-  if (!newPassword) {
-    return <Navigate to="/forgot-password/new" replace />;
-  }
-
   const submit = async () => {
-    if (code.length !== OTP_LENGTH) {
+    if (code.length !== OTP_LENGTH || !newPassword) {
       showDanger("Incorrect code. Please try again.");
       return;
     }
@@ -80,6 +76,10 @@ const ForgotVerifyOtp: React.FC = () => {
       submit();
     }
   }, [values, loading]);
+
+  if (!newPassword) {
+    return <Navigate to="/forgot-password/new" replace />;
+  }
 
   return (
     <>
