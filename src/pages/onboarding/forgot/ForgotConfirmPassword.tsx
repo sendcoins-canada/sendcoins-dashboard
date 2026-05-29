@@ -1,7 +1,7 @@
 import React from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/store";
 import Header from "@/components/onboarding/shared/Header";
@@ -11,22 +11,21 @@ import { showDanger, showSuccess } from "@/components/ui/toast";
 import { PasswordCheck, ArrowLeft2 } from "iconsax-react";
 import { requestPasswordResetThunk } from "@/store/auth/asyncThunks/requestPasswordReset";
 
-const confirmSchema = Yup.object({
-  confirmPassword: Yup.string()
-    .required("Confirm your password")
-    .test("passwords-match", "Passwords must match", function(value) {
-      const newPassword = localStorage.getItem("forgot_new_password");
-      return value === newPassword;
-    }),
-});
+const createConfirmSchema = (newPassword: string) =>
+  Yup.object({
+    confirmPassword: Yup.string()
+      .required("Confirm your password")
+      .test("passwords-match", "Passwords must match", (value) => value === newPassword),
+  });
 
 const ForgotConfirmPassword: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch<AppDispatch>();
   const { loading } = useSelector((state: RootState) => state.auth);
 
   const email = localStorage.getItem("forgot_email") || "";
-  const newPassword = localStorage.getItem("forgot_new_password") || "";
+  const newPassword = (location.state as { newPassword?: string })?.newPassword || "";
 
   const handleSubmitPasswordReset = async () => {
     const result = await dispatch(requestPasswordResetThunk({
@@ -35,7 +34,7 @@ const ForgotConfirmPassword: React.FC = () => {
 
     if (requestPasswordResetThunk.fulfilled.match(result)) {
       showSuccess(result.payload.message || "Code sent to your email");
-      navigate("/forgot-password/otp");
+      navigate("/forgot-password/otp", { state: { newPassword } });
     } else {
       showDanger(result.payload || "Failed to request password reset");
     }
@@ -60,7 +59,7 @@ const ForgotConfirmPassword: React.FC = () => {
 
             <Formik
               initialValues={{ confirmPassword: "" }}
-              validationSchema={confirmSchema}
+              validationSchema={createConfirmSchema(newPassword)}
               onSubmit={handleSubmitPasswordReset}
             >
               {({ isSubmitting, values }) => (

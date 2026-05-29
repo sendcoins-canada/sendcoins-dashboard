@@ -21,7 +21,7 @@ interface FormattedRecipient {
 
 interface FiatRecipientSelectProps {
   country: string;
-  onSelectRecipient: (data: { keychain: string; name: string; network: string; address: string }) => void;
+  onSelectRecipient: (data: { keychain: string; name: string; network: string; address: string; currency: string }) => void;
   onAddNew: () => void;
 }
 
@@ -60,11 +60,19 @@ const FiatRecipientSelect: React.FC<FiatRecipientSelectProps> = ({ country, onSe
     }
   }, [dispatch, hasLoaded, loading]);
 
-  // Filter for Fiat recipients relevant to the selected country (asset)
-  // const fiatRecipients = (recipients || []).filter((r: any) => r.asset === country);
+  // Known crypto assets — everything else is treated as fiat
+  const CRYPTO_ASSETS = ['BTC', 'ETH', 'USDT', 'USDC', 'BNB', 'ADA', 'SOL', 'CELO', 'DOGE', 'LINK', 'XRP', 'LTC', 'BCH', 'TRX'];
+
+  // Filter for fiat recipients: match specific currency if selected, otherwise show all fiat
+  const fiatRecipients = (recipients || []).filter((r: any) => {
+    const asset = (r.asset || '').toUpperCase();
+    if (CRYPTO_ASSETS.includes(asset)) return false; // exclude crypto
+    if (country) return asset === country.toUpperCase(); // match selected currency
+    return true; // no country selected — show all fiat
+  });
 
   // Format recipients with initials and colors
-  const formattedRecipients: FormattedRecipient[] = recipients.map((rec: any, index: number) => ({
+  const formattedRecipients: FormattedRecipient[] = fiatRecipients.map((rec: any, index: number) => ({
     keychain: rec.keychain,
     name: rec.name,
     initials: getInitials(rec.name),
@@ -132,7 +140,8 @@ const FiatRecipientSelect: React.FC<FiatRecipientSelectProps> = ({ country, onSe
                       keychain: recipient.keychain,
                       name: recipient.name,
                       network: recipient.network,
-                      address: recipient.detail
+                      address: recipient.detail,
+                      currency: recipient.currency
                     })}
                   >
                     <span className="font-medium text-xs text-gray-800">{recipient.initials}</span>
@@ -169,7 +178,8 @@ const FiatRecipientSelect: React.FC<FiatRecipientSelectProps> = ({ country, onSe
                           keychain: recipient.keychain,
                           name: recipient.name,
                           network: recipient.network,
-                          address: recipient.detail
+                          address: recipient.detail,
+                          currency: recipient.currency
                         })}
                         className="flex items-center justify-between cursor-pointer group"
                       >

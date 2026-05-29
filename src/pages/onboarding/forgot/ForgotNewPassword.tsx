@@ -49,8 +49,7 @@ const ForgotNewPassword: React.FC = () => {
               initialValues={{ password: "" }}
               validationSchema={passwordSchema}
               onSubmit={(values) => {
-                localStorage.setItem("forgot_new_password", values.password);
-                navigate("/forgot-password/confirm");
+                navigate("/forgot-password/confirm", { state: { newPassword: values.password } });
               }}
             >
               {({ isSubmitting, values, handleChange }) => (

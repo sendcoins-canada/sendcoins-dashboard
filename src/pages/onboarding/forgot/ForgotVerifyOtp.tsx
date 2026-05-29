@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { showDanger, showSuccess } from "@/components/ui/toast";
 import { ArrowLeft2, PasswordCheck } from "iconsax-react";
 import Header from "@/components/onboarding/shared/Header";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { verifyPasswordResetOtpThunk } from "@/store/auth/asyncThunks/verifyPasswordResetOtp";
 import { updatePasswordWithOtpThunk } from "@/store/auth/asyncThunks/updatePasswordWithOtp";
 
@@ -15,6 +15,7 @@ const ForgotVerifyOtp: React.FC = () => {
   const [values, setValues] = React.useState<string[]>(Array(OTP_LENGTH).fill(""));
   const inputsRef = React.useRef<Array<HTMLInputElement | null>>([]);
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch<AppDispatch>();
   const { loading } = useSelector((state: RootState) => state.auth);
 
@@ -34,7 +35,7 @@ const ForgotVerifyOtp: React.FC = () => {
 
   const code = values.join("");
   const email = localStorage.getItem("forgot_email") || "";
-  const newPassword = localStorage.getItem("forgot_new_password") || "";
+  const newPassword = (location.state as { newPassword?: string })?.newPassword || "";
 
   const submit = async () => {
     if (code.length !== OTP_LENGTH) {
@@ -60,7 +61,6 @@ const ForgotVerifyOtp: React.FC = () => {
       if (updatePasswordWithOtpThunk.fulfilled.match(updateResult)) {
         // Clear sensitive data
         localStorage.removeItem("forgot_email");
-        localStorage.removeItem("forgot_new_password");
         showSuccess("Password updated. Please login.");
         navigate("/login");
       } else {

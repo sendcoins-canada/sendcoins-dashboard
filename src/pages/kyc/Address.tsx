@@ -4,8 +4,9 @@ import * as Yup from "yup";
 import { Button } from "@/components/ui/button";
 import { ArrowCircleLeft2, Location, Lock1 } from "iconsax-react";
 import { useNavigate } from "react-router-dom";
-import Input from "@/components/ui/input"; // your custom Input component
 import { toast } from "sonner";
+import Input from "@/components/ui/input"; // your custom Input component
+
 // import MetaMapVerify from "@/components/Metamap";
 import Header from "@/components/onboarding/shared/Header";
 import { useSelector } from "react-redux";
