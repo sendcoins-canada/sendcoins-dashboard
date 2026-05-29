@@ -27,7 +27,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { loading, token } = useSelector((state: RootState) => state.auth);
-console.log(token)
+
   // 3. Add this effect to handle the redirect
   useEffect(() => {
     if (token) {
@@ -48,7 +48,6 @@ console.log(token)
       navigate("/verify", { state: { email: result.payload.email, purpose: "login" } });
     } else if (loginWithPasswordThunk.rejected.match(result)) {
       showDanger(result.payload || "Invalid email or password, please try again.");
-      console.log(result)
     }
   };
 

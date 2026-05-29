@@ -30,10 +30,10 @@ export const changePasscodeThunk = createAsyncThunk<
         return rejectWithValue("No authentication token found. Please log in again.");
       }
 
-      // API might need token - check if the API function accepts it
       const response = await changePasscodeApi({
         oldCode: payload.oldCode,
         newCode: payload.newCode,
+        token,
       });
 
       return {
