@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, PlusIcon } from 'lucide-react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from '@/store';
 import { getRecipientsThunk } from "@/store/recipients/asyncThunks/getAllRecipients";
 import { HeaderWithCancel } from '@/components/onboarding/shared/Header';
 import { ArrowLeft2 } from 'iconsax-react';
@@ -47,7 +48,7 @@ const shortenAddress = (address: string) => {
 
 const FiatRecipientSelect: React.FC<FiatRecipientSelectProps> = ({ country, onSelectRecipient, onAddNew }) => {
   const [search, setSearch] = useState('');
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate()
   const { recipients, hasLoaded, loading } = useSelector((state: any) => state.recipients);
 
@@ -55,7 +56,7 @@ const FiatRecipientSelect: React.FC<FiatRecipientSelectProps> = ({ country, onSe
     if (!hasLoaded && !loading) {
       const token = localStorage.getItem("azertoken");
       if (token) {
-        dispatch(getRecipientsThunk({ token }) as any);
+        dispatch(getRecipientsThunk({ token }));
       }
     }
   }, [dispatch, hasLoaded, loading]);

@@ -3,8 +3,8 @@
   import { SearchNormal1 } from "iconsax-react";
   import { useNavigate } from "react-router-dom";
   import Input from "@/components/ui/input";
-  import { useDispatch, useSelector } from "react-redux";
-  import type { RootState } from "@/store";
+  import { useSelector } from "react-redux";
+  import { useAppDispatch, type RootState } from "@/store";
   import { getRecipientsThunk } from "@/store/recipients/asyncThunks/getAllRecipients";
 import type { RawRecipient } from "@/types/recipients";
 import Search from "@/assets/search.png"
@@ -32,7 +32,7 @@ type FormattedRecipient = RawRecipient & {
   const Recipients = () => {
     const navigate = useNavigate()
     const [search, setSearch] = useState("");
-    const dispatch = useDispatch()
+    const dispatch = useAppDispatch()
     const { recipients, hasLoaded, loading } = useSelector((state: RootState) => state.recipients)
    
     const getInitials = (name: string) => {
@@ -65,7 +65,7 @@ const formattedRecipients: FormattedRecipient[] = recipients.map((rec, index) =>
        if (!hasLoaded && !loading) {
          const token = localStorage.getItem("azertoken");
          if (token) {
-           dispatch(getRecipientsThunk({ token }) as any);
+           dispatch(getRecipientsThunk({ token }));
          }
        }
      }, [dispatch, hasLoaded, loading]);

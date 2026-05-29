@@ -79,7 +79,12 @@ const authSlice = createSlice({
       state.token = null;
       state.user = null;
       state.result = null;
-      localStorage.clear();
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      localStorage.removeItem("azertoken");
+      localStorage.removeItem("result");
+      localStorage.removeItem("purpose");
+      localStorage.removeItem("forgot_email");
     },
     setSurveyIndex: (state, action: PayloadAction<number>) => {
   state.surveyIndex = action.payload;

@@ -10,8 +10,8 @@ import Modal from "@/components/ui/Modal";
 import SendOptionsModal from "./Components/Send/SendModal";
 import { useNavigate } from "react-router-dom";
 import FundOptionsModal from "./Components/Fund/FundOptionsModal";
-import { useSelector, useDispatch } from "react-redux";
-import type { RootState } from "@/store";
+import { useSelector } from "react-redux";
+import { useAppDispatch, type RootState } from "@/store";
 import { getTransactionsThunk } from "@/store/transactions/asyncThunks/getTransactions";
 import { getAllBalanceThunk } from "@/store/wallet/asyncThunks/getBalances";
 import { formatCryptoAmount, formatFiatAmount, formatSignedAmount } from "@/utils/formatAmount";
@@ -19,7 +19,7 @@ import { formatCryptoAmount, formatFiatAmount, formatSignedAmount } from "@/util
 
 const Home: React.FC = () => {
   const navigate = useNavigate()
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const [showBalance, setShowBalance] = useState(false);
   const [walletOpen, setWalletOpen] = useState(false);
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
@@ -64,9 +64,9 @@ const defaultFiatBalance = useMemo(() => {
   const token = localStorage.getItem("azertoken");
   if (token) {
     // 1. Fetch transactions immediately
-    dispatch(getTransactionsThunk({ token }) as any);
+    dispatch(getTransactionsThunk({ token }));
 
-      dispatch(getAllBalanceThunk({ token }) as any);
+      dispatch(getAllBalanceThunk({ token }));
 
   }
 }, [dispatch]); 

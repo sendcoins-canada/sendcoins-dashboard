@@ -3,8 +3,8 @@ import Modal from "@/components/ui/Modal";
 import { Apple, ArrowRight2, Bank, BuyCrypto, Copy, Refresh, TickCircle } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 import Select from "@/components/ui/select";
-import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "@/store";
+import { useSelector } from "react-redux";
+import { useAppDispatch, type RootState } from "@/store";
 import { getAllBalanceThunk } from "@/store/wallet/asyncThunks/getBalances";
 import { showSuccess } from "@/components/ui/toast";
 import { QRCodeSVG } from 'qrcode.react';
@@ -29,7 +29,7 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
 }) => {
   const [step, setStep] = useState<1 | 2>(1);
   const [selected, setSelected] = useState<"bank" | "crypto" | "apple" | null>(null);
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const navigate = useNavigate();
   const token = useSelector((state: RootState) => state.auth.token?.azer_token);
   // State to hold the currently selected wallet address for funding
@@ -66,7 +66,7 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
     if (open && !allBalances) {
       const token = localStorage.getItem("azertoken");
       if (token) {
-        dispatch(getAllBalanceThunk({ token }) as any);
+        dispatch(getAllBalanceThunk({ token }));
       }
     }
   }, [open, allBalances, dispatch]);

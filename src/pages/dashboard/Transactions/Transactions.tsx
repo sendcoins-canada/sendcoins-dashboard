@@ -3,8 +3,8 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { SearchNormal1, Filter, TransmitSqaure2, Convert } from "iconsax-react";
 import FilterDrawer from "./components/FilterDrawer";
 import Input from "@/components/ui/input";
-import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "@/store";
+import { useSelector } from "react-redux";
+import { useAppDispatch, type RootState } from "@/store";
 import { getTransactionsThunk } from "@/store/transactions/asyncThunks/getTransactions";
 import type { RawApiTransactionList } from "@/types/transaction";
 import SearchIcon from "@/assets/search.png"; // Renamed to avoid confusion with search state
@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { formatCryptoAmount, formatFiatAmount, formatSignedAmount } from "@/utils/formatAmount";
 
 const Transactions = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [openFilter, setOpenFilter] = useState(false);

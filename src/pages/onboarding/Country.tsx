@@ -6,7 +6,7 @@ import { SelectField } from "@/components/ui/form";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useAppDispatch } from "@/store";
 import { setCountry } from "@/store/registration/slice";
 import { useQuery } from "@tanstack/react-query";
 import { getCountries } from "@/api/authApi";
@@ -19,7 +19,7 @@ const Country: React.FC = () => {
     country: Yup.string().required("Select a country"),
   });
   const navigate = useNavigate()
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { data } = useQuery({
     queryKey: ["countries"],
     queryFn: getCountries,

@@ -3,8 +3,8 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/onboarding/shared/Header";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "@/store";
+import { useSelector } from "react-redux";
+import { useAppDispatch, type RootState } from "@/store";
 import { getActiveSurvey, submitSurvey } from "@/api/authApi";
 // import { submitSurveyThunk } from "@/store/user/asyncThunks/submitSurvey";
 import { showDanger } from "@/components/ui/toast";
@@ -34,7 +34,7 @@ const Survey: React.FC = () => {
   const [allQuestions, setAllQuestions] = useState<Array<Question & { config_id: number; survey_title: string }>>([]);
   const navigate = useNavigate();
   const currentQuestionIndex = useSelector((state: RootState) => state.auth.surveyIndex);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { user, loading } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {

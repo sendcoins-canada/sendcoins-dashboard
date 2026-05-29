@@ -20,9 +20,38 @@ interface Network {
   network_logo: string;
 }
 
+interface WalletBalance {
+  symbol: string;
+  name: string;
+  TotalAvailableBalancePrice: string;
+  totalAvailableBalance: number;
+  logo: string;
+  isWalletAvailable: boolean;
+  walletAddress?: string;
+}
+
+interface FiatAccount {
+  currency: string;
+  availableBalance: string;
+  [key: string]: unknown;
+}
+
+interface AllBalancesData {
+  balances: Record<string, WalletBalance>;
+  fiatAccounts: FiatAccount[];
+  fetchedSuccessfully: string[];
+  totalFiatBalance: string;
+}
+
+interface AllBalancesResponse {
+  isSuccess: boolean;
+  data: AllBalancesData;
+  message?: string;
+}
+
 type SelectedBalance = {
   usd: string;
-  amount: string; 
+  amount: string;
   symbol: string;
   logo: string;
   isWalletAvailable?: boolean
@@ -34,7 +63,7 @@ type WalletState = {
   networks: Network[];
   loading: boolean;
   error?: string;
-  allBalances?: any;
+  allBalances?: AllBalancesResponse;
   selectedBalance: SelectedBalance | null;
 };
 

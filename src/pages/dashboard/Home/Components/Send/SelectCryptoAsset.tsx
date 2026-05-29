@@ -4,8 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { TickCircle, SearchNormal1, ArrowLeft2 } from "iconsax-react";
 import { HeaderWithCancel } from "@/components/onboarding/shared/Header";
-import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "@/store";
+import { useSelector } from "react-redux";
+import { useAppDispatch, type RootState } from "@/store";
 import { getAllBalanceThunk } from "@/store/wallet/asyncThunks/getBalances";
 
 type Asset = {
@@ -23,7 +23,7 @@ const SelectCryptoAsset = ({ onContinue }: Props) => {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
   const navigate = useNavigate()
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
 
    const { allBalances, loading } = useSelector(
     (state: RootState) => state.wallet
@@ -55,7 +55,7 @@ const SelectCryptoAsset = ({ onContinue }: Props) => {
     if (!allBalances && !loading) {
       const token = localStorage.getItem("azertoken");
       if (token) {
-        dispatch(getAllBalanceThunk({ token }) as any);
+        dispatch(getAllBalanceThunk({ token }));
       }
     }
   }, [allBalances, loading, dispatch]);

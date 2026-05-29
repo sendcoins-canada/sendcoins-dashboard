@@ -3,8 +3,8 @@ import { CheckCircle2, Loader2, XCircle, Copy, CheckCircle } from "lucide-react"
 import Send from "@/assets/Send.svg";
 import { ArrowLeft2 } from "iconsax-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "@/store";
+import { useSelector } from "react-redux";
+import { useAppDispatch, type RootState } from "@/store";
 import { getTransactionDetailThunk } from "@/store/transactions/asyncThunks/getTransactionDetail";
 import type { RawApiTransactionList } from "@/types/transaction";
 import MinimalLayout from "@/components/MinimalLayout";
@@ -46,7 +46,7 @@ const statusStyles = {
 
 const TransactionDetails: React.FC = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [activeTab, setActiveTab] = useState<"timeline" | "details">("timeline");
   const [copied, setCopied] = useState(false);
 
@@ -64,7 +64,7 @@ const TransactionDetails: React.FC = () => {
     if (txId) {
       const token = localStorage.getItem("azertoken");
       if (token) {
-        dispatch(getTransactionDetailThunk({ token, txId }) as any);
+        dispatch(getTransactionDetailThunk({ token, txId }));
       }
     }
   }, [dispatch, txId]);

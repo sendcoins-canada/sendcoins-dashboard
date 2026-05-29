@@ -6,7 +6,7 @@ import { TextInputField } from "@/components/ui/form"; // assuming you have a re
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useAppDispatch } from "@/store";
 import { setFirstName, setLastName, setPhoneNumber } from "@/store/registration/slice";
 
 const PersonalInfo: React.FC = () => {
@@ -17,7 +17,7 @@ const PersonalInfo: React.FC = () => {
   });
 
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   return (
     <>

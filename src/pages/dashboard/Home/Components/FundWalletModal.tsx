@@ -1,10 +1,9 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { getAllBalanceThunk, getBNBBalanceThunk, getBTCBalanceThunk, getETHBalanceThunk, getUSDCBalanceThunk, getUSDTBalanceThunk } from "@/store/wallet/asyncThunks/getBalances";
-import type { RootState } from "@/store";
-import type { BalancesResponse } from "@/types/wallet";
+import { useAppDispatch, type RootState } from "@/store";
 import { setSelectedBalance } from "@/store/wallet/slice";
 import { Bank } from "iconsax-react";
 import NGN from '@/assets/nigerianflag.svg'
@@ -32,7 +31,7 @@ const balanceThunkMap = {
 const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const navigate = useNavigate();
   const token = localStorage.getItem("azertoken")
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
 
   const shortenAddress = (address: string, chars = 6) => {
     if (!address) return "";
@@ -42,7 +41,7 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { allBalances, loading } = useSelector(
     (state: RootState) => state.wallet
   );
-  const balances = (allBalances?.data?.balances || {}) as BalancesResponse;
+  const balances = allBalances?.data?.balances || {};
 
   const parsedCryptoWallets = Object.keys(balances)
     .map((key) => {
@@ -77,7 +76,7 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   useEffect(() => {
     if (token) {
-      dispatch(getAllBalanceThunk({ token }) as any);
+      dispatch(getAllBalanceThunk({ token }));
     }
   }, [token, dispatch]);
 
@@ -122,7 +121,7 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (!wallet.isFiat) {
         const specificThunk = balanceThunkMap[symbol as keyof typeof balanceThunkMap];
         if (specificThunk && token) {
-            dispatch(specificThunk({ token, network: network }) as any)
+            dispatch(specificThunk({ token, network: network }))
                 .unwrap()
                 .then((newBalanceData: any) => {
           if (newBalanceData && newBalanceData.TotalAvailableBalancePrice) {

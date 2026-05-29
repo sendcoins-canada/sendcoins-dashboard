@@ -6,8 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { Money, Money2, ArrowLeft2 } from "iconsax-react";
 import WalletSelectionModal from "@/pages/dashboard/WalletSelectionModal";
 import { useGasFee } from "@/store/hooks/useGasFee";
-import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "@/store";
+import { useSelector } from "react-redux";
+import { useAppDispatch, type RootState } from "@/store";
 import { getAllBalanceThunk } from "@/store/wallet/asyncThunks/getBalances";
 
 
@@ -31,13 +31,13 @@ const EnterAmount: React.FC<EnterAmountProps> = ({ asset, onNext, isFiat, recipi
   const [error, setError] = useState("");
   const [isWalletModalOpen, setWalletModalOpen] = useState(false);
 
-const dispatch = useDispatch();
+const dispatch = useAppDispatch();
 const token = useSelector((state: RootState) => state.auth.token?.azer_token);
 // 1. Get Wallet Balance from Redux
   const { allBalances } = useSelector((state: RootState) => state.wallet);
 useEffect(() => {
   if (token && (!allBalances || !allBalances.data)) {
-    dispatch(getAllBalanceThunk({token}) as any);
+    dispatch(getAllBalanceThunk({token}));
   }
 }, [dispatch, token, allBalances]);
 
