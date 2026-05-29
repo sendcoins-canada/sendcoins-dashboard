@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import SendOptionsModal from "./SendModal";
 import SelectCryptoAsset from "./SelectCryptoAsset";
 import RecipientDetails from "./RecipientDetails";
@@ -46,6 +46,11 @@ const SendFlow: React.FC = () => {
   const [fee, setFee] = useState<string>("0");  
 // fetch bankdetails
 const { fetchAccount } = useCrayfiAccount();
+  const pollCleanupRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    return () => { pollCleanupRef.current?.(); };
+  }, []);
 
 useEffect(() => {
   if (isFiatRoute && token) {
@@ -103,13 +108,19 @@ useEffect(() => {
   const handleFiatRecipientSelect = (data: {
     keychain: string;
     name: string;
-    network: string; // Bank Name
+    network: string; // Bank Code
     address: string; // Account Number
+    currency: string; // Currency code (NGN, CAD, etc.)
   }) => {
     setRecipient({
-      ...data,
+      keychain: data.keychain,
+      name: data.name,
+      network: data.network,
+      address: data.address,
       transitNumber: ""
-    }); setSelectedAsset(selectedCountry || "CAD");
+    });
+    setSelectedCountry(data.currency);
+    setSelectedAsset(data.currency);
     setStep("amount");
   };
 
@@ -196,7 +207,7 @@ useEffect(() => {
             setTransactionId(reference);
 
             // Poll in background — update UI when done
-            pollTransferStatus(
+            pollCleanupRef.current = pollTransferStatus(
               reference,
               (transfer) => {
                 if (transfer.status === 'completed') {

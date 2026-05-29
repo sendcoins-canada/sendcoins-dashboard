@@ -72,10 +72,10 @@ const ForgotVerifyOtp: React.FC = () => {
   };
 
   React.useEffect(() => {
-    if (values.every((val) => val !== "")) {
+    if (values.every((val) => val !== "") && !loading) {
       submit();
     }
-  }, [values]);
+  }, [values, loading]);
 
   return (
     <>

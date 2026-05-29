@@ -32,19 +32,8 @@ export interface AuthState {
   message: string | null;
   token: AuthToken | null;
   user: User | null;
-  result: Result | null
-}
-
-export interface AuthToken { azer_token: string; expires_at: number; }
-export interface User { oauth_id: number; useremail: string; device?: string; }
-export interface Result { azer_id: number; }
-
-export interface AuthState {
-  loading: boolean;
-  token: AuthToken | null;
-  user: User | null;
   result: Result | null;
-  surveyIndex: number
+  surveyIndex: number;
 }
 function safeParse<T>(key: string): T | null {
   const item = localStorage.getItem(key);
