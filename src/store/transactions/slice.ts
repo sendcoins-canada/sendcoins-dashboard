@@ -14,8 +14,6 @@ export interface Transaction {
   amount: string;
   currency: string;
   timestamp: string;
-  // Add any other relevant fields like address, network, etc.
-  [key: string]: any; 
 }
 
 // Define the shape of the entire transaction state

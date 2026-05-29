@@ -30,7 +30,7 @@ export interface AddRecipientPayload {
 export interface RecipientResponse {
   title: string;
   isSuccess: boolean;
-  recipients: any[];  // Replace with a strict type if needed
+  recipients: RawRecipient[];
   totalRecipients: number;
 }
 

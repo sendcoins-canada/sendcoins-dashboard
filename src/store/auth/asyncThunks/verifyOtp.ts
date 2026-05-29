@@ -1,4 +1,3 @@
-// @ts-ignore
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { verifyOtp as verifyOtpApi } from "@/api/authApi";
 import type { VerifyOtpRequest, VerifyOtpResponse } from "@/types/onboarding";
