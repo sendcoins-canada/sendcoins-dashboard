@@ -62,6 +62,7 @@ type WalletState = {
   coins: Record<string, Coin>;
   networks: Network[];
   loading: boolean;
+  hasLoaded: boolean;
   error?: string;
   allBalances?: AllBalancesResponse;
   selectedBalance: SelectedBalance | null;
@@ -72,6 +73,7 @@ const initialState: WalletState = {
   coins: {},
   networks: [],
   loading: false,
+  hasLoaded: false,
   allBalances: undefined,
   selectedBalance: null,
 };
@@ -256,6 +258,7 @@ const walletSlice = createSlice({
     })
     .addCase(getAllBalanceThunk.fulfilled, (state, action) => {
   state.loading = false;
+  state.hasLoaded = true;
   state.allBalances = action.payload;
 
   const balances = action.payload?.data?.balances;

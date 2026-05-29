@@ -26,9 +26,9 @@ const Home: React.FC = () => {
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
   const [isFundingOpen, setIsFundingOpen] = useState(false)
   // 1. Get transaction data and loading state from the Redux store
-    const { transactions: fetchedTransactions, loading: transactionsLoading, error: transactionsError   } = useSelector((state: RootState) => state.transaction);
+    const { transactions: fetchedTransactions, loading: transactionsLoading, error: transactionsError, hasLoaded: transactionsHasLoaded   } = useSelector((state: RootState) => state.transaction);
     
-const {selectedBalance, allBalances } = useSelector((state: RootState) => state.wallet);
+const {selectedBalance, allBalances, loading: walletLoading, hasLoaded: walletHasLoaded } = useSelector((state: RootState) => state.wallet);
 const defaultFiatBalance = useMemo(() => {
     const fiatAccount = allBalances?.data?.fiatAccounts?.[0]; // Get the first fiat account
     
@@ -63,13 +63,14 @@ const defaultFiatBalance = useMemo(() => {
   // 3. Fetch transactions on component mount
    useEffect(() => {
   if (token) {
-    // 1. Fetch transactions immediately
-    dispatch(getTransactionsThunk({ token }));
-
+    if (!transactionsHasLoaded && !transactionsLoading) {
+      dispatch(getTransactionsThunk({ token }));
+    }
+    if (!walletHasLoaded && !walletLoading) {
       dispatch(getAllBalanceThunk({ token }));
-
+    }
   }
-}, [dispatch]); 
+}, [dispatch, token, transactionsHasLoaded, transactionsLoading, walletHasLoaded, walletLoading]);
 
 
   const handleSelectOption = (option: "crypto" | "fiat") => {

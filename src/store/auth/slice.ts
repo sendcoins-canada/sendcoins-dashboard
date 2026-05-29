@@ -22,7 +22,6 @@ export interface AuthState {
   token: AuthToken | null;
   user: User | null;
   result: Result | null;
-  surveyIndex: number;
 }
 function safeParse<T>(key: string): T | null {
   const item = localStorage.getItem(key);
@@ -41,7 +40,6 @@ const initialState: AuthState = {
   result: safeParse<Result>("result"),
    error: null,
   message: null,
-  surveyIndex: 0
 };
 
 const authSlice = createSlice({
@@ -75,11 +73,8 @@ const authSlice = createSlice({
       localStorage.removeItem("purpose");
       localStorage.removeItem("forgot_email");
     },
-    setSurveyIndex: (state, action: PayloadAction<number>) => {
-  state.surveyIndex = action.payload;
-}
   },
 });
 
-export const { setCredentials, setLoading, logout, setSurveyIndex } = authSlice.actions;
+export const { setCredentials, setLoading, logout } = authSlice.actions;
 export default authSlice.reducer;

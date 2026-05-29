@@ -8,7 +8,7 @@ import { useAppDispatch, type RootState } from "@/store";
 import { getActiveSurvey, submitSurvey } from "@/api/authApi";
 // import { submitSurveyThunk } from "@/store/user/asyncThunks/submitSurvey";
 import { showDanger } from "@/components/ui/toast";
-import {  setLoading, setSurveyIndex } from "@/store/auth/slice";
+import { setLoading } from "@/store/auth/slice";
 
 interface Question {
   question_id: number;
@@ -28,12 +28,11 @@ interface Survey {
 }
 
 const Survey: React.FC = () => {
-  // const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<{ [key: string]: string }>({});
   // const [surveys, setSurveys] = useState<Survey[]>([]);
   const [allQuestions, setAllQuestions] = useState<Array<Question & { config_id: number; survey_title: string }>>([]);
   const navigate = useNavigate();
-  const currentQuestionIndex = useSelector((state: RootState) => state.auth.surveyIndex);
   const dispatch = useAppDispatch();
   const { user, loading } = useSelector((state: RootState) => state.auth);
 
@@ -113,9 +112,7 @@ const Survey: React.FC = () => {
 
       // 3. Update UI Local State
       if (currentQuestionIndex < allQuestions.length - 1) {
-        // setCurrentQuestionIndex(currentQuestionIndex + 1);
-        // setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
-        dispatch(setSurveyIndex(currentQuestionIndex + 1));
+        setCurrentQuestionIndex(currentQuestionIndex + 1);
       } else {
         navigate("/welcome");
       }
@@ -128,8 +125,7 @@ const Survey: React.FC = () => {
 
   const handleBack = () => {
     if (currentQuestionIndex > 0) {
-      // setCurrentQuestionIndex(currentQuestionIndex - 1);
-      dispatch(setSurveyIndex(currentQuestionIndex - 1));
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
     }
   };
 

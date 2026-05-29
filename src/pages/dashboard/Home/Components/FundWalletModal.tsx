@@ -38,7 +38,7 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     return `${address.slice(0, chars)}...${address.slice(-chars)}`;
   };
 
-  const { allBalances, loading } = useSelector(
+  const { allBalances, loading, hasLoaded } = useSelector(
     (state: RootState) => state.wallet
   );
   const balances = allBalances?.data?.balances || {};
@@ -75,10 +75,10 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   // const allWallets = [...parsedFiatWallets, ...parsedCryptoWallets];
 
   useEffect(() => {
-    if (token) {
+    if (token && !hasLoaded && !loading) {
       dispatch(getAllBalanceThunk({ token }));
     }
-  }, [token, dispatch]);
+  }, [token, dispatch, hasLoaded, loading]);
 
  const handleWalletClick = (wallet: ParsedWallet) => {
     const symbol = wallet.symbol.toUpperCase();   
