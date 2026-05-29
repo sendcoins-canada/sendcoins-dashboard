@@ -1,4 +1,4 @@
-import { StrictMode } from "react";
+import { StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import "./fonts.css"
@@ -21,7 +21,7 @@ createRoot(document.getElementById("root")!).render(
           <GoogleOAuthProvider clientId="420603153609-qcuu08bi474a8a6factcdigh9jno8p5k.apps.googleusercontent.com">
         <App />
         <Toaster />
-        {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+        {import.meta.env.DEV && <Suspense fallback={null}><ReactQueryDevtools initialIsOpen={false} /></Suspense>}
          </GoogleOAuthProvider>
       </QueryClientProvider>
     </ReduxProvider>
