@@ -12,6 +12,7 @@ import Passcode from "./pages/onboarding/Passcode";
 import CTA from "./pages/onboarding/CTA";
 import Address from "./pages/kyc/Address";
 import ProtectedRoute from "./components/ProtectedRoutes";
+import VerifiedRoute from "./components/VerifiedRoute";
 import Home from "./pages/dashboard/Home/Home";
 import Recipients from "./pages/dashboard/Recipients/Recipients";
 import Transactions from "./pages/dashboard/Transactions/Transactions";
@@ -149,35 +150,28 @@ function App() {
         <Route
           path="/dashboard/send-crypto"
           element={
-            <ProtectedRoute>
+            <VerifiedRoute>
               <SendFlow />
-            </ProtectedRoute>
+            </VerifiedRoute>
           }
         />
         <Route
           path="/dashboard/send-fiat"
           element={
-            <ProtectedRoute>
+            <VerifiedRoute>
               <SendFlow />
-            </ProtectedRoute>
+            </VerifiedRoute>
           }
         />
         <Route
           path="/dashboard/convert"
           element={
-            <ProtectedRoute>
+            <VerifiedRoute>
               <EnterConvertAmount />
-            </ProtectedRoute>
+            </VerifiedRoute>
           }
         />
-        <Route
-          path="/account-deleted"
-          element={
-            <ProtectedRoute>
-              <AccountDeleted />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/account-deleted" element={<AccountDeleted />} />
         <Route
           path="/dashboard/setup-fiat"
           element={

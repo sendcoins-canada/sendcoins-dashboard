@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { showDanger, showSuccess } from "@/components/ui/toast";
 import { ArrowLeft2, PasswordCheck } from "iconsax-react";
 import Header from "@/components/onboarding/shared/Header";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import { verifyPasswordResetOtpThunk } from "@/store/auth/asyncThunks/verifyPasswordResetOtp";
 import { updatePasswordWithOtpThunk } from "@/store/auth/asyncThunks/updatePasswordWithOtp";
 
@@ -36,6 +36,10 @@ const ForgotVerifyOtp: React.FC = () => {
   const code = values.join("");
   const email = localStorage.getItem("forgot_email") || "";
   const newPassword = (location.state as { newPassword?: string })?.newPassword || "";
+
+  if (!newPassword) {
+    return <Navigate to="/forgot-password/new" replace />;
+  }
 
   const submit = async () => {
     if (code.length !== OTP_LENGTH) {

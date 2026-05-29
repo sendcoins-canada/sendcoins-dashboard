@@ -1,7 +1,7 @@
 import React from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/store";
 import Header from "@/components/onboarding/shared/Header";
@@ -26,6 +26,10 @@ const ForgotConfirmPassword: React.FC = () => {
 
   const email = localStorage.getItem("forgot_email") || "";
   const newPassword = (location.state as { newPassword?: string })?.newPassword || "";
+
+  if (!newPassword) {
+    return <Navigate to="/forgot-password/new" replace />;
+  }
 
   const handleSubmitPasswordReset = async () => {
     const result = await dispatch(requestPasswordResetThunk({
