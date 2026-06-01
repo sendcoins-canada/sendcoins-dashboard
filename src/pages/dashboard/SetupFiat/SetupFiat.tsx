@@ -79,7 +79,7 @@ const SetupFiat: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-md mx-auto py-8 px-4">
+      <div className="md:w-[50%] max-w-md py-8 px-4">
         {/* Back Button */}
         <div
           className="flex items-center cursor-pointer border rounded-full w-fit justify-center py-2 px-4 mb-8"
