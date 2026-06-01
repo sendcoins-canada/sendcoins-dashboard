@@ -33,13 +33,13 @@ const EnterAmount: React.FC<EnterAmountProps> = ({ asset, onNext, isFiat, recipi
 const { data: balancesData } = useBalances();
 
 const walletAvailableBalance = useMemo(() => {
-  if (!balancesData) return 0;
+  if (!balancesData?.data) return 0;
 
   if (isFiat) {
-    return parseFloat(balancesData.totalFiatBalance) || 0;
+    return parseFloat(balancesData.data.totalFiatBalance) || 0;
   } else {
     const key = asset.toLowerCase();
-    const currentWallet = balancesData.balances?.[key];
+    const currentWallet = balancesData.data.balances?.[key];
     return currentWallet?.totalAvailableBalance || 0;
   }
 }, [balancesData, asset, isFiat]);

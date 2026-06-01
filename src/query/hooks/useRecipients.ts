@@ -11,7 +11,7 @@ export const useRecipients = () => {
     queryFn: async () => {
       if (!token) throw new Error("No token");
       const res = await getRecipients(token);
-      return res.data;
+      return res.data ?? res;
     },
     enabled: !!token,
     staleTime: 30_000,

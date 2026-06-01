@@ -40,8 +40,8 @@ const ConfirmSend: React.FC<Props> = ({
 
   // 2. Find the specific wallet address for the asset we are sending
   const userWallet = useMemo(() => {
-    if (!balancesData?.balances) return null;
-    return balancesData.balances[asset.toLowerCase()];
+    if (!balancesData?.data?.balances) return null;
+    return balancesData.data.balances[asset.toLowerCase()];
   }, [balancesData, asset]);
 
   const userAddress = userWallet?.walletAddress || "Loading...";

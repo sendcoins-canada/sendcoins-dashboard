@@ -33,7 +33,7 @@ const Home: React.FC = () => {
   const { selectedBalance } = useSelector((state: RootState) => state.wallet);
 
 const defaultFiatBalance = useMemo(() => {
-    const fiatAccount = balancesData?.fiatAccounts?.[0];
+    const fiatAccount = balancesData?.data?.fiatAccounts?.[0];
 
     if (fiatAccount) {
       return {

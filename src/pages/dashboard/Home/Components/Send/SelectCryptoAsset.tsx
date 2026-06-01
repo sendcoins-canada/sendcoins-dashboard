@@ -24,7 +24,7 @@ const SelectCryptoAsset = ({ onContinue }: Props) => {
 
   // Server data via React Query
   const { data: balancesData } = useBalances();
-  const walletMap = balancesData?.balances || {};
+  const walletMap = balancesData?.data?.balances || {};
 
   const fetchedAssets: Asset[] = Object.keys(walletMap)
     .map(key => {

@@ -11,7 +11,7 @@ export const useTransactions = (filters?: Omit<TransactionFilterParams, "token">
     queryFn: async () => {
       if (!token) throw new Error("No token");
       const res = await getTransactions({ token, ...filters });
-      return res.data;
+      return res.data ?? res;
     },
     enabled: !!token,
     staleTime: 30_000,
@@ -26,7 +26,7 @@ export const useTransactionDetail = (txId: string | undefined) => {
     queryFn: async () => {
       if (!token || !txId) throw new Error("Missing params");
       const res = await getTransactionDetail({ token, txId });
-      return res.data;
+      return res.data ?? res;
     },
     enabled: !!token && !!txId,
     staleTime: 60_000,

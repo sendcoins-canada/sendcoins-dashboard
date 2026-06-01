@@ -69,7 +69,7 @@ const FundOptionsModal: React.FC<FundOptionsModalProps> = ({
   }, [step, selected, open, token, fetchAccount]);
 
   // 3. Process wallet data for dropdown and details
-  const walletMap = balancesData?.balances || {};
+  const walletMap = balancesData?.data?.balances || {};
   // Convert fetched balances into a clean list of options
   const walletOptions: WalletOption[] = Object.keys(walletMap)
     .map(key => {

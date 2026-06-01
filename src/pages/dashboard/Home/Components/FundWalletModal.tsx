@@ -41,7 +41,7 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   // Server data via React Query (auto-cached, no manual fetch needed)
   const { data: balancesData, isLoading: loading } = useBalances();
-  const balances = balancesData?.balances || {};
+  const balances = balancesData?.data?.balances || {};
 
   const parsedCryptoWallets = Object.keys(balances)
     .map((key) => {
@@ -60,7 +60,7 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }))
 
     // 2. Parse Fiat Accounts
-  const fiatAccounts = (balancesData?.fiatAccounts || []) as any[];
+  const fiatAccounts = (balancesData?.data?.fiatAccounts || []) as any[];
   const parsedFiatWallets: ParsedWallet[] = fiatAccounts.map((account) => ({
     name: account.bankName,
     address: account.accountNumber,

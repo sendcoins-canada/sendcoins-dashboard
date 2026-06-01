@@ -22,7 +22,7 @@ const shortenAddress = (address: string, chars = 6) => {
   return `${address.slice(0, chars)}...${address.slice(-chars)}`;
 };
 
-const parsedWallets = Object.values(balancesData?.balances || {})
+const parsedWallets = Object.values(balancesData?.data?.balances || {})
   .filter((wallet: any) => wallet?.isWalletAvailable)
   .map((wallet: any) => ({
     name: wallet.name,

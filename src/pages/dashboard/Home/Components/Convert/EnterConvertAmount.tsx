@@ -66,14 +66,14 @@ const ConvertFlow: React.FC = () => {
   // --- 2. Derive Wallets from Redux ---
   // Safely convert the balances object into an array
   const wallets = React.useMemo(() => {
-    const balancesObj = balancesData?.balances as Record<string, WalletBalance> | undefined;
+    const balancesObj = balancesData?.data?.balances as Record<string, WalletBalance> | undefined;
     if (!balancesObj) return [];
 
     return Object.values(balancesObj).filter((w: any) => w.isWalletAvailable === true);
   }, [balancesData]);
 
   const fiatWallets = React.useMemo(() => {
-    const accounts = balancesData?.fiatAccounts;
+    const accounts = balancesData?.data?.fiatAccounts;
     if (!accounts || !Array.isArray(accounts)) return [];
     return accounts as FiatAccount[];
   }, [balancesData]);
