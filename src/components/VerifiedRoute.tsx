@@ -12,20 +12,15 @@ const VerifiedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const accessToken = auth.token?.azer_token;
 
   const hasPin = userData?.isPinAvailable?.found === true;
-  const isVerified = userData?.verified === true;
-  const shouldBlock = !!userData && (!hasPin || !isVerified);
+  const shouldBlock = !!userData && !hasPin;
   const toastShown = useRef(false);
 
   useEffect(() => {
     if (shouldBlock && !toastShown.current) {
       toastShown.current = true;
-      showDanger(
-        !hasPin
-          ? "Please set up your passcode before making transactions."
-          : "Please complete KYC verification before making transactions."
-      );
+      showDanger("Please set up your passcode before making transactions.");
     }
-  }, [shouldBlock, hasPin]);
+  }, [shouldBlock]);
 
   if (auth.loading) {
     return null;
