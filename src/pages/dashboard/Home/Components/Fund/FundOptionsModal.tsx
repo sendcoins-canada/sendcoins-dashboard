@@ -283,6 +283,21 @@ const handleCopy = (text: string, label?: string) => {
           </h2>
 
           <div className="p-2 bg-white rounded-2xl text-center my-4">
+            {walletOptions.length === 0 ? (
+              <div className="py-8 text-center">
+                <div className="mx-auto mb-3 inline-flex items-center justify-center rounded-full bg-[#E8EDFF] p-3">
+                  <BuyCrypto size="24" color="#0647F7" variant="Bold" />
+                </div>
+                <p className="text-sm text-[#555] mb-1">No crypto wallets yet</p>
+                <p className="text-xs text-[#8C8C8C] mb-4">Create a wallet first to receive crypto deposits.</p>
+                <Button
+                  onClick={() => { onOpenChange(false); navigate('/dashboard/create-wallet'); }}
+                  className="bg-[#0647F7] hover:bg-[#2563EB] text-white text-sm"
+                >
+                  Create Wallet
+                </Button>
+              </div>
+            ) : (
             <div className="bg-[#F5F5F5] rounded-2xl p-2 mb-4 pb-6">
 
               <div className="flex items-center justify-between gap-4 space-y-4 bg-white p-2 rounded-xl">
@@ -296,26 +311,23 @@ const handleCopy = (text: string, label?: string) => {
                 />
               </div>
 
-              {/* <img src={QR} alt="QR code"  className="mx-auto mt-4"/> */}
-              {/* DYNAMIC QR CODE HERE */}
               {selectedWalletAddress ? (
                 <QRCodeSVG
                   value={selectedWalletAddress}
-                  size={160} // Similar to w-40 h-40
-                  level="H"  // Highest correction level
+                  size={160}
+                  level="H"
                   includeMargin={true}
                   className="mx-auto mt-4"
                   imageSettings={{
-                    src: logo,  // Replace with your logo path
+                    src: logo,
                     x: undefined,
                     y: undefined,
                     height: 20,
                     width: 20,
-                    excavate: true, // clears the background behind logo
+                    excavate: true,
                   }}
                 />
               ) : (
-                // Placeholder/Fallback when address is not yet loaded
                 <div className="mx-auto mt-4 w-40 h-40 flex items-center justify-center text-gray-500 border border-dashed rounded-lg">
                   Select Wallet
                 </div>
@@ -324,13 +336,12 @@ const handleCopy = (text: string, label?: string) => {
               <p className="text-sm text-[#777777] mt-4 mb-2">Your {selectedWallet?.symbol || 'Crypto'} wallet address</p>
               <p className="text-sm break-all">{selectedWalletAddress || 'Select a wallet to see address...'}</p>
 
-
             </div>
+            )}
             <div className="flex justify-center gap-4">
 
               <Button className="bg-[#F5F5F5] my-2">Share</Button>
               <Button
-                // onClick={handleCopy}
                 onClick={() => handleCopy(selectedWalletAddress)}
                 className={`bg-[#0647F7] my-2 text-white`}
               >
