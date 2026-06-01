@@ -401,7 +401,7 @@ useEffect(() => {
             maxLength={requiredLength}
             value={passcode.join("")}
             onChange={handleChange}
-            className="absolute opacity-0 pointer-events-none"
+            className="absolute opacity-0 w-0 h-0"
           />
         </div>
 
