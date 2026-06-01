@@ -82,22 +82,28 @@ const SelectCryptoAsset = ({ onContinue }: Props) => {
 
         {/* Asset list */}
         <div className="space-y-2 max-h-[360px] overflow-y-auto">
-          {filtered.map((asset) => (
-            <button
-              key={asset.id}
-              onClick={() => setSelected(asset.id)}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition `}
-            >
-              <div className="flex items-center gap-3">
-                <img src={asset.icon} alt={asset.name} className="w-5 h-5" />
-                <span className=" text-primary">{asset.name}</span>
-              </div>
-              {selected === asset.id && (
-                // <div className="w-2 h-2 bg-green-500 rounded-full" />
-                <TickCircle size="16" color="#34C759" variant="Bold"/>
-              )}
-            </button>
-          ))}
+          {filtered.length === 0 ? (
+            <div className="py-10 text-center">
+              <p className="text-gray-400 text-sm">No crypto assets available.</p>
+              <p className="text-gray-400 text-xs mt-1">Create a wallet first to start sending crypto.</p>
+            </div>
+          ) : (
+            filtered.map((asset) => (
+              <button
+                key={asset.id}
+                onClick={() => setSelected(asset.id)}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition `}
+              >
+                <div className="flex items-center gap-3">
+                  <img src={asset.icon} alt={asset.name} className="w-5 h-5" />
+                  <span className=" text-primary">{asset.name}</span>
+                </div>
+                {selected === asset.id && (
+                  <TickCircle size="16" color="#34C759" variant="Bold"/>
+                )}
+              </button>
+            ))
+          )}
         </div>
 
         {/* Continue button */}
