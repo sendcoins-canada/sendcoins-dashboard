@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 import type { RootState } from "@/store";
@@ -9,6 +10,22 @@ const VerifiedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const userData = userSlice?.user?.data;
 
   const accessToken = auth.token?.azer_token;
+
+  const hasPin = userData?.isPinAvailable?.found === true;
+  const isVerified = userData?.verified === true;
+  const shouldBlock = !!userData && (!hasPin || !isVerified);
+  const toastShown = useRef(false);
+
+  useEffect(() => {
+    if (shouldBlock && !toastShown.current) {
+      toastShown.current = true;
+      showDanger(
+        !hasPin
+          ? "Please set up your passcode before making transactions."
+          : "Please complete KYC verification before making transactions."
+      );
+    }
+  }, [shouldBlock, hasPin]);
 
   if (auth.loading) {
     return null;
@@ -23,15 +40,7 @@ const VerifiedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     return <>{children}</>;
   }
 
-  const hasPin = userData?.isPinAvailable?.found === true;
-  const isVerified = userData?.verified === true;
-
-  if (!hasPin || !isVerified) {
-    showDanger(
-      !hasPin
-        ? "Please set up your passcode before making transactions."
-        : "Please complete KYC verification before making transactions."
-    );
+  if (shouldBlock) {
     return <Navigate to="/dashboard/home" replace />;
   }
 
