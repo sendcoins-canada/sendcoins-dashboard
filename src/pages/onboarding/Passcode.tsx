@@ -23,7 +23,10 @@ const SetupPasscode: React.FC = () => {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    inputRef.current?.focus();
+    const keepFocus = () => inputRef.current?.focus();
+    keepFocus();
+    window.addEventListener("click", keepFocus);
+    return () => window.removeEventListener("click", keepFocus);
   }, [step]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -131,7 +134,8 @@ const SetupPasscode: React.FC = () => {
             maxLength={4}
             value={passcode.join("")}
             onChange={handleChange}
-            className="absolute opacity-0 pointer-events-none"
+            onBlur={() => inputRef.current?.focus()}
+            className="absolute opacity-0 w-0 h-0"
           />
 
           {/* Visual passcode circles */}
