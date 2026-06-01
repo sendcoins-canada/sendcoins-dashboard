@@ -23,10 +23,19 @@ const bvnSchema = Yup.object({
     .matches(/^[0-9]{11}$/, "BVN must be exactly 11 digits"),
 });
 
+const ninSchema = Yup.object({
+  nin: Yup.string()
+    .required("NIN is required")
+    .matches(/^[0-9]{11}$/, "NIN must be exactly 11 digits"),
+});
+
+type VerifyType = "bvn" | "nin";
+
 const SetupFiat: React.FC = () => {
   const navigate = useNavigate();
   const token = useSelector((state: RootState) => state.auth.token?.azer_token);
   const [step, setStep] = useState<"name" | "bvn">("name");
+  const [verifyType, setVerifyType] = useState<VerifyType>("bvn");
   const [nameData, setNameData] = useState({ firstName: "", middleName: "", lastName: "" });
   const [loading, setLoading] = useState(false);
 
@@ -38,7 +47,7 @@ const SetupFiat: React.FC = () => {
     setStep("bvn");
   };
 
-  const handleBvnSubmit = async (values: { bvn: string }) => {
+  const handleVerifySubmit = async (values: { bvn?: string; nin?: string }) => {
     setLoading(true);
     if (!token) {
       showDanger("Session expired. Please log in again.");
@@ -47,13 +56,14 @@ const SetupFiat: React.FC = () => {
     }
 
     try {
-      // Step 1: Update profile with name and BVN
+      // Step 1: Update profile with name and BVN or NIN
       await updateProfile({
         token,
         first_name: nameData.firstName,
         middle_name: nameData.middleName || undefined,
         last_name: nameData.lastName,
         bvn: values.bvn,
+        nin: values.nin,
       });
 
       // Step 2: Request fiat account creation
@@ -133,34 +143,85 @@ const SetupFiat: React.FC = () => {
               <div className="mx-auto mb-4 inline-flex items-center justify-center rounded-2xl bg-[#E8EDFF] p-3">
                 <Bank size="28" color="#0647F7" variant="Bold" />
               </div>
-              <h2 className="text-2xl font-semibold">Add your BVN</h2>
+              <h2 className="text-2xl font-semibold">Verify your identity</h2>
               <p className="mt-2 text-[#8C8C8C] text-sm">
-                Your Bank Verification Number is required to create a Nigerian Naira account. It will not be shared with third parties.
+                Your {verifyType.toUpperCase()} is required to create a Nigerian Naira account. It will not be shared with third parties.
               </p>
             </div>
 
-            <Formik
-              initialValues={{ bvn: "" }}
-              validationSchema={bvnSchema}
-              onSubmit={handleBvnSubmit}
-            >
-              {() => (
-                <Form className="space-y-4">
-                  <TextInputField
-                    name="bvn"
-                    label="BVN (11 digits)"
-                    placeholder="eg: 22345678901"
-                  />
-                  <Button
-                    type="submit"
-                    className="w-full bg-[#0647F7] hover:bg-[#2563EB] text-white mt-4"
-                    disabled={loading}
-                  >
-                    {loading ? "Setting up your account..." : "Set Up NGN Account"}
-                  </Button>
-                </Form>
-              )}
-            </Formik>
+            {/* BVN / NIN Toggle */}
+            <div className="flex rounded-full bg-[#F5F5F5] p-1 mb-6">
+              <button
+                type="button"
+                onClick={() => setVerifyType("bvn")}
+                className={`flex-1 py-2 text-sm font-medium rounded-full transition ${
+                  verifyType === "bvn"
+                    ? "bg-white text-primary shadow-sm"
+                    : "text-[#8C8C8C]"
+                }`}
+              >
+                BVN
+              </button>
+              <button
+                type="button"
+                onClick={() => setVerifyType("nin")}
+                className={`flex-1 py-2 text-sm font-medium rounded-full transition ${
+                  verifyType === "nin"
+                    ? "bg-white text-primary shadow-sm"
+                    : "text-[#8C8C8C]"
+                }`}
+              >
+                NIN
+              </button>
+            </div>
+
+            {verifyType === "bvn" ? (
+              <Formik
+                initialValues={{ bvn: "" }}
+                validationSchema={bvnSchema}
+                onSubmit={(values) => handleVerifySubmit({ bvn: values.bvn })}
+              >
+                {() => (
+                  <Form className="space-y-4">
+                    <TextInputField
+                      name="bvn"
+                      label="BVN (11 digits)"
+                      placeholder="eg: 22345678901"
+                    />
+                    <Button
+                      type="submit"
+                      className="w-full bg-[#0647F7] hover:bg-[#2563EB] text-white mt-4"
+                      disabled={loading}
+                    >
+                      {loading ? "Setting up your account..." : "Set Up NGN Account"}
+                    </Button>
+                  </Form>
+                )}
+              </Formik>
+            ) : (
+              <Formik
+                initialValues={{ nin: "" }}
+                validationSchema={ninSchema}
+                onSubmit={(values) => handleVerifySubmit({ nin: values.nin })}
+              >
+                {() => (
+                  <Form className="space-y-4">
+                    <TextInputField
+                      name="nin"
+                      label="NIN (11 digits)"
+                      placeholder="eg: 12345678901"
+                    />
+                    <Button
+                      type="submit"
+                      className="w-full bg-[#0647F7] hover:bg-[#2563EB] text-white mt-4"
+                      disabled={loading}
+                    >
+                      {loading ? "Setting up your account..." : "Set Up NGN Account"}
+                    </Button>
+                  </Form>
+                )}
+              </Formik>
+            )}
           </div>
         )}
       </div>
