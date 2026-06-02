@@ -36,9 +36,10 @@ const defaultFiatBalance = useMemo(() => {
     const fiatAccount = balancesData?.data?.fiatAccounts?.[0];
 
     if (fiatAccount) {
+      const usdValue = Number(balancesData?.data?.totalFiatBalance) || 0;
       return {
         symbol: fiatAccount.currency,
-        usdAmount: Number(fiatAccount.availableBalance),
+        usdAmount: usdValue,
         amount: Number(fiatAccount.availableBalance),
         logo: "https://flagcdn.com/w40/ng.png"
       };
