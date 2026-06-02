@@ -36,12 +36,11 @@ const defaultFiatBalance = useMemo(() => {
     const fiatAccount = balancesData?.data?.fiatAccounts?.[0];
 
     if (fiatAccount) {
-      const usdValue = Number(balancesData?.data?.totalFiatBalance) || 0;
       return {
         symbol: fiatAccount.currency,
-        usdAmount: usdValue,
         amount: Number(fiatAccount.availableBalance),
-        logo: "https://flagcdn.com/w40/ng.png"
+        logo: "https://flagcdn.com/w40/ng.png",
+        isFiat: true
       };
     }
     return null;
@@ -122,32 +121,35 @@ const handleSwap = () => {
   <p className="text-[28px] text-[#777777]">
     <span className="text-primary text-5xl">
       {showBalance ? (
-        isSwapped 
-          ? formatFiatAmount((displayedBalance as any).usdAmount ?? 0, { currencySign: "$", fallbackToCode: false })
-          : formatFiatAmount((displayedBalance as any).amount ?? 0, { currencyCode: (displayedBalance as any).symbol || "NGN", currencySign: (displayedBalance as any).currency_sign })
+        (displayedBalance as any).isFiat
+          ? formatFiatAmount((displayedBalance as any).amount ?? 0, { currencyCode: (displayedBalance as any).symbol || "NGN", currencySign: (displayedBalance as any).currency_sign })
+          : isSwapped
+            ? formatFiatAmount((displayedBalance as any).usdAmount ?? 0, { currencySign: "$", fallbackToCode: false })
+            : formatFiatAmount((displayedBalance as any).amount ?? 0, { currencyCode: (displayedBalance as any).symbol || "NGN", currencySign: (displayedBalance as any).currency_sign })
       ) : (
         <span className="text-[#D2D2D2]"> ***** </span>
       )}
     </span>
-    {/* Optional: Add currency suffix if needed, e.g., {isSwapped ? 'USD' : 'NGN'} */}
   </p>
 
+  {!(displayedBalance as any).isFiat && (
   <p className="text-gray-400 text-sm mt-1 flex items-center">
     {showBalance ? (
-      isSwapped 
+      isSwapped
         ? formatFiatAmount((displayedBalance as any).amount ?? 0, { currencyCode: (displayedBalance as any).symbol || "NGN", currencySign: (displayedBalance as any).currency_sign })
         : formatFiatAmount((displayedBalance as any).usdAmount ?? 0, { currencySign: "$", fallbackToCode: false })
     ) : (
       "*******"
     )}
-    <ArrowSwapVertical 
-      size="14" 
-      color="black" 
-      variant="Outline" 
-      className="inline ml-2 cursor-pointer hover:opacity-70 transition-opacity" 
+    <ArrowSwapVertical
+      size="14"
+      color="black"
+      variant="Outline"
+      className="inline ml-2 cursor-pointer hover:opacity-70 transition-opacity"
       onClick={handleSwap}
     />
   </p>
+  )}
 </div>
             </div>
             <button onClick={handleToggle} className="cursor-pointer">
