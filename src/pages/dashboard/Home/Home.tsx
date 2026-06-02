@@ -39,6 +39,7 @@ const defaultFiatBalance = useMemo(() => {
       return {
         symbol: fiatAccount.currency,
         amount: Number(fiatAccount.availableBalance),
+        usdAmount: Number(fiatAccount.usdAvailableBalance ?? 0),
         logo: "https://flagcdn.com/w40/ng.png",
         isFiat: true
       };
@@ -121,18 +122,15 @@ const handleSwap = () => {
   <p className="text-[28px] text-[#777777]">
     <span className="text-primary text-5xl">
       {showBalance ? (
-        (displayedBalance as any).isFiat
-          ? formatFiatAmount((displayedBalance as any).amount ?? 0, { currencyCode: (displayedBalance as any).symbol || "NGN", currencySign: (displayedBalance as any).currency_sign })
-          : isSwapped
-            ? formatFiatAmount((displayedBalance as any).usdAmount ?? 0, { currencySign: "$", fallbackToCode: false })
-            : formatFiatAmount((displayedBalance as any).amount ?? 0, { currencyCode: (displayedBalance as any).symbol || "NGN", currencySign: (displayedBalance as any).currency_sign })
+        isSwapped
+          ? formatFiatAmount((displayedBalance as any).usdAmount ?? 0, { currencySign: "$", fallbackToCode: false })
+          : formatFiatAmount((displayedBalance as any).amount ?? 0, { currencyCode: (displayedBalance as any).symbol || "NGN", currencySign: (displayedBalance as any).currency_sign })
       ) : (
         <span className="text-[#D2D2D2]"> ***** </span>
       )}
     </span>
   </p>
 
-  {!(displayedBalance as any).isFiat && (
   <p className="text-gray-400 text-sm mt-1 flex items-center">
     {showBalance ? (
       isSwapped
@@ -149,7 +147,6 @@ const handleSwap = () => {
       onClick={handleSwap}
     />
   </p>
-  )}
 </div>
             </div>
             <button onClick={handleToggle} className="cursor-pointer">
