@@ -30,6 +30,13 @@ interface WalletBalance {
   walletAddress?: string;
 }
 
+function parseUsdAmount(input: unknown): number {
+  if (!input) return 0;
+  const s = String(input);
+  const n = Number(s.replace(/[^0-9.-]+/g, ""));
+  return Number.isFinite(n) ? n : 0;
+}
+
 interface FiatAccount {
   currency: string;
   availableBalance: string;
@@ -52,9 +59,11 @@ interface AllBalancesResponse {
 type SelectedBalance = {
   usd: string;
   amount: string;
+  usdAmount?: number;
   symbol: string;
   logo: string;
   isWalletAvailable?: boolean
+  isFiat?: boolean;
 };
 
 type WalletState = {
@@ -137,6 +146,7 @@ const walletSlice = createSlice({
         if (state.selectedBalance?.symbol === 'BTC') {
             state.selectedBalance = {
                 usd: coinData.TotalAvailableBalancePrice,
+                usdAmount: parseUsdAmount(coinData.TotalAvailableBalancePrice),
                 amount: `${coinData.totalAvailableBalance} ${coinData.symbol}`,
                 symbol: coinData.symbol,
                 logo: coinData.logo
@@ -162,6 +172,7 @@ const walletSlice = createSlice({
         if (state.selectedBalance?.symbol === 'ETH') {
             state.selectedBalance = {
                 usd: coinData.TotalAvailableBalancePrice,
+                usdAmount: parseUsdAmount(coinData.TotalAvailableBalancePrice),
                 amount: `${coinData.totalAvailableBalance} ${coinData.symbol}`,
                 symbol: coinData.symbol,
                 logo: coinData.logo
@@ -187,6 +198,7 @@ const walletSlice = createSlice({
         if (state.selectedBalance?.symbol === 'BNB') {
             state.selectedBalance = {
                 usd: coinData.TotalAvailableBalancePrice,
+                usdAmount: parseUsdAmount(coinData.TotalAvailableBalancePrice),
                 amount: `${coinData.totalAvailableBalance} ${coinData.symbol}`,
                 symbol: coinData.symbol,
                 logo: coinData.logo
@@ -213,6 +225,7 @@ const walletSlice = createSlice({
         if (state.selectedBalance?.symbol === 'USDT') {
             state.selectedBalance = {
                 usd: coinData.TotalAvailableBalancePrice,
+                usdAmount: parseUsdAmount(coinData.TotalAvailableBalancePrice),
                 amount: `${coinData.totalAvailableBalance} ${coinData.symbol}`,
                 symbol: coinData.symbol,
                                 logo: coinData.logo
@@ -239,6 +252,7 @@ const walletSlice = createSlice({
         if (state.selectedBalance?.symbol === 'USDC') {
             state.selectedBalance = {
                 usd: coinData.TotalAvailableBalancePrice,
+                usdAmount: parseUsdAmount(coinData.TotalAvailableBalancePrice),
                 amount: `${coinData.totalAvailableBalance} ${coinData.symbol}`,
                 symbol: coinData.symbol,
                                 logo: coinData.logo
@@ -275,12 +289,13 @@ const walletSlice = createSlice({
       
       state.selectedBalance = {
         symbol: firstFiat.currency, // e.g., "NGN"
-        // Fiat doesn't usually have a 'usd' price field, so we just show the currency code or formatted balance
-        usd: `${firstFiat.currency} ${firstFiat.availableBalance}`, 
-        amount: `${firstFiat.availableBalance}`, 
+        usd: `$${Number(firstFiat.usdAvailableBalance ?? 0).toFixed(2)}`,
+        usdAmount: Number(firstFiat.usdAvailableBalance ?? 0),
+        amount: `${firstFiat.availableBalance}`,
         // You can set a static flag for NGN/Fiat here since the API might not return a logo
-        logo: "https://flagcdn.com/w40/ng.png", 
-        isWalletAvailable: true
+        logo: "https://flagcdn.com/w40/ng.png",
+        isWalletAvailable: true,
+        isFiat: true
       };
     } 
     // 3. FALLBACK: Use Crypto if no Fiat found
@@ -292,6 +307,7 @@ const walletSlice = createSlice({
         state.selectedBalance = {
           symbol: firstWallet.symbol,
           usd: firstWallet.TotalAvailableBalancePrice || "$0.00",
+          usdAmount: parseUsdAmount(firstWallet.TotalAvailableBalancePrice),
           amount: `${firstWallet.totalAvailableBalance} ${firstWallet.symbol}`,
           logo: firstWallet.logo,
           isWalletAvailable: firstWallet.isWalletAvailable

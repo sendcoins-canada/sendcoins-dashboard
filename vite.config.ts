@@ -10,7 +10,7 @@ export default defineConfig({
     tailwindcss()
   ],
   define: {
-    global: 'window', 
+    global: 'window',
   },
   resolve: {
     alias: {

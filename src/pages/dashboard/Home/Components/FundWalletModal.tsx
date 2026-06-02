@@ -64,7 +64,7 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const parsedFiatWallets: ParsedWallet[] = fiatAccounts.map((account) => ({
     name: account.bankName,
     address: account.accountNumber,
-    usd: undefined,
+    usd: formatFiatAmount(account.usdAvailableBalance ?? 0, { currencyCode: "USD", currencySign: "$", fallbackToCode: false }),
     amount: account.availableBalance,
     logo: NGN,
     symbol: account.currency,
@@ -80,8 +80,12 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   dispatch(setSelectedBalance({
     usd: wallet.usd ? String(wallet.usd) : "",
     amount: wallet.amount !== undefined && wallet.amount !== null ? String(wallet.amount) : "",
+    usdAmount: wallet.isFiat
+      ? Number((fiatAccounts.find(a => String(a.currency).toUpperCase() === String(wallet.symbol).toUpperCase())?.usdAvailableBalance) ?? 0)
+      : Number(String(wallet.usd ?? "").replace(/[^0-9.-]+/g, "")) || 0,
     symbol: wallet.symbol,
-    logo: wallet.logo
+    logo: wallet.logo,
+    isFiat: wallet.isFiat
   }));
     
     // const specificThunk = balanceThunkMap[symbol as keyof typeof balanceThunkMap];
