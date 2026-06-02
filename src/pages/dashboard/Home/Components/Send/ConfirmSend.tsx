@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { TransmitSqaure2, ArrowLeft2, Global } from "iconsax-react";
 import Header from "@/components/onboarding/shared/Header";
 import { Convert, Money, Money2 } from "iconsax-react";
-import { useNavigate } from "react-router-dom";
+
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import { useBalances } from "@/query/hooks/useBalances";
@@ -26,10 +26,10 @@ const ConfirmSend: React.FC<Props> = ({
   amount,
   platformFee = "0.00",
   isFiat,
+  onBack,
   onConfirm,
 }) => {
   const estimatedArrival = "3 mins";
-  const navigate = useNavigate()
 
   // 1. Get User's Wallet Data via React Query
   const { data: balancesData } = useBalances();
@@ -64,10 +64,10 @@ const ConfirmSend: React.FC<Props> = ({
 
         
         <div className="flex items-center md:justify-center gap-6 mb-8 md:mb-2">
-                             <div className="absolute left-4 md:hidden flex items-center cursor-pointer border rounded-full justify-center p-2  w-fit" onClick={() => navigate(-1)}>
+                             <div className="absolute left-4 md:hidden flex items-center cursor-pointer border rounded-full justify-center p-2  w-fit" onClick={onBack}>
                                <ArrowLeft2 size="20" color="black" className="" />
                              </div>
-                              <div className="absolute left-4 md:flex hidden items-center cursor-pointer border rounded-full w-fit md:ml-28 ml-6 justify-center py-2 px-4" onClick={() => navigate(-1)}>
+                              <div className="absolute left-4 md:flex hidden items-center cursor-pointer border rounded-full w-fit md:ml-28 ml-6 justify-center py-2 px-4" onClick={onBack}>
                                      <ArrowLeft2 size="16" color="black" /><p className="text-sm ml-1">Back</p>
                                    </div>
                  

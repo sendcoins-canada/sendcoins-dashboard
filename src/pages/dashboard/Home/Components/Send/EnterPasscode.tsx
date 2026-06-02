@@ -258,11 +258,11 @@ import { showDanger } from "@/components/ui/toast";
 import { verifyPasscode } from "@/api/authApi";
 
 interface EnterPasscodeProps {
-  // onSuccess is the function passed from SendFlow that handles the API transfer
   onSuccess: (code: string) => Promise<void> | void;
+  onBack?: () => void;
 }
 
-const EnterPasscode: React.FC<EnterPasscodeProps> = ({ onSuccess }) => {
+const EnterPasscode: React.FC<EnterPasscodeProps> = ({ onSuccess, onBack }) => {
   const navigate = useNavigate();
   const token = useSelector((state: RootState) => state.auth.token?.azer_token);
   
@@ -348,7 +348,7 @@ useEffect(() => {
       </div>
       <div
         className="flex items-center cursor-pointer border rounded-full w-fit ml-6 p-2 mt-10 md:mt-0"
-        onClick={() => navigate(-1)}
+        onClick={() => onBack ? onBack() : navigate(-1)}
       >
         <ArrowLeft2 size="16" color="black" />
       </div>

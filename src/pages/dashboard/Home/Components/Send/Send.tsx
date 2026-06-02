@@ -7,8 +7,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import EnterAmount from "./EnterAmount";
 import EnterPasscode from "./EnterPasscode";
 import SuccessPage from "@/pages/dashboard/SuccessPage";
-import { useSelector } from "react-redux";
-import type { RootState } from "@/store";
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState, AppDispatch } from "@/store";
+import { addRecipientThunk } from "@/store/recipients/asyncThunks/addrecipient";
 import FiatRecipientSelect from "./FiatRecipientSelection";
 import FiatCountrySelection from "./FiatCountrySelect";
 import EnterBankDetails from "./FiatBankDetails";
@@ -24,6 +25,7 @@ import { useCrayfiAccount } from "@/store/hooks/useGetAccount";
 const SendFlow: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch<AppDispatch>();
   const [transactionId, setTransactionId] = useState<string>("");
   const isFiatRoute = location.pathname.includes('send-fiat');
   
@@ -132,13 +134,11 @@ useEffect(() => {
     name: string;
     bankCode: string;
     accountNumber: string;
-    transitNumber: string; // Not used in state but passed to API later
+    transitNumber: string;
     country: string;
   }) => {
-    // Generate a temporary keychain for a new, unsaved recipient
-    const newRecipientKeychain = `new-fiat-${Date.now()}`;
     setRecipient({
-      keychain: newRecipientKeychain,
+      keychain: `new-fiat-${Date.now()}`,
       name: data.name,
       network: data.bankCode,
       address: data.accountNumber,
@@ -146,6 +146,17 @@ useEffect(() => {
     });
     setSelectedAsset(data.country);
     setStep("amount");
+
+    // Save recipient in background (non-blocking)
+    if (token) {
+      dispatch(addRecipientThunk({
+        token,
+        name: data.name,
+        network: data.bankCode,
+        asset: data.country,
+        walletAddress: data.accountNumber
+      }));
+    }
   };
 
   // --- COMMON HANDLERS ---
@@ -356,8 +367,7 @@ useEffect(() => {
       )} */}
       {step === "passcode" && (
         <EnterPasscode
-          // If hasPin is true, we go to 'verify' mode. Else 'create' mode.
-          // mode={hasPin ? "verify" : "create"}
+          onBack={() => setStep("confirm")}
           onSuccess={handlePasscodeSuccess}
         />
       )}

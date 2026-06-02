@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/onboarding/shared/Header";
-import { useNavigate } from "react-router-dom";
 import { Scanner, ArrowLeft2 } from "iconsax-react";
 import { Select } from "@/components/ui/select"; // Ensure this imports the file above
 import SaveRecipientModal from "./SaveRecipientModal";
@@ -31,8 +30,7 @@ const getValidatorSymbol = (networkStr: string, assetStr: string) => {
   return assetStr.toLowerCase();
 };
 
-const RecipientDetails: React.FC<Props> = ({ asset, onNext }) => {
-  const navigate = useNavigate();
+const RecipientDetails: React.FC<Props> = ({ asset, onBack, onNext }) => {
   const [address, setAddress] = useState("");
   const [isValid, setIsValid] = useState(false);
   const [openSaveModal, setOpenSaveModal] = useState(false);
@@ -128,7 +126,7 @@ const RecipientDetails: React.FC<Props> = ({ asset, onNext }) => {
       <div className="hidden md:block">
         <Header />
       </div>
-      <div className="md:flex hidden items-center cursor-pointer border rounded-full w-fit md:ml-28 ml-6 justify-center py-2 px-4" onClick={() => navigate(-1)}>
+      <div className="md:flex hidden items-center cursor-pointer border rounded-full w-fit md:ml-28 ml-6 justify-center py-2 px-4" onClick={onBack}>
         <ArrowLeft2 size="16" color="black" /><p className="text-sm ml-1">Back</p>
       </div>
 
@@ -136,7 +134,7 @@ const RecipientDetails: React.FC<Props> = ({ asset, onNext }) => {
         <div className="w-full max-w-sm md:mt-0 mt-20">
           
           <div className="flex items-center md:justify-center gap-6 mb-8">
-            <div className="md:hidden flex items-center cursor-pointer border rounded-full justify-center p-2 w-fit" onClick={() => navigate(-1)}>
+            <div className="md:hidden flex items-center cursor-pointer border rounded-full justify-center p-2 w-fit" onClick={onBack}>
               <ArrowLeft2 size="20" color="black" />
             </div>
             <h2 className="md:text-2xl font-semibold text-center">

@@ -2,7 +2,6 @@
 import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/onboarding/shared/Header";
-import { useNavigate } from "react-router-dom";
 import { Money, Money2, ArrowLeft2 } from "iconsax-react";
 import WalletSelectionModal from "@/pages/dashboard/WalletSelectionModal";
 import { useGasFee } from "@/store/hooks/useGasFee";
@@ -22,8 +21,7 @@ interface EnterAmountProps {
 }
 
 
-const EnterAmount: React.FC<EnterAmountProps> = ({ asset, onNext, isFiat, recipient }) => {
-  const navigate = useNavigate();
+const EnterAmount: React.FC<EnterAmountProps> = ({ asset, onBack, onNext, isFiat, recipient }) => {
   const [sendAmount, setSendAmount] = useState("");
   const [sendAsset, _setSendAsset] = useState(asset);
   const [error, setError] = useState("");
@@ -147,10 +145,10 @@ const handleContinue = () => {
       <div className="flex flex-col items-center justify-center min-h-[75vh] px-4">
         <div className="w-full max-w-md mt-16 md:mt-0">
           <div className="flex items-center md:justify-center gap-6 mb-8">
-                      <div className="absolute left-4 md:hidden flex items-center cursor-pointer border rounded-full justify-center p-2 w-fit" onClick={() => navigate(-1)}>
+                      <div className="absolute left-4 md:hidden flex items-center cursor-pointer border rounded-full justify-center p-2 w-fit" onClick={onBack}>
                         <ArrowLeft2 size="20" color="black" className="" />
                       </div>
-                       <div className="absolute left-4 md:flex hidden items-center cursor-pointer border rounded-full w-fit md:ml-28 ml-6 justify-center py-2 px-4" onClick={() => navigate(-1)}>
+                       <div className="absolute left-4 md:flex hidden items-center cursor-pointer border rounded-full w-fit md:ml-28 ml-6 justify-center py-2 px-4" onClick={onBack}>
                               <ArrowLeft2 size="16" color="black" /><p className="text-sm ml-1">Back</p>
                             </div>
           
