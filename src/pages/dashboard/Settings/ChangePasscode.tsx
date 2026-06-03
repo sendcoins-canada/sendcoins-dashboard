@@ -70,10 +70,12 @@ const ResetPasscode: React.FC = () => {
       
       else if (step === "otp") {
         // Verify OTP (Step 2)
+        const userEmail = userData?.user_email || JSON.parse(localStorage.getItem("user") || "{}")?.useremail || "";
         const otpResult = await verifyOtp({
-          email: userData?.user_email || "",
+          email: userEmail,
           code: currentCodeAsString,
-          purpose: "passcode_reset"
+          purpose: "passcode_reset",
+          token: token?.azer_token
         });
 
         const hash = otpResult.data.authHash || ""; // Adjust based on your API response structure
