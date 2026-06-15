@@ -91,9 +91,13 @@ const RecipientDetails: React.FC<Props> = ({ asset, onBack, onNext }) => {
     const validatorSymbol = getValidatorSymbol(networkValue, asset);
 
     try {
-      const valid = WAValidator.validate(address, validatorSymbol);
+      // Try mainnet first, then testnet (for development/testing)
+      let valid = WAValidator.validate(address, validatorSymbol);
+      if (!valid) {
+        valid = WAValidator.validate(address, validatorSymbol, 'testnet');
+      }
       setIsValid(valid);
-      
+
     } catch (e) {
       console.warn("Validator error:", e);
       // Fallback for unsupported coins

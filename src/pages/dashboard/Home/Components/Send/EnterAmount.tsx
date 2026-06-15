@@ -112,8 +112,10 @@ const handleContinue = () => {
       return;
     }
 
-    if (!isFiat && Number(sendAmount) < 5) {
-      setError("Minimum send amount is 5 USDT.");
+    const isBtc = asset.toLowerCase() === 'btc' || asset.toLowerCase() === 'bitcoin';
+    const minCryptoSend = isBtc ? 0.00001 : 5; // BTC: very low frontend min, real $10 USD min enforced by backend gasFee
+    if (!isFiat && Number(sendAmount) < minCryptoSend) {
+      setError(isBtc ? `Minimum send amount is $10 worth of BTC.` : `Minimum send amount is ${minCryptoSend} ${asset.toUpperCase()}.`);
       return;
     }
 
@@ -208,7 +210,7 @@ const handleContinue = () => {
 )}
               {!isFiat && (
                 <p className="text-xs text-neutral-400 mt-1">
-                  Min: 5 {asset.toUpperCase()} · Max: 10,000 {asset.toUpperCase()} (verified) / 5,000 (unverified)
+                  Min: {(asset.toLowerCase() === 'btc' || asset.toLowerCase() === 'bitcoin') ? '$10 worth of' : '5'} {asset.toUpperCase()} · Max: {(asset.toLowerCase() === 'btc' || asset.toLowerCase() === 'bitcoin') ? '1' : '10,000'} {asset.toUpperCase()} (verified) / {(asset.toLowerCase() === 'btc' || asset.toLowerCase() === 'bitcoin') ? '0.5' : '5,000'} (unverified)
                 </p>
               )}
             </div>
@@ -282,7 +284,7 @@ const handleContinue = () => {
                 disabled={
       isGasLoading ||
       !sendAmount ||
-      (!isFiat && Number(sendAmount) < 5) ||
+      (!isFiat && Number(sendAmount) < ((asset.toLowerCase() === 'btc' || asset.toLowerCase() === 'bitcoin') ? 0.00001 : 5)) ||
       calculation.status === 'insufficient' ||
       calculation.recipientGets <= 0
     }
