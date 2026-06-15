@@ -57,7 +57,6 @@ export interface UpdateProfileParams {
   middle_name?: string;
   last_name?: string;
   bvn?: string;
-  nin?: string;
 }
 
 export interface RequestFiatAccountParams {
@@ -71,7 +70,6 @@ export const updateProfile = async (params: UpdateProfileParams) => {
   if (params.middle_name) formData.append("middle_name", params.middle_name);
   if (params.last_name) formData.append("last_name", params.last_name);
   if (params.bvn) formData.append("bvn", params.bvn);
-  if (params.nin) formData.append("nin", params.nin);
 
   const response = await api.put(
     "/user/profile",
