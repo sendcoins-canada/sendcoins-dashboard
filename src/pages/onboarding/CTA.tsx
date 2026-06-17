@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Check } from "lucide-react";
 import Header from "@/components/onboarding/shared/Header";
 import { ArrowLeft2, ShieldTick } from "iconsax-react";
 import type { RootState, AppDispatch } from "@/store";
@@ -157,27 +157,53 @@ const CTA = () => {
           </p>
 
           <div className="w-full max-w-md flex flex-col gap-4">
-            {/* BVN — only for Nigerian users who haven't linked it */}
-            {isNigerian && isBvnMissing && (
-              <button
-                onClick={() => setIsBvnModalOpen(true)}
-                className="w-full flex items-center justify-between bg-purple-50 p-4 rounded-xl border border-purple-100 cursor-pointer hover:bg-purple-100 transition-colors"
-              >
-                <div className="text-left">
-                  <h3 className="font-semibold text-purple-900">
-                    Link your BVN
-                  </h3>
-                  <p className="text-sm text-purple-700">
-                    Securely link your Bank Verification Number to unlock higher
-                    transaction limits.
-                  </p>
+            {/* BVN — Nigerian users */}
+            {isNigerian && (
+              isBvnMissing ? (
+                <button
+                  onClick={() => setIsBvnModalOpen(true)}
+                  className="w-full flex items-center justify-between bg-purple-50 p-4 rounded-xl border border-purple-100 cursor-pointer hover:bg-purple-100 transition-colors"
+                >
+                  <div className="text-left">
+                    <h3 className="font-semibold text-purple-900">
+                      Link your BVN
+                    </h3>
+                    <p className="text-sm text-purple-700">
+                      Securely link your Bank Verification Number to unlock higher
+                      transaction limits.
+                    </p>
+                  </div>
+                  <ChevronRight className="text-purple-400" />
+                </button>
+              ) : (
+                <div className="w-full flex items-center justify-between bg-green-50 p-4 rounded-xl border border-green-200">
+                  <div className="text-left">
+                    <h3 className="font-semibold text-green-800">BVN linked</h3>
+                    <p className="text-sm text-green-600">
+                      Your Bank Verification Number has been linked successfully.
+                    </p>
+                  </div>
+                  <div className="bg-green-500 rounded-full p-1">
+                    <Check size={16} className="text-white" />
+                  </div>
                 </div>
-                <ChevronRight className="text-purple-400" />
-              </button>
+              )
             )}
 
-            {/* Passcode — show for all users who don't have one */}
-            {!hasPin && (
+            {/* Passcode */}
+            {hasPin ? (
+              <div className="w-full flex items-center justify-between bg-green-50 p-4 rounded-xl border border-green-200">
+                <div className="text-left">
+                  <h3 className="font-semibold text-green-800">Passcode set</h3>
+                  <p className="text-sm text-green-600">
+                    Your account is protected with a secure passcode.
+                  </p>
+                </div>
+                <div className="bg-green-500 rounded-full p-1">
+                  <Check size={16} className="text-white" />
+                </div>
+              </div>
+            ) : (
               <button
                 onClick={() => navigate("/setup-passcode")}
                 className="w-full flex items-center justify-between bg-gray-100 p-4 rounded-xl cursor-pointer hover:bg-gray-200 transition-colors"
@@ -193,23 +219,37 @@ const CTA = () => {
               </button>
             )}
 
-            {/* KYC — for international users (Dojah) who aren't verified */}
-            {!isNigerian && !isVerified && (
-              <button
-                onClick={handleDojahVerify}
-                disabled={loadingConfig || !kycConfig?.config}
-                className="w-full flex items-center justify-between bg-gray-100 p-4 rounded-xl cursor-pointer hover:bg-gray-200 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                <div className="text-left">
-                  <h3 className="font-semibold">Verify your identity</h3>
-                  <p className="text-sm text-gray-500">
-                    {loadingConfig
-                      ? "Preparing verification, please wait..."
-                      : "Upload a government-issued ID and take a quick selfie to verify your identity."}
-                  </p>
+            {/* KYC — for international users */}
+            {!isNigerian && (
+              isVerified ? (
+                <div className="w-full flex items-center justify-between bg-green-50 p-4 rounded-xl border border-green-200">
+                  <div className="text-left">
+                    <h3 className="font-semibold text-green-800">Identity verified</h3>
+                    <p className="text-sm text-green-600">
+                      Your identity has been successfully verified.
+                    </p>
+                  </div>
+                  <div className="bg-green-500 rounded-full p-1">
+                    <Check size={16} className="text-white" />
+                  </div>
                 </div>
-                <ChevronRight className="text-gray-400" />
-              </button>
+              ) : (
+                <button
+                  onClick={handleDojahVerify}
+                  disabled={loadingConfig || !kycConfig?.config}
+                  className="w-full flex items-center justify-between bg-gray-100 p-4 rounded-xl cursor-pointer hover:bg-gray-200 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <div className="text-left">
+                    <h3 className="font-semibold">Verify your identity</h3>
+                    <p className="text-sm text-gray-500">
+                      {loadingConfig
+                        ? "Preparing verification, please wait..."
+                        : "Upload a government-issued ID and take a quick selfie to verify your identity."}
+                    </p>
+                  </div>
+                  <ChevronRight className="text-gray-400" />
+                </button>
+              )
             )}
           </div>
 

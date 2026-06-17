@@ -82,6 +82,14 @@ function App() {
           }
         />
         <Route
+          path="/kyc"
+          element={
+            <ProtectedRoute>
+              <CTA />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/address"
           element={
             <ProtectedRoute>
