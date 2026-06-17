@@ -107,12 +107,14 @@ const submit = async (overrideCode?: string) => {
       if (response.data.token) {
         dispatch(setCredentials({
           token: response.data.token,
-          user: { 
-            useremail: email || "", 
-            oauth_id: 0 
+          user: {
+            useremail: email || "",
+            oauth_id: 0
           }
         }));
-        navigate("/dashboard/home");
+        const redirect = localStorage.getItem("login_redirect");
+        localStorage.removeItem("login_redirect");
+        navigate(redirect || "/dashboard/home");
       }
     }
   } catch (e: any) {

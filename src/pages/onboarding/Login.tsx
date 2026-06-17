@@ -3,7 +3,7 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { TextInputField } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/store";
 import { showSuccess, showDanger } from "@/components/ui/toast";
@@ -25,13 +25,24 @@ const schema = Yup.object({
 });
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const dispatch = useDispatch<AppDispatch>();
   const { loading, token } = useSelector((state: RootState) => state.auth);
 
-  // 3. Add this effect to handle the redirect
+  // Store redirect param so it survives the OTP flow
+  useEffect(() => {
+    const redirect = searchParams.get("redirect");
+    if (redirect) {
+      localStorage.setItem("login_redirect", redirect);
+    }
+  }, [searchParams]);
+
+  // Redirect if already logged in
   useEffect(() => {
     if (token) {
-      navigate("/dashboard/home", { replace: true });
+      const redirect = localStorage.getItem("login_redirect");
+      localStorage.removeItem("login_redirect");
+      navigate(redirect || "/dashboard/home", { replace: true });
     }
   }, [token, navigate]);
 
@@ -69,7 +80,9 @@ const handleGoogleSuccess = async (tokenResponse: any) => {
         result: data.data.result
       }));
       showSuccess("Welcome back!");
-      navigate("/dashboard/home");
+      const redirect = localStorage.getItem("login_redirect");
+      localStorage.removeItem("login_redirect");
+      navigate(redirect || "/dashboard/home");
     } else {
       showDanger("Google Sign-In failed. No token returned.");
     }
