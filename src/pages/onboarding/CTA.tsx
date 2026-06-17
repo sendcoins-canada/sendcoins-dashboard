@@ -39,7 +39,7 @@ const CTA = () => {
   const isNigerian =
     kycConfig?.kyc_provider === "crayfi" ||
     (!kycConfig && (userCountry === "nigeria" || userCountry === "ng"));
-  const isDojah = kycConfig?.kyc_provider === "dojah";
+
 
   // Fetch unified KYC config on mount
   useEffect(() => {
