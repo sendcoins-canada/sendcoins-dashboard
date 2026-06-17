@@ -35,30 +35,36 @@ export const updateUserProfile = async (params: UpdateProfileParams) => {
   return response.data;
 };
 
-// MetaMap config from backend
-export interface MetaMapConfigParams {
-  token: string;
-}
-
-export interface MetaMapConfigResponse {
+// Unified KYC config — returns Dojah or CrayFi based on user's country
+export interface UnifiedKycConfigResponse {
   success: boolean;
+  kyc_provider: 'dojah' | 'crayfi';
+  // CrayFi response (Nigerian users — no widget needed)
+  verified?: boolean;
+  message?: string;
+  // Dojah response (international users)
   config?: {
-    clientId: string;
-    flowId: string;
+    app_id: string;
+    p_key: string;
+    widget_id: string;
+    type: string;
     metadata: {
+      user_api_key: string;
       email: string;
-      userId: string;
       firstName: string;
       lastName: string;
+    };
+    user_data: {
+      first_name: string;
+      last_name: string;
+      email: string;
     };
   };
 }
 
-export const getMetaMapConfig = async (
-  params: MetaMapConfigParams
-): Promise<MetaMapConfigResponse> => {
-  const response = await api.post("/user/kyc/config", {
-    token: params.token,
-  });
+export const getUnifiedKycConfig = async (
+  token: string
+): Promise<UnifiedKycConfigResponse> => {
+  const response = await api.post("/user/kyc/config/unified", { token });
   return response.data;
 };

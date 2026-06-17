@@ -1,22 +1,22 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { Button } from "@/components/ui/button";
 import { ArrowCircleLeft2, Location, Lock1 } from "iconsax-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import Input from "@/components/ui/input"; // your custom Input component
+import Input from "@/components/ui/input";
 
-// import MetaMapVerify from "@/components/Metamap";
 import Header from "@/components/onboarding/shared/Header";
-import { useSelector } from "react-redux";
-import type { RootState } from "@/store";
-import { getMetaMapConfig } from "@/api/kyc";
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState, AppDispatch } from "@/store";
+import { getUnifiedKycConfig } from "@/api/kyc";
+import { fetchUser } from "@/store/user/asyncRequests/fetchUser";
 
-// ✅ Validation schema
+// Validation schema
 const AddressSchema = Yup.object().shape({
   street: Yup.string().required("Street address is required"),
-  apartment: Yup.string(), // optional
+  apartment: Yup.string(),
   city: Yup.string().required("City is required"),
   postalCode: Yup.string().required("Postal code is required"),
   province: Yup.string().required("Province is required"),
@@ -24,34 +24,69 @@ const AddressSchema = Yup.object().shape({
 
 const Address: React.FC = () => {
   const navigate = useNavigate();
-  const metamapRef = useRef<HTMLElement | null>(null);
+  const dispatch = useDispatch<AppDispatch>();
   const token = useSelector((state: RootState) => state.auth.token?.azer_token);
-  const [metaMapConfig, setMetaMapConfig] = useState<{
-    clientId: string;
-    flowId: string;
-    metadata: string;
+  const [dojahConfig, setDojahConfig] = useState<{
+    app_id: string;
+    p_key: string;
+    widget_id: string;
+    type: string;
+    metadata: Record<string, string>;
+    user_data: Record<string, string>;
   } | null>(null);
 
   useEffect(() => {
     const loadConfig = async () => {
       if (!token) return;
       try {
-        const res = await getMetaMapConfig({ token });
-        if (res.success && res.config) {
-          setMetaMapConfig({
-            clientId: res.config.clientId,
-            flowId: res.config.flowId,
-            metadata: JSON.stringify(res.config.metadata),
+        const res = await getUnifiedKycConfig(token);
+        if (res.success && res.kyc_provider === "dojah" && res.config) {
+          setDojahConfig({
+            app_id: res.config.app_id,
+            p_key: res.config.p_key,
+            widget_id: res.config.widget_id,
+            type: res.config.type,
+            metadata: res.config.metadata as unknown as Record<string, string>,
+            user_data: res.config.user_data as unknown as Record<string, string>,
           });
-        } else {
-          console.error("Failed to load MetaMap config (Address):", res);
         }
       } catch (err) {
-        console.error("Error loading MetaMap config (Address)", err);
+        console.error("Error loading KYC config (Address)", err);
       }
     };
     loadConfig();
   }, [token]);
+
+  const handleLaunchDojah = () => {
+    if (!dojahConfig) {
+      toast.error("Verification is not ready yet. Please try again.");
+      return;
+    }
+
+    const connect = new Connect({
+      app_id: dojahConfig.app_id,
+      p_key: dojahConfig.p_key,
+      type: dojahConfig.type || "custom",
+      config: { widget_id: dojahConfig.widget_id },
+      metadata: dojahConfig.metadata,
+      user_data: dojahConfig.user_data,
+      onSuccess: () => {
+        toast.success("Identity verification completed!");
+        dispatch(fetchUser());
+        navigate("/dashboard/home");
+      },
+      onError: (error: unknown) => {
+        console.error("[Dojah] Verification error:", error);
+        toast.error("Verification failed. Please try again.");
+      },
+      onClose: () => {
+        console.log("[Dojah] Widget closed");
+      },
+    });
+
+    connect.setup();
+    connect.open();
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-white px-6 py-8">
@@ -69,11 +104,7 @@ const Address: React.FC = () => {
       <div className="max-w-sm w-full text-center">
         {/* Icon */}
         <div className="bg-[#EDC7CF] w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
-          <Location
- size="32"
- color="#480355"
- variant="Bold"
-/>
+          <Location size="32" color="#480355" variant="Bold" />
         </div>
 
         {/* Title */}
@@ -92,58 +123,25 @@ const Address: React.FC = () => {
           }}
           validationSchema={AddressSchema}
           onSubmit={() => {
-            // console.log("Submitted values:", values);
             toast.success("Address saved successfully!");
-            // navigate("/next-step"); // move to next step
-            //  Trigger MetaMap SDK
-        metamapRef.current?.click();
-
+            handleLaunchDojah();
           }}
         >
           {() => (
             <Form className="flex flex-col gap-4 text-left">
-              {/* Street */}
-              <Field
-                name="street"
-                as={Input}
-                placeholder="e.g. 123 King Street W"
-              />
-              <ErrorMessage
-                name="street"
-                component="div"
-                className="text-red-500 text-xs ml-2"
-              />
+              <Field name="street" as={Input} placeholder="e.g. 123 King Street W" />
+              <ErrorMessage name="street" component="div" className="text-red-500 text-xs ml-2" />
 
-              {/* Apartment */}
-              <Field
-                name="apartment"
-                as={Input}
-                placeholder="Apartment / Unit / Suite (optional)"
-              />
+              <Field name="apartment" as={Input} placeholder="Apartment / Unit / Suite (optional)" />
 
-              {/* City */}
               <Field name="city" as={Input} placeholder="City" />
-              <ErrorMessage
-                name="city"
-                component="div"
-                className="text-red-500 text-xs ml-2"
-              />
+              <ErrorMessage name="city" component="div" className="text-red-500 text-xs ml-2" />
 
-              {/* Postal Code */}
               <Field name="postalCode" as={Input} placeholder="Postal code" />
-              <ErrorMessage
-                name="postalCode"
-                component="div"
-                className="text-red-500 text-xs ml-2"
-              />
+              <ErrorMessage name="postalCode" component="div" className="text-red-500 text-xs ml-2" />
 
-              {/* Province */}
               <Field name="province" as={Input} placeholder="Province" />
-              <ErrorMessage
-                name="province"
-                component="div"
-                className="text-red-500 text-xs ml-2"
-              />
+              <ErrorMessage name="province" component="div" className="text-red-500 text-xs ml-2" />
 
               {/* Country (locked) */}
               <div className="flex items-center justify-between w-full rounded-full border border-gray-200 px-4 py-3 bg-gray-50 text-gray-500">
@@ -151,29 +149,12 @@ const Address: React.FC = () => {
                   <span>🇨🇦</span>
                   <span>Canada</span>
                 </div>
-                <Lock1
- size="12"
- color="#8C8C8C"
-/>
+                <Lock1 size="12" color="#8C8C8C" />
               </div>
 
-              {/* Continue Button */}
-              <Button variant="primary" size="lg" className=" bg-[#249FFF] text-white cursor-pointer">
-  Continue
-</Button>
- {/* Hidden MetaMap button */}
- {/* @ts-ignore */}
-          {metaMapConfig && (
-            <metamap-button
-              ref={metamapRef}
-              clientid={metaMapConfig.clientId}
-              flowid={metaMapConfig.flowId}
-              metadata={metaMapConfig.metadata}
-              style={{ display: "none" }}
-            >
-              {/* @ts-ignore */}
-            </metamap-button>
-          )}
+              <Button variant="primary" size="lg" className="bg-[#249FFF] text-white cursor-pointer">
+                Continue
+              </Button>
             </Form>
           )}
         </Formik>
