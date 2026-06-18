@@ -11,6 +11,8 @@ import Welcome from "./pages/onboarding/Welcome";
 import Passcode from "./pages/onboarding/Passcode";
 import CTA from "./pages/onboarding/CTA";
 import Address from "./pages/kyc/Address";
+import Terms from "./pages/legal/Terms";
+import Contact from "./pages/legal/Contact";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import VerifiedRoute from "./components/VerifiedRoute";
 import Home from "./pages/dashboard/Home/Home";
@@ -40,6 +42,8 @@ function App() {
         <Route path="/signup" element={<Signup />} />
 
         <Route path="/verify" element={<Verify />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/country" element={<Country />} />
         <Route path="/personal-info" element={<PersonalInfo />} />
         <Route path="/password" element={<Password />} />
